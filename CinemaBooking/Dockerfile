@@ -19,5 +19,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+# Create uploads directory
+RUN mkdir -p uploads
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CinemaBooking.dll"]

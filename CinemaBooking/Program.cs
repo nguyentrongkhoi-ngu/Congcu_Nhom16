@@ -33,12 +33,15 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100MB
 
-    // Cấu hình Kestrel để lắng nghe trên tất cả địa chỉ IP
+    // Cấu hình Kestrel để lắng nghe trên cổng đã định nghĩa
     options.ListenAnyIP(5153); // HTTP
+    // Tạm thời tắt HTTPS trong Docker để tránh lỗi thiếu chứng chỉ
+    /*
     options.ListenAnyIP(7065, listenOptions => // HTTPS
     {
         listenOptions.UseHttps();
     });
+    */
 });
 
 builder.Services.Configure<FormOptions>(options =>
