@@ -1,0 +1,459 @@
+@model IEnumerable<CinemaBooking.Models.Phim>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+    ViewData["MetaDescription"] = "CineZore 2026 – Đặt vé xem phim trực tuyến nhanh chóng. Trải nghiệm rạp chiếu phim đẳng cấp.";
+    var featured = ViewBag.FeaturedMovies as IEnumerable<CinemaBooking.Models.Phim>;
+    var nowShowing = ViewBag.NowShowingMovies as IEnumerable<CinemaBooking.Models.Phim>;
+    var comingSoon = ViewBag.ComingSoonMovies as IEnumerable<CinemaBooking.Models.Phim>;
+    var topRated = ViewBag.TopRatedMovies as IEnumerable<CinemaBooking.Models.Phim>;
+    var firstMovie = featured?.FirstOrDefault() ?? Model.FirstOrDefault();
+}
+
+@section Styles {
+    <style>
+        /* Ensure main has no padding for full-bleed hero */
+        main { padding-top: 0 !important; }
+        
+        /* 🚨 Force Light Text for Home Page (Beating !important globals) */
+        .home-page h3.section-title, 
+        .home-page .movie-card .card-content h6,
+        .home-page .section-header .section-title,
+        .home-page .movie-card h6 {
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .home-page .hero-content h1, 
+        .home-page .hero-content p {
+            color: #ffffff !important;
+        }
+
+        .section-title { font-weight: 800; letter-spacing: -0.5px; opacity: 1 !important; }
+        .movie-card h6 { font-weight: 700; margin-bottom: 5px; opacity: 1 !important; }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 4%;
+        }
+        .section-title { margin-bottom: 0 !important; }
+        .view-all-link {
+            color: #E50914;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .view-all-link:hover {
+            color: #fff;
+            transform: translateX(5px);
+        }
+    </style>
+}
+
+@if (featured != null && featured.Any())
+{
+    <section class="hero-slider swiper">
+        <div class="swiper-wrapper">
+            @foreach (var movie in featured)
+            {
+                <div class="swiper-slide">
+                    <div class="hero-image-container">
+                        <img class="hero-img" 
+                             src="@(string.IsNullOrEmpty(movie.UrlBackdrop) ? (string.IsNullOrEmpty(movie.UrlPoster) ? "/images/no-image.jpg" : movie.UrlPoster) : movie.UrlBackdrop)" 
+                             alt="@movie.TenPhim">
+                    </div>
+                    
+                    <div class="hero-overlay"></div>
+                    
+                    <div class="hero-content">
+                        <div class="hero-meta-badge mb-4">
+                            <span class="badge-featured"><i class="fas fa-star me-2"></i>Phim nổi bật</span>
+                        </div>
+                        
+                        <h1 class="hero-title mb-3">@(movie.TenPhim ?? "Unknown Title")</h1>
+                        
+                        <div class="hero-info-row mb-4">
+                            @if (movie.DiemIMDb.HasValue)
+                            {
+                                <div class="info-item">
+                                    <i class="fas fa-star text-warning me-2"></i>
+                                    <span class="fw-bold">@movie.DiemIMDb.Value.ToString("0.0")</span>
+                                </div>
+                            }
+                            <div class="info-item">
+                                <i class="far fa-calendar-alt me-2"></i>
+                                <span>@(movie.NgayPhatHanh.HasValue ? movie.NgayPhatHanh.Value.Year.ToString() : "2024")</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="far fa-clock me-2"></i>
+                                <span>@movie.ThoiLuong phút</span>
+                            </div>
+                            <span class="genre-tag">@movie.TheLoai</span>
+                        </div>
+                        
+                        <p class="hero-desc mb-5">
+                            @if (!string.IsNullOrEmpty(movie.MoTa))
+                            {
+                                @(movie.MoTa.Length > 180 ? movie.MoTa.Substring(0, 177) + "..." : movie.MoTa)
+                            }
+                            else
+                            {
+                                <span>Trải nghiệm siêu phẩm điện ảnh đỉnh cao chỉ có tại hệ thống rạp CineZore. Đặt vé ngay để nhận vị trí ngồi tốt nhất!</span>
+                            }
+                        </p>
+                        
+                        <div class="hero-cta-group">
+                            <a asp-controller="DatVe" asp-action="Index" asp-route-maPhim="@movie.MaPhim" 
+                               class="btn-cz-primary btn-lg-cz me-3">
+                                <i class="fas fa-ticket-alt me-2"></i> ĐẶT VÉ NGAY
+                            </a>
+                            <a asp-controller="Phim" asp-action="Detail" asp-route-id="@movie.MaPhim" 
+                               class="btn-cz-outline btn-lg-cz">
+                                <i class="fas fa-play me-2"></i> XEM TRAILER
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="swiper-pagination-custom"></div>
+        <div class="swiper-nav swiper-prev"><i class="fas fa-chevron-left"></i></div>
+        <div class="swiper-nav swiper-next"><i class="fas fa-chevron-right"></i></div>
+    </section>
+}
+
+<!-- QUICK BOOKING BAR -->
+<div class="quick-booking-wrapper">
+    <div class="container">
+        <form asp-controller="DatVe" asp-action="Index" method="get" class="quick-booking-bar">
+            <div class="qb-field">
+                <label><i class="fas fa-film me-2"></i>Chọn phim</label>
+                <select name="maPhim" class="form-select-cz" required>
+                    <option value="">Phim bạn muốn xem?</option>
+                    @if (nowShowing != null)
+                    {
+                        @foreach (var p in nowShowing)
+                        {
+                            <option value="@p.MaPhim">@p.TenPhim</option>
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="qb-field">
+                <label><i class="fas fa-map-marker-alt me-2"></i>Chọn rạp</label>
+                <select name="maRap" class="form-select-cz">
+                    <option value="">Gần bạn nhất</option>
+                    @if (ViewBag.Cinemas != null)
+                    {
+                        @foreach (var r in ViewBag.Cinemas as IEnumerable<CinemaBooking.Models.RapPhim>)
+                        {
+                            <option value="@r.MaRap">@r.TenRap</option>
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="qb-field">
+                <label><i class="fas fa-calendar-day me-2"></i>Chọn ngày</label>
+                <select name="ngayChieu" class="form-select-cz">
+                    <option value="@DateTime.Now.ToString("yyyy-MM-dd")">Hôm nay, @DateTime.Now.ToString("dd/MM")</option>
+                    <option value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")">Ngày mai, @DateTime.Now.AddDays(1).ToString("dd/MM")</option>
+                    <option value="@DateTime.Now.AddDays(2).ToString("yyyy-MM-dd")">@DateTime.Now.AddDays(2).ToString("dddd, dd/MM")</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-qb-submit">
+                <i class="fas fa-search me-2"></i> ĐẶT VÉ NHANH
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="movie-rows-container">
+    <!-- PHIM ĐANG CHIẾU -->
+    @if (nowShowing != null && nowShowing.Any())
+    {
+        <div class="row-container">
+            <div class="section-header-cz">
+                <div class="title-with-subtitle">
+                    <h3 class="section-title-cz">Phim đang chiếu</h3>
+                    <p class="section-subtitle">Đừng bỏ lỡ những siêu phẩm đang "làm mưa làm gió" tại rạp</p>
+                </div>
+                <a asp-controller="Phim" asp-action="Index" class="view-all-cz">Xem tất cả <i class="fas fa-arrow-right ms-2"></i></a>
+            </div>
+            <div class="movie-row-wrapper">
+                <button class="nav-btn-cz prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                <div class="movie-row-cz" id="rowNowShowing">
+                    @foreach (var item in nowShowing)
+                    {
+                        <div class="movie-card-cz" onclick="location.href='@Url.Action("Detail", "Phim", new { id = item.MaPhim })'">
+                            <div class="poster-wrapper">
+                                <img src="@(string.IsNullOrEmpty(item.UrlPoster) ? "/images/no-image.jpg" : item.UrlPoster)" alt="@item.TenPhim">
+                                <div class="poster-overlay">
+                                    <span class="btn-detail-overlay">CHI TIẾT</span>
+                                </div>
+                                <div class="rating-badge-cz">
+                                    <i class="fas fa-star me-1 text-warning"></i> @(item.DiemIMDb?.ToString("0.0") ?? "8.0")
+                                </div>
+                            </div>
+                            <div class="card-info-cz">
+                                <h6 class="movie-title-cz">@item.TenPhim</h6>
+                                <p class="movie-meta-cz">@item.TheLoai</p>
+                                <a href="@Url.Action("Index", "DatVe", new { maPhim = item.MaPhim })" class="btn-book-cz" onclick="event.stopPropagation()">ĐẶT VÉ</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button class="nav-btn-cz next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    }
+
+    <!-- PROMOTIONS SECTION -->
+    @if (ViewBag.Promotions != null && (ViewBag.Promotions as IEnumerable<CinemaBooking.Models.KhuyenMai>).Any())
+    {
+        <div id="promotions" class="container-fluid px-4 mt-5 mb-5">
+            <div class="promo-section-cz">
+                <div class="section-header-cz mb-4">
+                    <h3 class="section-title-cz">Ưu đãi độc quyền</h3>
+                </div>
+                <div class="row g-4">
+                    @foreach (var promo in ViewBag.Promotions as IEnumerable<CinemaBooking.Models.KhuyenMai>)
+                    {
+                        <div class="col-md-3">
+                            <div class="promo-card-cz">
+                                <div class="promo-tag">GIẢM @(promo.PhanTramGiam)%</div>
+                                <div class="promo-body">
+                                    <h5>@promo.MaCode</h5>
+                                    <p>@promo.MoTa</p>
+                                    <div class="promo-footer">
+                                        <span><i class="far fa-clock me-1"></i>HSD: @promo.NgayKetThuc.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- PHIM SẮP CHIẾU -->
+    @if (comingSoon != null && comingSoon.Any())
+    {
+        <div class="row-container">
+            <div class="section-header-cz">
+                <div class="title-with-subtitle">
+                    <h3 class="section-title-cz">Phim sắp chiếu</h3>
+                    <p class="section-subtitle">Lên lịch ngay cho những bộ phim bom tấn sắp ra mắt</p>
+                </div>
+            </div>
+            <div class="movie-row-wrapper">
+                <button class="nav-btn-cz prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                <div class="movie-row-cz" id="rowComingSoon">
+                    @foreach (var item in comingSoon)
+                    {
+                        <div class="movie-card-cz" onclick="location.href='@Url.Action("Detail", "Phim", new { id = item.MaPhim })'">
+                            <div class="poster-wrapper">
+                                <img src="@(string.IsNullOrEmpty(item.UrlPoster) ? "/images/no-image.jpg" : item.UrlPoster)" alt="@item.TenPhim">
+                                <div class="date-badge-cz">
+                                    <div class="day">@item.NgayPhatHanh?.Day</div>
+                                    <div class="month">THG @item.NgayPhatHanh?.Month</div>
+                                </div>
+                            </div>
+                            <div class="card-info-cz">
+                                <h6 class="movie-title-cz text-truncate">@item.TenPhim</h6>
+                                <p class="movie-meta-cz">@item.TheLoai</p>
+                                <span class="btn-detail-cz">XEM CHI TIẾT</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button class="nav-btn-cz next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    }
+
+    <!-- CINEMAS SECTION -->
+    @if (ViewBag.Cinemas != null && (ViewBag.Cinemas as IEnumerable<CinemaBooking.Models.RapPhim>).Any())
+    {
+        <div id="cinemas" class="row-container mt-5">
+            <div class="section-header-cz">
+                <div class="title-with-subtitle">
+                    <h3 class="section-title-cz">Hệ thống rạp CineZore</h3>
+                    <p class="section-subtitle">Trải nghiệm không gian xem phim đẳng cấp quốc tế</p>
+                </div>
+            </div>
+            <div class="cinema-grid-cz px-4">
+                <div class="row g-4">
+                    @foreach (var cinema in ViewBag.Cinemas as IEnumerable<CinemaBooking.Models.RapPhim>)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="cinema-card-cz" onclick="location.href='@Url.Action("Index", "Phim", new { maRap = cinema.MaRap })'">
+                                <div class="cinema-img">
+                                    <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop" alt="@cinema.TenRap">
+                                    <div class="cinema-overlay">
+                                        <span class="city-tag"><i class="fas fa-map-marker-alt me-2"></i>@cinema.ThanhPho</span>
+                                    </div>
+                                </div>
+                                <div class="cinema-info">
+                                    <h5>@cinema.TenRap</h5>
+                                    <p><i class="bi bi-geo-alt me-2"></i>@cinema.DiaChi</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="room-count">@(cinema.PhongChieus?.Count ?? 8) phòng chiếu</span>
+                                        <a href="@Url.Action("Index", "Phim", new { maRap = cinema.MaRap })" class="btn-cinema-link">Xem lịch chiếu <i class="fas fa-chevron-right ms-1"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- PROMO STRIP -->
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        <div class="container px-4">
+            <div class="promo-banner-cz mt-5">
+                <div class="promo-overlay"></div>
+                <div class="promo-banner-content">
+                    <div class="promo-text">
+                        <div class="promo-badge">CƠ HỘI DUY NHẤT</div>
+                        <h3>Trở thành thành viên CineZore!</h3>
+                        <p>Nhận ngay <span class="text-highlight">giảm 20%</span> cho vé đầu tiên và tích lũy điểm thưởng khi đặt vé trực tuyến.</p>
+                    </div>
+                    <div class="promo-action">
+                        <a asp-controller="Account" asp-action="Register" class="btn-banner-cta">
+                            <span>Đăng ký ngay</span>
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // === NAVBAR SCROLL EFFECT ===
+        const nav = document.querySelector('.navbar-custom');
+        if (nav) {
+            const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 60);
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        }
+
+        // === CINEMATIC HERO SLIDER (SWIPER) ===
+        const swiper = new Swiper('.hero-slider', {
+            loop: true,
+            speed: 1000,
+            autoplay: {
+                delay: 6000,
+                disableOnInteraction: false,
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            pagination: {
+                el: '.swiper-pagination-custom',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-next',
+                prevEl: '.swiper-prev',
+            },
+        });
+
+        // === MOVIE ROW NAVIGATION & DRAG ===
+        document.querySelectorAll('.movie-row-wrapper').forEach(function (wrapper) {
+            const row = wrapper.querySelector('.movie-row-cz');
+            const prevBtn = wrapper.querySelector('.nav-btn-cz.prev');
+            const nextBtn = wrapper.querySelector('.nav-btn-cz.next');
+
+            if (!row) return;
+
+            // Update button visibility
+            const updateButtons = () => {
+                if (prevBtn) prevBtn.style.visibility = (row.scrollLeft > 10) ? 'visible' : 'hidden';
+                if (nextBtn) nextBtn.style.visibility = (row.scrollLeft + row.clientWidth < row.scrollWidth - 10) ? 'visible' : 'hidden';
+            };
+
+            // Click scrolling (One container width at a time)
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    row.scrollBy({ left: -row.clientWidth * 0.75, behavior: 'smooth' });
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    row.scrollBy({ left: row.clientWidth * 0.75, behavior: 'smooth' });
+                });
+            }
+
+            row.addEventListener('scroll', updateButtons);
+            window.addEventListener('resize', updateButtons);
+            
+            // Initial check
+            setTimeout(updateButtons, 500);
+
+            // Drag-to-Scroll (Enhanced with Click/Drag Threshold)
+            let isDown = false, startX, scrollLeft, moved = false;
+
+            row.addEventListener('mousedown', (e) => {
+                isDown = true;
+                moved = false; // Reset movement flag
+                row.classList.add('active');
+                startX = e.pageX - row.offsetLeft;
+                scrollLeft = row.scrollLeft;
+                row.style.cursor = 'grabbing';
+            });
+            
+            const deactivate = () => {
+                isDown = false;
+                row.classList.remove('active');
+                row.style.cursor = 'default';
+                // Delay clearing 'moved' to allow pending click events to check it
+                setTimeout(() => { row.dataset.recentDrag = moved; }, 10);
+            };
+
+            row.addEventListener('mouseleave', deactivate);
+            row.addEventListener('mouseup', deactivate);
+            
+            row.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                const x = e.pageX - row.offsetLeft;
+                const walk = (x - startX) * 2; // Scroll speed
+                
+                // Set 'moved' to true only if significant movement occurred
+                if (Math.abs(x - startX) > 8) {
+                    moved = true;
+                    e.preventDefault();
+                    row.scrollLeft = scrollLeft - walk;
+                }
+            });
+
+            // Prevent card redirection if it was a drag
+            row.addEventListener('click', (e) => {
+                if (moved) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        });
+
+    });
+</script>
+}

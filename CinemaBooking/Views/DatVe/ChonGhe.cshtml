@@ -1,0 +1,861 @@
+@model CinemaBooking.Models.LichChieu
+
+@{
+    ViewData["Title"] = "Chọn ghế – " + Model.Phim.TenPhim + " | CineZore";
+    var posterUrl = string.IsNullOrEmpty(Model.Phim.UrlPoster) ? "/images/no-image.jpg" : Model.Phim.UrlPoster;
+    var gheDaDat = ViewBag.GheDaDat as List<string> ?? new List<string>();
+    var hangGhe  = ViewBag.HangGhe  as char[]       ?? new[] { 'A','B','C','D','E','F','G','H','I','J' };
+    var soCot    = ViewBag.SoCot    as int?          ?? 12;
+    var showtimeStr = $"{Model.GioChieu.Hours:D2}:{Model.GioChieu.Minutes:D2}";
+    var basePriceStr = string.Format("{0:N0}đ", Model.GiaVe);
+}
+
+
+@section Styles {
+<style>
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+        --cz-bg:           #0a0a0f;
+        --cz-surface:      #111117;
+        --cz-surface-2:    #18181f;
+        --cz-border:       rgba(255,255,255,0.08);
+        --cz-border-hover: rgba(255,255,255,0.18);
+        --cz-accent:       #E50914;
+        --cz-accent-dim:   rgba(229,9,20,0.12);
+        --cz-gold:         #f5a623;
+        --cz-gold-dim:     rgba(245,166,35,0.12);
+        --cz-pink:         #e91e63;
+        --cz-pink-dim:     rgba(233,30,99,0.12);
+        --cz-blue:         #2979ff;
+        --cz-text:         #ffffff;
+        --cz-text-sub:     rgba(255,255,255,0.70);
+        --cz-text-muted:   rgba(255,255,255,0.40);
+        --cz-ease:         cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== BASE ===== */
+    body {
+        background: var(--cz-bg) !important;
+        color: var(--cz-text) !important;
+        font-family: 'Outfit', 'Inter', sans-serif !important;
+    }
+
+    main .container,
+    .container {
+        background: transparent !important;
+        box-shadow: none !important;
+        max-width: 1320px !important;
+        padding-inline: 5% !important;
+    }
+
+    /* ===== AMBIENT BACKGROUND ===== */
+    .cg-ambient {
+        position: fixed;
+        inset: 0; z-index: -1;
+        background-size: cover;
+        background-position: center;
+        filter: blur(80px) brightness(0.18) saturate(1.4);
+        transform: scale(1.1);
+    }
+
+    /* ===== PROGRESS STEPPER ===== */
+
+    /* ===== PAGE WRAPPER ===== */
+    .cg-page {
+        padding-bottom: 80px !important;
+    }
+
+    /* ===== GLASS PANEL ===== */
+    .cg-panel {
+        background: rgba(17,17,23,0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--cz-border);
+        border-radius: 18px;
+        padding: 36px;
+    }
+
+    /* ===== SCREEN INDICATOR ===== */
+    .cg-screen {
+        text-align: center;
+        margin-bottom: 36px;
+    }
+
+    .cg-screen__label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--cz-text-muted);
+        margin-bottom: 12px;
+    }
+
+    .cg-screen__bar {
+        height: 4px;
+        width: 70%;
+        margin: 0 auto;
+        background: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(255,255,255,0.55) 20%,
+            rgba(255,255,255,0.90) 50%,
+            rgba(255,255,255,0.55) 80%,
+            transparent 100%
+        );
+        border-radius: 2px;
+    }
+
+    .cg-screen__glow {
+        width: 55%;
+        height: 20px;
+        margin: 0 auto;
+        background: radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+
+    /* ===== SEAT MAP ===== */
+    .cg-seat-map {
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--cz-border) transparent;
+    }
+
+    .cg-seat-table {
+        border-spacing: 5px;
+        border-collapse: separate;
+        margin: 0 auto;
+    }
+
+    .cg-seat-row-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--cz-text-muted);
+        padding: 0 10px 0 4px;
+        text-align: right;
+        user-select: none;
+    }
+
+    .cg-seat-col-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--cz-text-muted);
+        text-align: center;
+        padding-bottom: 8px;
+        user-select: none;
+        min-width: 36px;
+    }
+
+    /* ===== SEAT BUTTON ===== */
+    .cg-seat {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        border: 1px solid;
+        cursor: pointer;
+        transition:
+            background   0.2s var(--cz-ease),
+            border-color 0.2s var(--cz-ease),
+            transform    0.15s var(--cz-ease),
+            box-shadow   0.2s var(--cz-ease);
+        position: relative;
+        outline: none;
+    }
+
+    .cg-seat:focus-visible {
+        outline: 2px solid var(--cz-accent);
+        outline-offset: 2px;
+    }
+
+    /* Seat types */
+    .cg-seat--regular {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.12);
+    }
+
+    .cg-seat--regular:hover:not(:disabled) {
+        background: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.4);
+        transform: scale(1.12);
+    }
+
+    .cg-seat--vip {
+        background: var(--cz-gold-dim);
+        border-color: rgba(245,166,35,0.35);
+    }
+
+    .cg-seat--vip:hover:not(:disabled) {
+        background: rgba(245,166,35,0.3);
+        border-color: var(--cz-gold);
+        transform: scale(1.12);
+    }
+
+    .cg-seat--sweetbox {
+        background: var(--cz-pink-dim);
+        border-color: rgba(233,30,99,0.35);
+    }
+
+    .cg-seat--sweetbox:hover:not(:disabled) {
+        background: rgba(233,30,99,0.3);
+        border-color: var(--cz-pink);
+        transform: scale(1.12);
+    }
+
+    .cg-seat--occupied {
+        background: rgba(255,255,255,0.03) !important;
+        border-color: rgba(255,255,255,0.06) !important;
+        cursor: not-allowed;
+        opacity: 0.35;
+    }
+
+    .cg-seat--occupied::after {
+        content: '×';
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .cg-seat--selected {
+        background: var(--cz-accent) !important;
+        border-color: rgba(255,255,255,0.5) !important;
+        box-shadow: 0 0 14px rgba(229,9,20,0.45);
+        transform: translateY(-3px) scale(1.08);
+    }
+
+    .cg-seat--busy {
+        background: var(--cz-blue) !important;
+        border-color: rgba(255,255,255,0.3) !important;
+        animation: pulseBusy 1.8s ease-in-out infinite;
+        cursor: not-allowed;
+    }
+
+    @@keyframes pulseBusy {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(41,121,255,0.5); }
+        50%       { box-shadow: 0 0 0 6px rgba(41,121,255,0); }
+    }
+
+    /* ===== LEGEND ===== */
+    .cg-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 32px;
+        padding-top: 28px;
+        border-top: 1px solid var(--cz-border);
+    }
+
+    .cg-legend__item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: var(--cz-text-sub);
+        font-weight: 500;
+    }
+
+    .cg-legend__swatch {
+        width: 18px; height: 18px;
+        border-radius: 4px;
+        border: 1px solid;
+        flex-shrink: 0;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .cg-sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.25rem;
+        color: var(--cz-text);
+    }
+
+    .cg-info-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--cz-text-muted);
+        margin-bottom: 6px;
+    }
+
+    .cg-info-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--cz-text);
+        margin-bottom: 0;
+    }
+
+    .cg-info-sub {
+        font-size: 0.87rem;
+        color: var(--cz-text-sub);
+    }
+
+    .cg-divider {
+        height: 1px;
+        background: var(--cz-border);
+        margin: 20px 0;
+    }
+
+    /* ===== SELECTED SEATS ===== */
+    .cg-selected-seats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-height: 36px;
+    }
+
+    .cg-seat-badge {
+        display: inline-flex;
+        align-items: center;
+        background: var(--cz-accent-dim);
+        border: 1px solid rgba(229,9,20,0.3);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        letter-spacing: 0.5px;
+    }
+
+    .cg-hint {
+        font-size: 0.82rem;
+        color: var(--cz-text-muted);
+        font-style: italic;
+    }
+
+    /* ===== COUPON ===== */
+    .cg-coupon {
+        display: flex;
+        gap: 8px;
+    }
+
+    .cg-coupon__input {
+        flex: 1;
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid var(--cz-border) !important;
+        border-radius: 8px !important;
+        color: var(--cz-text) !important;
+        padding: 10px 14px !important;
+        font-size: 0.88rem !important;
+        font-family: 'Outfit', sans-serif !important;
+        transition: border-color 0.2s;
+    }
+
+    .cg-coupon__input:focus {
+        outline: none !important;
+        border-color: var(--cz-border-hover) !important;
+        background: rgba(255,255,255,0.06) !important;
+        box-shadow: none !important;
+    }
+
+    .cg-coupon__input::placeholder { color: var(--cz-text-muted); }
+
+    .cg-coupon__btn {
+        background: var(--cz-surface-2);
+        border: 1px solid var(--cz-border);
+        border-radius: 8px;
+        color: var(--cz-text-sub);
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+        white-space: nowrap;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .cg-coupon__btn:hover {
+        background: var(--cz-border-hover);
+        border-color: var(--cz-border-hover);
+        color: var(--cz-text);
+    }
+
+    .cg-coupon__msg {
+        font-size: 0.8rem;
+        margin-top: 6px;
+        min-height: 18px;
+        font-weight: 600;
+    }
+
+    .cg-coupon__msg--success { color: #4caf50; }
+    .cg-coupon__msg--error   { color: #ef5350; }
+
+    /* ===== PRICE BOX ===== */
+    .cg-price-box {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--cz-border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cg-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.88rem;
+        color: var(--cz-text-sub);
+        margin-bottom: 10px;
+    }
+
+    .cg-price-row:last-child { margin-bottom: 0; }
+
+    .cg-price-row--discount { color: #4caf50; }
+
+    .cg-price-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 14px;
+        border-top: 1px solid var(--cz-border);
+        margin-top: 14px;
+    }
+
+    .cg-price-total__label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--cz-text-muted);
+    }
+
+    .cg-price-total__amount {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        color: var(--cz-text);
+    }
+
+    /* ===== SUBMIT BUTTON ===== */
+    .cg-btn-submit {
+        width: 100%;
+        padding: 16px;
+        background: var(--cz-accent);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.25s, box-shadow 0.25s, transform 0.2s;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .cg-btn-submit:hover:not(:disabled) {
+        background: #c40812;
+        box-shadow: 0 8px 24px rgba(229,9,20,0.4);
+        transform: translateY(-2px);
+    }
+
+    .cg-btn-submit:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 991px) {
+        .cg-panel { padding: 24px 16px; }
+        .cg-seat { width: 30px; height: 30px; }
+        .cg-seat-table { border-spacing: 4px; }
+    }
+</style>
+}
+
+<!-- Ambient blurred poster background -->
+<div class="cg-ambient" style="background-image: url('@posterUrl');" aria-hidden="true"></div>
+
+<div class="container cg-page">
+    
+    <div class="row g-4">
+
+        <!-- ===== SEAT MAP COLUMN ===== -->
+        <div class="col-lg-8">
+            <div class="cg-panel">
+
+                <!-- Screen -->
+                <div class="cg-screen" aria-hidden="true">
+                    <p class="cg-screen__label">Màn hình chiếu</p>
+                    <div class="cg-screen__bar"></div>
+                    <div class="cg-screen__glow"></div>
+                </div>
+
+                <!-- Seat Map -->
+                <div class="cg-seat-map" role="group" aria-label="Sơ đồ ghế ngồi">
+                    <table class="cg-seat-table" aria-label="Chọn ghế">
+                        <!-- Column labels -->
+                        <tr aria-hidden="true">
+                            <td></td>
+                            @for (int col = 1; col <= soCot; col++)
+                            {
+                                <td class="cg-seat-col-label">@col</td>
+                            }
+                        </tr>
+
+                        <!-- Seat rows -->
+                        @foreach (var row in hangGhe)
+                        {
+                            int rowIndex = Array.IndexOf(hangGhe, row);
+                            <tr>
+                                <td class="cg-seat-row-label" aria-hidden="true">@row</td>
+                                @for (int col = 1; col <= soCot; col++)
+                                {
+                                    string seatId = $"{row}{col}";
+                                    bool isOccupied = gheDaDat.Contains(seatId);
+
+                                    string seatType = "regular";
+                                    if (rowIndex >= hangGhe.Length * 0.7) seatType = "vip";
+                                    if (row == hangGhe[hangGhe.Length - 1] && col <= 4) seatType = "sweetbox";
+
+                                    decimal seatPrice = Model.GiaVe;
+                                    if (seatType == "vip")       seatPrice = Model.GiaVe * 1.2m;
+                                    if (seatType == "sweetbox")  seatPrice = Model.GiaVe * 1.5m;
+
+                                    <td>
+                                        <button
+                                            class="cg-seat cg-seat--@seatType @(isOccupied ? "cg-seat--occupied" : "")"
+                                            data-seat="@seatId"
+                                            data-price="@seatPrice"
+                                            data-type="@seatType"
+                                            aria-label="Ghế @seatId loại @seatType @(isOccupied ? "(đã đặt)" : "")"
+                                            aria-pressed="false"
+                                            @(isOccupied ? "disabled" : "")>
+                                        </button>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </table>
+                </div>
+
+                <!-- Legend -->
+                <div class="cg-legend" role="list" aria-label="Chú thích loại ghế">
+                    <div class="cg-legend__item" role="listitem">
+                        <span class="cg-legend__swatch"
+                              style="background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.12);"
+                              aria-hidden="true"></span>
+                        <span>Thường</span>
+                    </div>
+                    <div class="cg-legend__item" role="listitem">
+                        <span class="cg-legend__swatch"
+                              style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.35);"
+                              aria-hidden="true"></span>
+                        <span>VIP (+20%)</span>
+                    </div>
+                    <div class="cg-legend__item" role="listitem">
+                        <span class="cg-legend__swatch"
+                              style="background:rgba(233,30,99,0.12);border-color:rgba(233,30,99,0.35);"
+                              aria-hidden="true"></span>
+                        <span>Sweetbox (+50%)</span>
+                    </div>
+                    <div class="cg-legend__item" role="listitem">
+                        <span class="cg-legend__swatch"
+                              style="background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06);opacity:0.4;"
+                              aria-hidden="true"></span>
+                        <span>Đã đặt</span>
+                    </div>
+                    <div class="cg-legend__item" role="listitem">
+                        <span class="cg-legend__swatch"
+                              style="background:#E50914;border-color:rgba(255,255,255,0.5);"
+                              aria-hidden="true"></span>
+                        <span>Đang chọn</span>
+                    </div>
+                    <div class="cg-legend__item" role="listitem">
+                        <span class="cg-legend__swatch"
+                              style="background:#2979ff;border-color:rgba(255,255,255,0.3);"
+                              aria-hidden="true"></span>
+                        <span>Người khác đang xem</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== INFO SIDEBAR ===== -->
+        <div class="col-lg-4">
+            <div class="cg-panel position-sticky" style="top: 100px;">
+
+                <h2 class="cg-sidebar-title">Thông tin vé</h2>
+
+                <!-- Movie info -->
+                <div>
+                    <p class="cg-info-label">Phim</p>
+                    <p class="cg-info-value">@Model.Phim.TenPhim</p>
+                    <p class="cg-info-sub mt-1">@Model.PhongChieu.RapPhim.TenRap — Phòng @Model.PhongChieu.SoPhong</p>
+                    <p class="cg-info-sub">@Model.NgayChieu.ToString("dd/MM/yyyy") &nbsp;|&nbsp; @showtimeStr</p>
+                </div>
+
+                <div class="cg-divider"></div>
+
+                <!-- Selected seats -->
+                <div>
+                    <p class="cg-info-label">Ghế đang chọn</p>
+                    <div class="cg-selected-seats" id="selected-seats-display" role="list" aria-live="polite">
+                        <span class="cg-hint">Chưa chọn ghế nào...</span>
+                    </div>
+                </div>
+
+                <div class="cg-divider"></div>
+
+                <!-- Coupon -->
+                <div>
+                    <p class="cg-info-label">Mã giảm giá</p>
+                    <div class="cg-coupon">
+                        <input
+                            type="text"
+                            id="coupon-input"
+                            class="cg-coupon__input"
+                            placeholder="Nhập mã..."
+                            autocomplete="off"
+                            aria-label="Nhập mã giảm giá">
+                        <button type="button" id="btn-apply-coupon" class="cg-coupon__btn">
+                            Áp dụng
+                        </button>
+                    </div>
+                    <p class="cg-coupon__msg" id="coupon-msg" aria-live="polite"></p>
+                </div>
+
+                <div class="cg-divider"></div>
+
+                <!-- Price summary -->
+                <div class="cg-price-box">
+                    <div class="cg-price-row">
+                        <span>Tạm tính</span>
+                        <span id="subtotal-display">0đ</span>
+                    </div>
+                    <div class="cg-price-row cg-price-row--discount" id="membership-discount-row" style="display: @(ViewBag.DiscountPercent > 0 ? "flex" : "none")">
+                        <span>Giảm giá thành viên (@ViewBag.UserRank - @ViewBag.DiscountPercent%)</span>
+                        <span id="membership-discount-display">0đ</span>
+                    </div>
+                    <div class="cg-price-row cg-price-row--discount">
+                        <span>Mã giảm giá</span>
+                        <span id="discount-display">0đ</span>
+                    </div>
+                    <div class="cg-price-total">
+                        <span class="cg-price-total__label">Tổng cộng</span>
+                        <span class="cg-price-total__amount" id="total-display">0đ</span>
+                    </div>
+                </div>
+
+                <!-- Booking form -->
+                <form asp-action="ChonCombo" method="get" id="form-booking">
+                    <input type="hidden" name="maLichChieu" value="@Model.MaLichChieu">
+                    <input type="hidden" name="selectedSeats" id="hidden-seats">
+
+                    <button type="submit"
+                            id="btn-submit-booking"
+                            class="cg-btn-submit"
+                            disabled
+                            aria-disabled="true">
+                        Tiếp tục: Chọn Combo
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+    (function () {
+        'use strict';
+
+        /* ── State ── */
+        var selectedSeats = [];   // [{ id, price }]
+        var membershipDiscountPercent = parseFloat('@ViewBag.DiscountPercent') || 0;
+        var couponDiscountAmount = 0;
+        var couponCode = '';
+        var screeningId = '@Model.MaLichChieu';
+        var maxSeats = 8;
+
+        /* ── DOM refs ── */
+        var seatDisplayEl   = document.getElementById('selected-seats-display');
+        var subtotalEl      = document.getElementById('subtotal-display');
+        var discountEl      = document.getElementById('discount-display');
+        var totalEl         = document.getElementById('total-display');
+        var hiddenSeatsEl   = document.getElementById('hidden-seats');
+        var hiddenCouponEl  = document.getElementById('hidden-coupon');
+        var submitBtn       = document.getElementById('btn-submit-booking');
+        var couponInput     = document.getElementById('coupon-input');
+        var couponMsgEl     = document.getElementById('coupon-msg');
+        var applyCouponBtn  = document.getElementById('btn-apply-coupon');
+
+        /* ── Helpers ── */
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(Math.round(amount)) + 'đ';
+        }
+
+        /* ── UI update ── */
+        function renderUI() {
+            // Seat badges
+            seatDisplayEl.innerHTML = '';
+            if (selectedSeats.length === 0) {
+                seatDisplayEl.innerHTML = '<span class="cg-hint">Chưa chọn ghế nào...</span>';
+                submitBtn.disabled = true;
+                submitBtn.setAttribute('aria-disabled', 'true');
+            } else {
+                selectedSeats.forEach(function (s) {
+                    var badge = document.createElement('span');
+                    badge.className = 'cg-seat-badge';
+                    badge.textContent = s.id;
+                    badge.setAttribute('role', 'listitem');
+                    seatDisplayEl.appendChild(badge);
+                });
+                submitBtn.disabled = false;
+                submitBtn.setAttribute('aria-disabled', 'false');
+            }
+
+            // Price
+            var subtotal = selectedSeats.reduce(function (sum, s) { return sum + s.price; }, 0);
+            
+            // Calculate membership discount first
+            var membershipDiscount = subtotal * (membershipDiscountPercent / 100);
+            var afterMembership = subtotal - membershipDiscount;
+            
+            // Recalculate coupon discount based on amount after membership discount ? 
+            // OR simple sum? Let's assume cumulative on subtotal for simplicity or policy.
+            // Based on Controller logic: tongTien = tongTien * (1 - membershipDiscountPercent / 100); then coupon.
+            
+            var finalTotal = Math.max(0, afterMembership - couponDiscountAmount);
+
+            subtotalEl.textContent = formatCurrency(subtotal);
+            
+            var memberDiscountEl = document.getElementById('membership-discount-display');
+            if (memberDiscountEl) {
+                memberDiscountEl.textContent = '-' + formatCurrency(membershipDiscount);
+                document.getElementById('membership-discount-row').style.display = membershipDiscount > 0 ? 'flex' : 'none';
+            }
+            
+            discountEl.textContent = couponDiscountAmount > 0 ? '-' + formatCurrency(couponDiscountAmount) : '0đ';
+            totalEl.textContent    = formatCurrency(finalTotal);
+
+            // Hidden inputs
+            hiddenSeatsEl.value  = selectedSeats.map(function (s) { return s.id; }).join(',');
+            hiddenCouponEl.value = couponCode;
+        }
+
+        /* ── Seat selection ── */
+        document.querySelectorAll('.cg-seat:not(.cg-seat--occupied)').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var seatId    = this.dataset.seat;
+                var seatPrice = parseFloat(this.dataset.price);
+
+                if (this.classList.contains('cg-seat--selected')) {
+                    this.classList.remove('cg-seat--selected');
+                    this.setAttribute('aria-pressed', 'false');
+                    selectedSeats = selectedSeats.filter(function (s) { return s.id !== seatId; });
+                    invokeSignalR('DeselectSeat', [screeningId, seatId]);
+                } else {
+                    if (selectedSeats.length >= maxSeats) {
+                        alert('Chỉ được chọn tối đa ' + maxSeats + ' ghế');
+                        return;
+                    }
+                    this.classList.add('cg-seat--selected');
+                    this.setAttribute('aria-pressed', 'true');
+                    selectedSeats.push({ id: seatId, price: seatPrice });
+                    invokeSignalR('SelectSeat', [screeningId, seatId]);
+                }
+                renderUI();
+            });
+        });
+
+        /* ── Coupon ── */
+        applyCouponBtn.addEventListener('click', function () {
+            var code = couponInput.value.trim();
+            if (!code) return;
+
+            // Calculate current total before applying coupon
+            var subtotal = selectedSeats.reduce(function (sum, s) { return sum + s.price; }, 0);
+            var membershipDiscount = subtotal * (membershipDiscountPercent / 100);
+            var afterMembership = subtotal - membershipDiscount;
+
+            fetch('/DatVe/KiemTraKhuyenMai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: 'maKhuyenMai=' + encodeURIComponent(code) + '&tongTien=' + afterMembership
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.isValid) {
+                    couponDiscountAmount = afterMembership * (data.phanTramGiam / 100);
+                    couponCode = code;
+                    couponMsgEl.textContent  = data.message;
+                    couponMsgEl.className    = 'cg-coupon__msg cg-coupon__msg--success';
+                } else {
+                    couponDiscountAmount = 0;
+                    couponCode = '';
+                    couponMsgEl.textContent = data.message;
+                    couponMsgEl.className   = 'cg-coupon__msg cg-coupon__msg--error';
+                }
+                renderUI();
+                couponMsgEl.className   = 'cg-coupon__msg cg-coupon__msg--error';
+            });
+        });
+
+        couponInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); applyCouponBtn.click(); }
+        });
+
+        /* ── SignalR ── */
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/bookingHub')
+            .withAutomaticReconnect()
+            .build();
+
+        function invokeSignalR(method, args) {
+            if (connection.state === signalR.HubConnectionState.Connected) {
+                connection.invoke.apply(connection, [method].concat(args)).catch(console.warn);
+            }
+        }
+
+        connection.on('SeatSelectedByOther', function (seatId) {
+            var btn = document.querySelector('.cg-seat[data-seat="' + seatId + '"]');
+            if (btn && !btn.classList.contains('cg-seat--selected')) {
+                btn.classList.add('cg-seat--busy');
+                btn.disabled = true;
+                btn.setAttribute('aria-label', btn.getAttribute('aria-label').replace('(đang chọn)', '') + ' (người khác đang xem)');
+            }
+        });
+
+        connection.on('SeatDeselectedByOther', function (seatId) {
+            var btn = document.querySelector('.cg-seat[data-seat="' + seatId + '"]');
+            if (btn && !btn.classList.contains('cg-seat--occupied')) {
+                btn.classList.remove('cg-seat--busy');
+                btn.disabled = false;
+            }
+        });
+
+        connection.on('UpdateSelectingSeats', function (seats) {
+            seats.forEach(function (seatId) {
+                var btn = document.querySelector('.cg-seat[data-seat="' + seatId + '"]');
+                if (btn && !btn.classList.contains('cg-seat--selected')) {
+                    btn.classList.add('cg-seat--busy');
+                    btn.disabled = true;
+                }
+            });
+        });
+
+        connection.start()
+            .then(function () {
+                return connection.invoke('JoinScreening', screeningId);
+            })
+            .catch(console.warn);
+
+        /* ── Init ── */
+        renderUI();
+
+    })();
+</script>
+}
