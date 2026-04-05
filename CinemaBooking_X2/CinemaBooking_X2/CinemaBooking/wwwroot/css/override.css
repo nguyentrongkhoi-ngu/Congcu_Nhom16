@@ -1,0 +1,216 @@
+/* Override để ngăn hiệu ứng gạch chân trên CineZore */
+.edge-brand::after,
+.navbar-brand::after,
+.edge-brand .brand-text::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    background-color: transparent !important;
+}
+
+.edge-brand:hover::after,
+.navbar-brand:hover::after,
+.edge-brand:hover .brand-text::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    background-color: transparent !important;
+}
+
+/* Vô hiệu hóa mọi hiệu ứng hover trên logo */
+.navbar-brand,
+.edge-brand,
+.navbar-brand .brand-text,
+.edge-brand .brand-text {
+    text-decoration: none !important;
+}
+
+.navbar-brand:hover,
+.edge-brand:hover,
+.navbar-brand:hover .brand-text,
+.edge-brand:hover .brand-text {
+    text-decoration: none !important;
+}
+
+/* Đảm bảo chỉ các .nav-link trong .navbar-nav mới có hiệu ứng gạch chân */
+.navbar-nav .nav-link::after {
+    display: block !important;
+    content: '' !important;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #e50914;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 70% !important;
+}
+
+/* Những thành phần không phải .nav-link không có hiệu ứng */
+.navbar-brand::after,
+a:not(.nav-link)::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Ghi đè !important để đảm bảo không có hiệu ứng */
+.navbar-brand {
+    position: relative !important;
+}
+
+.navbar-brand::before,
+.navbar-brand::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Xóa hoàn toàn hiệu ứng cho navbar-brand */
+.navbar-brand::after,
+.edge-brand::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    background-color: transparent !important;
+}
+
+/* Reset tất cả các hiệu ứng trước */
+.navbar a::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Đảm bảo brand-text không có hiệu ứng gạch chân */
+.brand-text::after,
+.brand-text:hover::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Thêm một lớp bảo vệ cuối cùng */
+.navbar-brand:hover,
+.edge-brand:hover,
+.brand-text:hover {
+    text-decoration: none !important;
+}
+
+/* Vô hiệu hóa đặc biệt cho navbar-brand */
+.navbar-brand::after,
+a.navbar-brand::after,
+.edge-brand::after,
+.brand-text::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background-color: transparent !important;
+}
+
+/* Vô hiệu hóa gạch chân màu trắng có sẵn */
+.nav-link {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* Khôi phục hiệu ứng gạch chân màu đỏ cho các menu item */
+ul.navbar-nav li.nav-item a.nav-link::after {
+    display: block !important;
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background-color: #e50914 !important;
+    transition: all 0.3s ease !important;
+    transform: translateX(-50%) !important;
+}
+
+/* Hiệu ứng hover cho menu item */
+ul.navbar-nav li.nav-item a.nav-link:hover::after {
+    width: 70% !important;
+}
+
+/* Reset tất cả hiệu ứng ::after trong navbar, nhưng không ảnh hưởng đến footer */
+header .navbar a::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Vô hiệu hóa đặc biệt cho navbar-brand, giới hạn ở header */
+header .navbar-brand::after,
+header a.navbar-brand::after,
+header .edge-brand::after,
+header .brand-text::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background-color: transparent !important;
+}
+
+/* Vô hiệu hóa gạch chân màu trắng có sẵn, chỉ áp dụng cho header */
+header .nav-link {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* Khôi phục hiệu ứng gạch chân màu đỏ cho các menu item trong header */
+header ul.navbar-nav li.nav-item a.nav-link::after {
+    display: block !important;
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background-color: #e50914 !important;
+    transition: all 0.3s ease !important;
+    transform: translateX(-50%) !important;
+}
+
+/* Hiệu ứng hover cho menu item trong header */
+header ul.navbar-nav li.nav-item a.nav-link:hover::after {
+    width: 70% !important;
+}
+
+/* Khôi phục hiển thị footer */
+footer {
+    background-color: #212529 !important;
+    color: white !important;
+}
+
+footer div, 
+footer span {
+    color: white !important;
+    opacity: 1 !important;
+}
+
+/* Đảm bảo chữ CineZore trong footer có màu đỏ */
+footer span[style*="color: #e50914"] {
+    color: #e50914 !important;
+    opacity: 1 !important;
+}
+
+/* Đảm bảo link Privacy có màu xanh và không có gạch chân */
+footer .privacy-link {
+    color: rgb(43, 71, 255) !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+} 

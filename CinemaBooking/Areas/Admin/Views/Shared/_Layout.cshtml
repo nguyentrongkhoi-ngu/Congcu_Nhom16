@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | CineZore Admin</title>
+    <link rel="icon" href="~/images/imagescinezore-logo.png" type="image/png">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Essential Layout Positioning (Overrides if necessary) */
+        .admin-sidebar {
+            width: 250px;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .admin-main-content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .admin-header {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8fafc;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="d-flex w-100">
+        <!-- Sidebar (Fixed) -->
+        <aside class="admin-sidebar">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <img src="~/images/imagescinezore-logo.png" alt="CineZore" style="height: 40px;" />
+                    <p class="text-white small fw-bold mt-2 mb-0 opacity-75">ADMIN PANEL</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-th-large"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">
+                            <i class="fas fa-users"></i>
+                            Quản lý người dùng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Movies" asp-action="Index">
+                            <i class="fas fa-film"></i>
+                            Quản lý phim
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Cinemas" asp-action="Index">
+                            <i class="fas fa-building"></i>
+                            Quản lý rạp phim
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="LichChieu" asp-action="Index">
+                            <div class="sb-nav-link-icon text-netflix"><i class="fas fa-calendar-alt"></i></div>
+                            Quản lý lịch chiếu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="AdminBooking" asp-action="Index">
+                            <i class="fas fa-ticket-alt"></i>
+                            Quản lý đặt vé
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="AdminKhuyenMai" asp-action="Index">
+                            <i class="fas fa-tags"></i>
+                            Quản lý mã giảm giá
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="AdminCombos" asp-action="Index">
+                            <i class="fas fa-hamburger"></i>
+                            Quản lý Combo (F&B)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="AdminTicket" asp-action="Verify">
+                            <i class="fas fa-qrcode"></i>
+                            Kiểm tra vé
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                            <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Đăng xuất
+                            </a>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content (Full Width) -->
+        <main class="admin-main-content">
+            <header class="admin-header">
+                <div class="container-fluid d-flex justify-content-between align-items-center px-0">
+                    <h5 class="m-0 fw-bold text-slate-800">@ViewData["Title"]</h5>
+                    <div class="user-profile d-flex align-items-center">
+                        <span class="text-slate-600 small me-3">
+                            <i class="fas fa-circle text-success me-1" style="font-size: 0.6rem"></i>
+                            Admin: @User.Identity.Name
+                        </span>
+                        <div class="avatar-sm rounded-circle bg-slate-100 d-flex align-items-center justify-content-center" style="width:36px; height:36px">
+                            <i class="fas fa-user-shield text-slate-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                    </div>
+                }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+                
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Highlight active menu item with precision
+            var currentPath = window.location.pathname.toLowerCase();
+            if (currentPath.endsWith('/')) {
+                currentPath = currentPath.substring(0, currentPath.length - 1);
+            }
+
+            $('.admin-sidebar .nav-link').each(function() {
+                var href = $(this).attr('href');
+                if (!href) return;
+                
+                var linkPath = href.toLowerCase();
+                if (linkPath.endsWith('/')) {
+                    linkPath = linkPath.substring(0, linkPath.length - 1);
+                }
+
+                // Special case for Dashboard (exact or /Admin/Home/Index)
+                if (linkPath.includes('/admin/home/index') || linkPath === '/admin') {
+                    if (currentPath === '/admin' || currentPath === '/admin/home' || currentPath === '/admin/home/index' || currentPath === '') {
+                        $(this).addClass('active');
+                    }
+                } 
+                // Other Admin sections: match as prefix but check if it's a real sub-area
+                else if (linkPath !== '' && linkPath !== '/' && currentPath.startsWith(linkPath)) {
+                    // Avoid highlighting "Về trang chủ" (which might be /) while in Admin
+                    if (linkPath.includes('/admin/')) {
+                        $(this).addClass('active');
+                    }
+                }
+            });
+
+            // Prevent highlighting of utility links like Logout or Home
+            $('.admin-sidebar .nav-link').filter(function() {
+                var href = $(this).attr('href');
+                return href && (href.toLowerCase().includes('logout') || !href.toLowerCase().includes('/admin'));
+            }).removeClass('active');
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

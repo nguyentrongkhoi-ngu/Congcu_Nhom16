@@ -1,0 +1,146 @@
+@model IEnumerable<CinemaBooking.Models.Phim>
+
+@{
+    ViewData["Title"] = "Phim chiếu ngày " + ViewBag.Date?.ToString("dd/MM/yyyy");
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-calendar-day me-2"></i>Phim chiếu ngày @(ViewBag.Date?.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <form asp-action="MoviesByDate" method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="date" name="date" class="form-control" value="@(ViewBag.Date?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-2"></i>Xem lịch chiếu
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <h4 class="mb-3">Danh sách phim (@Model.Count())</h4>
+                        <div class="row">
+                            @foreach (var phim in Model)
+                            {
+                                <div class="col-md-6 mb-4">
+                                    <div class="movie-container">
+                                        <div class="card shadow-sm">
+                                            <div class="row g-0">
+                                                <div class="col-md-4">
+                                                    <div class="h-100">
+                                                        <img src="@(string.IsNullOrEmpty(phim.UrlPoster) ? "/images/no-image.jpg" : phim.UrlPoster)"
+                                                             class="img-fluid rounded-start h-100 w-100 object-fit-cover"
+                                                             alt="@phim.TenPhim" style="max-height: 300px;">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title mb-1">@phim.TenPhim</h4>
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <span class="badge bg-secondary me-2">@phim.TheLoai</span>
+                                                            <span class="text-muted"><i class="fas fa-clock me-1"></i>@phim.ThoiLuong phút</span>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <a asp-controller="Phim" asp-action="Detail" asp-route-id="@phim.MaPhim"
+                                                               class="btn btn-sm btn-outline-danger">
+                                                                <i class="fas fa-info-circle"></i> Chi tiết phim
+                                                            </a>
+                                                        </div>
+
+                                                        <h5 class="mt-3 mb-2">Suất chiếu:</h5>
+                                                        <div class="showtimes-container">
+                                                            @{
+                                                                var lichChieuPhim = phim.LichChieus
+                                                                    .Where(l => l.NgayChieu.Date == ViewBag.Date.Date)
+                                                                    .OrderBy(l => l.GioChieu)
+                                                                    .ToList();
+
+                                                                if (lichChieuPhim.Any())
+                                                                {
+                                                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                                                        @foreach (var lichChieu in lichChieuPhim)
+                                                                        {
+                                                                            <a href="@Url.Action("ChonGhe", "DatVe", new { maLichChieu = lichChieu.MaLichChieu })"
+                                                                               class="btn btn-outline-primary">
+                                                                                <div>@($"{lichChieu.GioChieu.Hours:D2}:{lichChieu.GioChieu.Minutes:D2}")</div>
+                                                                                <div class="small">@lichChieu.PhongChieu.RapPhim.TenRap</div>
+                                                                                <div class="small">@string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:N0}", lichChieu.GiaVe)đ</div>
+                                                                            </a>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="alert alert-warning py-2">
+                                                                        <small><i class="fas fa-exclamation-circle me-1"></i>Không có suất chiếu nào vào ngày này</small>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>Không có phim nào chiếu vào ngày này.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .showtimes-container {
+            margin-top: auto;
+        }
+
+        .btn-outline-primary {
+            min-width: 90px;
+            text-align: center;
+            margin: 3px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Không sử dụng hiệu ứng
+        });
+    </script>
+}

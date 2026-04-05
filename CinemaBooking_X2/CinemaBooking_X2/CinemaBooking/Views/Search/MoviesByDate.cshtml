@@ -1,0 +1,120 @@
+@model IEnumerable<CinemaBooking.Models.Phim>
+
+@{
+    ViewData["Title"] = "Phim chiếu ngày " + ViewBag.Date?.ToString("dd/MM/yyyy");
+}
+
+<div class="movies-by-date-page">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content text-center">
+                <div class="hero-icon mb-3">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <h1 class="hero-title">
+                    Phim chiếu ngày
+                    <span class="highlight-date">@(ViewBag.Date?.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))</span>
+                </h1>
+                <p class="hero-subtitle">Khám phá những bộ phim đang chiếu hôm nay</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="container">
+            <div class="search-card">
+                <div class="search-header">
+                    <h3 class="search-title">
+                        <i class="fas fa-search me-2"></i>
+                        Tìm kiếm theo ngày
+                    </h3>
+                </div>
+                <div class="search-body">
+                    <form asp-action="MoviesByDate" method="get" class="search-form">
+                        <div class="date-input-group">
+                            <div class="input-wrapper">
+                                <label for="date-picker" class="input-label">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    Chọn ngày chiếu
+                                </label>
+                                <input type="date"
+                                       id="date-picker"
+                                       name="date"
+                                       class="form-control date-input"
+                                       value="@(ViewBag.Date?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+                            </div>
+                            <button type="submit" class="btn btn-search">
+                                <i class="fas fa-search me-2"></i>
+                                Xem lịch chiếu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movies Section -->
+    <div class="movies-section">
+        <div class="container">
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <h4 class="mb-3">Danh sách phim (@Model.Count())</h4>
+                        <div class="row">
+                            @foreach (var phim in Model)
+                            {
+                                <div class="col-md-3 mb-4">
+                                    <div class="movie-container">
+                                        <div class="movie-card" data-id="@phim.MaPhim">
+                                            <div class="img-hover-zoom">
+                                                <img src="@(string.IsNullOrEmpty(phim.UrlPoster) ? "/images/no-image.jpg" : phim.UrlPoster)" class="card-img-top" alt="@phim.TenPhim">
+                                            </div>
+                                            <div class="card-content">
+                                                <h5 class="card-title">@phim.TenPhim</h5>
+                                                <span class="movie-genre">@phim.TheLoai</span>
+                                                <p class="card-text"><small>@phim.ThoiLuong phút</small></p>
+                                                <div class="d-flex gap-2">
+                                                    <a asp-controller="Phim" asp-action="Detail" asp-route-id="@phim.MaPhim" class="btn btn-sm btn-danger btn-ripple">
+                                                        <i class="fas fa-info-circle"></i> Chi tiết
+                                                    </a>
+                                                    <a asp-controller="DatVe" asp-action="Index" asp-route-maPhim="@phim.MaPhim" class="btn btn-sm btn-success btn-ripple">
+                                                        <i class="fas fa-ticket-alt"></i> Đặt vé
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>Không có phim nào chiếu vào ngày này.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Hiệu ứng hover cho movie card
+            $('.movie-card').hover(
+                function() {
+                    $(this).addClass('hover');
+                },
+                function() {
+                    $(this).removeClass('hover');
+                }
+            );
+        });
+    </script>
+}

@@ -1,0 +1,260 @@
+/**
+ * Theme CSS - Định nghĩa các biến và style cho chế độ sáng/tối
+ */
+
+:root {
+    /* Biến màu chung */
+    --primary-color: #e50914;
+    --secondary-color: #0d6efd;
+    --accent-color: #ffc107;
+
+    /* Biến màu cho chế độ tối (mặc định) */
+    --bg-color: #000912;
+    --bg-overlay: rgba(0, 9, 18, 0.7);
+    --container-bg: rgba(11, 20, 30, 0.85);
+    --card-bg: rgba(17, 25, 40, 0.8);
+    --text-color: rgba(255, 255, 255, 0.9);
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --text-bright: #ffffff;
+    --heading-color: #ffffff;
+    --navbar-bg: rgba(0, 0, 0, 0.95);
+    --navbar-border: rgba(255, 163, 84, 0.5);
+    --navbar-text: rgba(255, 255, 255, 0.95);
+    --navbar-text-hover: #ffffff;
+    --navbar-text-active: #e50914;
+    --footer-bg: rgba(0, 0, 0, 0.95);
+    --dropdown-bg: #343a40;
+    --dropdown-hover: #212529;
+    --card-shadow: 0 4px 20px rgba(32, 156, 255, 0.2);
+    --card-hover-shadow: 0 15px 30px rgba(32, 156, 255, 0.3);
+    --btn-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    --link-color: #3498db;
+    --link-hover-color: #2980b9;
+}
+
+/* Chế độ sáng */
+body.light-theme {
+    --bg-color: #f5f5f7;
+    --bg-overlay: rgba(245, 245, 247, 0.7);
+    --container-bg: rgba(255, 255, 255, 0.9);
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --text-color: #333333;
+    --text-muted: rgba(0, 0, 0, 0.6);
+    --text-bright: #111111;
+    --heading-color: #111111;
+    --navbar-bg: rgba(255, 255, 255, 0.95);
+    --navbar-border: rgba(229, 9, 20, 0.5);
+    --navbar-text: rgba(0, 0, 0, 0.8);
+    --navbar-text-hover: #000000;
+    --navbar-text-active: #e50914;
+    --footer-bg: rgba(255, 255, 255, 0.95);
+    --dropdown-bg: #f8f9fa;
+    --dropdown-hover: #e9ecef;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --card-hover-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    --btn-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --link-color: #2471a3;
+    --link-hover-color: #1a5276;
+}
+
+/* Áp dụng biến màu vào các phần tử */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body::before {
+    background: linear-gradient(to bottom, var(--bg-overlay), var(--bg-overlay));
+    transition: background 0.3s ease;
+}
+
+body.home-page main .container {
+    background-color: var(--container-bg);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.home-page main .container h1,
+body.home-page main .container h2,
+body.home-page main .container h3,
+body.home-page main .container h4,
+body.home-page main .container h5,
+body.home-page main .container h6 {
+    color: var(--heading-color);
+    transition: color 0.3s ease;
+}
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    border-bottom: 1px solid var(--navbar-border) !important;
+    transition: background-color 0.3s ease, border-bottom 0.3s ease;
+}
+
+.navbar.scrolled {
+    background-color: var(--navbar-bg) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--navbar-text) !important;
+    transition: color 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--navbar-text-hover) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--navbar-text-active) !important;
+    font-weight: 600;
+}
+
+.dropdown-menu {
+    background-color: var(--dropdown-bg);
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-item {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--dropdown-hover);
+    color: var(--heading-color);
+}
+
+/* Màu chữ cho các liên kết */
+a {
+    color: var(--link-color);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+.movie-card {
+    background-color: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.movie-card:hover {
+    box-shadow: var(--card-hover-shadow);
+}
+
+.footer {
+    background-color: var(--footer-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(5deg);
+    background-color: var(--secondary-color);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.theme-toggle:hover::before {
+    opacity: 0.3;
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle i {
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover i {
+    transform: rotate(15deg);
+}
+
+/* Điều chỉnh màu chữ cho navbar */
+.navbar-dark .navbar-brand {
+    color: var(--text-bright) !important;
+}
+
+.navbar-dark .navbar-brand .brand-text {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
+}
+
+.navbar-nav .nav-item .nav-link.logout-btn {
+    color: #ff9966 !important;
+    font-weight: 500;
+}
+
+.navbar-nav .nav-item .nav-link.logout-btn:hover {
+    color: #ffcc99 !important;
+}
+
+/* Light theme navbar adjustments */
+body.light-theme .navbar-dark .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Feedback icon in light theme */
+body.light-theme .feedback-icon {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Feedback panel in light theme */
+body.light-theme .feedback-panel {
+    background-color: white;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .feedback-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+body.light-theme .chat-message.received {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+body.light-theme .chat-message.sent {
+    background-color: var(--secondary-color);
+    color: white;
+}

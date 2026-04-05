@@ -1,0 +1,33 @@
+@model IEnumerable<CinemaBooking.Models.Phim>
+
+@if (Model != null && Model.Any())
+{
+    <div class="search-suggestions-list">
+        @foreach (var movie in Model)
+        {
+            <div class="search-suggestion-item" onclick="location.href='@Url.Action("Detail", "Phim", new { id = movie.MaPhim })'">
+                <div class="suggestion-poster">
+                    <img src="@(string.IsNullOrEmpty(movie.UrlPoster) ? "/images/no-image.jpg" : movie.UrlPoster)" alt="@movie.TenPhim">
+                </div>
+                <div class="suggestion-info">
+                    <h6 class="suggestion-title">@movie.TenPhim</h6>
+                    <div class="suggestion-meta">
+                        <span class="suggestion-year">@(movie.NgayPhatHanh.HasValue ? movie.NgayPhatHanh.Value.Year.ToString() : "2024")</span>
+                        <span class="suggestion-divider">|</span>
+                        <span class="suggestion-genre">@movie.TheLoai</span>
+                        @if (movie.DiemIMDb.HasValue)
+                        {
+                            <span class="suggestion-rating"><i class="fas fa-star text-warning small me-1"></i>@movie.DiemIMDb.Value.ToString("0.0")</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="no-suggestions">
+        <p><i class="fas fa-info-circle me-2"></i>Không tìm thấy phim phù hợp</p>
+    </div>
+}
