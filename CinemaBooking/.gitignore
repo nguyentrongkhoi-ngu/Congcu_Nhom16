@@ -1,0 +1,44 @@
+## [Visual Studio]
+.vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## [Visual Studio Code]
+.vscode/
+
+## [ASP.NET Core]
+wwwroot/lib/
+appsettings.json
+!appsettings.Development.json
+Properties/launchSettings.json
+
+## [Logs & Temporary Files]
+*.log
+*.txt
+dotnet_error.log
+run_error.log
+build_errors.txt
+ef_out.txt
+ef_out_utf8.txt
+
+## [Environment]
+.env
+.env.local
+
+## [User Uploads]
+wwwroot/uploads/*
+
+## [Database]
+*.db
+*.mdf
+*.ldf

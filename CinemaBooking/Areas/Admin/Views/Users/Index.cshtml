@@ -1,0 +1,310 @@
+@using CinemaBooking.Models
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    var users = ViewBag.Users as List<dynamic>;
+    var allRoles = ViewBag.AllRoles as List<ApplicationRole>;
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold text-slate-800">Quản lý người dùng</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                <li class="breadcrumb-item active">Người dùng</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="position-relative">
+            <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-slate-400"></i>
+            <input type="text" id="userSearch" class="form-control ps-5 shadow-sm border-0" placeholder="Tìm kiếm người dùng..." style="width: 250px;">
+        </div>
+        <button type="button" class="btn btn-admin shadow-sm" data-bs-toggle="modal" data-bs-target="#createModal">
+            <i class="fas fa-plus me-2"></i>Thêm người dùng
+        </button>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="ps-4" style="width: 35%">Người dùng</th>
+                        <th style="width: 25%">Liên hệ</th>
+                        <th style="width: 15%">Vai trò</th>
+                        <th style="width: 15%">Ngày tạo</th>
+                        <th class="text-end pe-4" style="width: 10%">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (users != null && users.Any())
+                    {
+                        foreach (var item in users)
+                        {
+                            var user = item.User as ApplicationUser;
+                            var roles = item.Roles as IList<string>;
+                            
+                            <tr class="user-row">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-3 bg-indigo-50 rounded-circle d-flex align-items-center justify-content-center text-indigo-600 fw-bold shadow-sm" style="width:42px; height:42px; border: 2px solid #fff">
+                                            @(user.HoTen?.Substring(0, 1).ToUpper() ?? "U")
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-slate-800 search-target">@user.HoTen</div>
+                                            <div class="small text-slate-500 search-target">@@@user.UserName</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small fw-medium text-slate-700 search-target">@user.Email</div>
+                                    <div class="small text-slate-500">@user.SoDienThoai</div>
+                                </td>
+                                <td>
+                                    @if (roles != null && roles.Any())
+                                    {
+                                        foreach (var role in roles)
+                                        {
+                                            var badgeClass = role == "Admin" ? "bg-danger" : "bg-indigo-600";
+                                            var icon = role == "Admin" ? "fa-user-shield" : "fa-user";
+                                            <span class="badge @badgeClass rounded-pill px-3 py-1 shadow-sm" style="font-size: 0.65rem">
+                                                <i class="fas @icon me-1"></i>@role
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-slate-200 text-slate-600 rounded-pill px-3 py-1" style="font-size: 0.65rem">Khách</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center small text-slate-600">
+                                        <i class="far fa-calendar-alt me-2 opacity-50"></i>
+                                        @user.NgayTao?.ToString("dd/MM/yyyy")
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm rounded">
+                                        <button type="button" class="btn btn-sm btn-white border-end text-slate-600 hover-bg-slate-50" onclick="editUser('@user.Id')" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-white text-red-500 hover-bg-red-50" onclick="confirmDelete('@user.Id', '@user.UserName')" title="Xóa">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-slate-400">
+                                <i class="fas fa-users-slash fa-3x mb-3 opacity-20"></i>
+                                <p class="mb-0">Chưa có người dùng nào được tìm thấy</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom bg-slate-50 py-3">
+                <h6 class="modal-title fw-bold text-slate-800">Thêm người dùng mới</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Tên đăng nhập</label>
+                            <input type="text" name="UserName" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Email</label>
+                            <input type="email" name="Email" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-slate-600">Mật khẩu</label>
+                            <input type="password" name="Password" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-slate-600">Họ và tên</label>
+                            <input type="text" name="HoTen" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Số điện thoại</label>
+                            <input type="text" name="SoDienThoai" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Vai trò</label>
+                            <select name="Role" class="form-select form-select-sm shadow-none border-slate-200">
+                                @if (allRoles != null)
+                                {
+                                    foreach (var role in allRoles)
+                                    {
+                                        <option value="@role.Name">@role.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-slate-50 border-top py-3">
+                    <button type="button" class="btn btn-sm btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-admin px-4">Lưu thông tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom bg-slate-50 py-3">
+                <h6 class="modal-title fw-bold text-slate-800">Chỉnh sửa người dùng</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editForm" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="editUserId" />
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-slate-600">Tên đăng nhập (Không thể đổi)</label>
+                            <input type="text" id="editUserName" class="form-control form-control-sm bg-light" readonly />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-slate-600">Họ và tên</label>
+                            <input type="text" name="HoTen" id="editHoTen" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-slate-600">Email</label>
+                            <input type="email" name="Email" id="editEmail" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Số điện thoại</label>
+                            <input type="text" name="SoDienThoai" id="editSoDienThoai" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Vai trò</label>
+                            <select name="Role" id="editRole" class="form-select form-select-sm shadow-none border-slate-200">
+                                @if (allRoles != null)
+                                {
+                                    foreach (var role in allRoles)
+                                    {
+                                        <option value="@role.Name">@role.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-slate-50 border-top py-3">
+                    <button type="button" class="btn btn-sm btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-admin px-4">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <i class="fas fa-exclamation-triangle fa-3x text-red-500 mb-3"></i>
+                <h6 class="fw-bold text-slate-800">Xác nhận xóa</h6>
+                <p class="small text-slate-500 px-2">Bạn có chắc chắn muốn xóa người dùng <strong id="deleteUserName" class="text-slate-800"></strong>?</p>
+                
+                <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteUserId" />
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger shadow-sm">Xác nhận xóa</button>
+                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy bỏ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $("#userSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".user-row").filter(function() {
+                    var text = $(this).find(".search-target").text().toLowerCase();
+                    $(this).toggle(text.indexOf(value) > -1);
+                });
+            });
+        });
+
+        function editUser(userId) {
+            // Fetch user data
+            fetch(`/Admin/Users/GetUser/${userId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('editUserId').value = data.id;
+                    document.getElementById('editUserName').value = data.userName;
+                    document.getElementById('editHoTen').value = data.hoTen;
+                    document.getElementById('editEmail').value = data.email;
+                    document.getElementById('editSoDienThoai').value = data.soDienThoai;
+                    
+                    // Set role
+                    if (data.roles && data.roles.length > 0) {
+                        document.getElementById('editRole').value = data.roles[0];
+                    }
+
+                    var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                    editModal.show();
+                })
+                .catch(err => {
+                    alert('Lỗi khi tải dữ liệu người dùng');
+                    console.error(err);
+                });
+        }
+
+        function confirmDelete(userId, userName) {
+            document.getElementById('deleteUserName').textContent = userName;
+            document.getElementById('deleteUserId').value = userId;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+    
+    <style>
+        .bg-indigo-50 { background-color: #eef2ff !important; }
+        .text-indigo-600 { color: #4f46e5 !important; }
+        .bg-slate-50 { background-color: #f8fafc !important; }
+        .bg-indigo-600 { background-color: #4f46e5 !important; }
+        .text-red-500 { color: #ef4444 !important; }
+        .hover-bg-slate-50:hover { background-color: #f8fafc !important; }
+        .hover-bg-red-50:hover { background-color: #fef2f2 !important; color: #dc2626 !important; }
+        .btn-white { background-color: #fff; border: 1px solid #e2e8f0; color: #64748b; }
+        .user-row { transition: all 0.2s ease; }
+        .user-row:hover { background-color: #f8fafc !important; transform: scale(1.002); }
+        .avatar-sm { font-size: 1rem; }
+        .form-control:focus, .form-select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    </style>
+}

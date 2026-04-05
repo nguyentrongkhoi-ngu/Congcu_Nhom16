@@ -1,0 +1,19 @@
+# Root ignore
+antigravity-awesome-skills/
+
+# .NET Build Artifacs
+**/bin/
+**/obj/
+.vs/
+*.user
+
+# Log and build error files (cleaning up the root)
+CinemaBooking/*.txt
+CinemaBooking/*.log
+!CinemaBooking/README.md
+
+# Application settings
+**/appsettings.Development.json
+
+# User Uploads
+CinemaBooking/uploads/
