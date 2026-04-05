@@ -1,0 +1,57 @@
+## .NET gitignore
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Xx]64/
+[Xx]86/
+bin/
+obj/
+out/
+
+# Log files
+*.log
+*.txt
+*.cache
+
+# Build log temp files
+build.log
+build.txt
+build_err.txt
+build_error.txt
+build_errors.log
+build_errors.txt
+build_errors_2.txt
+build_full.log
+build_last.log
+build_out.txt
+build_output.txt
+ef_out.txt
+ef_out_utf8.txt
+msbuild.log
+run_error.log
+run_error_2.log
+run_retry.log
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code / Rider
+.vs/
+.vscode/
+.idea/
+
+# NuGet
+packages/
+*.nupkg
+
+# Publish
+publish/
+web.config
+
+# OS
+.DS_Store
+Thumbs.db
