@@ -1,0 +1,261 @@
+@{
+    ViewData["Title"] = "Kiểm tra vé";
+}
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2><i class="fas fa-ticket-alt"></i> Kiểm tra vé</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("VerifyHistory", "AdminTicket")" class="btn btn-outline-primary">
+                <i class="fas fa-history"></i> Lịch sử kiểm tra
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Nhập thông tin vé</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group mb-3">
+                                <label for="ticketId" class="form-label">Mã vé <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="ticketId" placeholder="Nhập mã vé">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="seatNumber" class="form-label">Số ghế (tùy chọn)</label>
+                                <input type="text" class="form-control" id="seatNumber" placeholder="Nhập số ghế (VD: A1)">
+                                <div class="form-text">Ghế cụ thể để kiểm tra (nếu có)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            @Html.AntiForgeryToken()
+                            <button type="button" id="verifyBtn" class="btn btn-primary w-100 mt-3">
+                                <i class="fas fa-search"></i> Kiểm tra
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div id="resultContainer" class="card shadow-sm" style="display: none;">
+                <div id="resultHeader" class="card-header">
+                    <h5 class="mb-0" id="resultTitle">Kết quả kiểm tra</h5>
+                </div>
+                <div class="card-body">
+                    <div id="resultContent">
+                        <!-- Nội dung kết quả sẽ được hiển thị ở đây -->
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <button type="button" id="newScanBtn" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync"></i> Kiểm tra mới
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Hướng dẫn</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success"></i> <strong>Vé hợp lệ:</strong> Có thể cho khách vào xem phim</li>
+                        <li class="mb-2"><i class="fas fa-exclamation-circle text-warning"></i> <strong>Vé quá sớm:</strong> Khách đến sớm hơn 1 giờ so với suất chiếu</li>
+                        <li class="mb-2"><i class="fas fa-history text-info"></i> <strong>Vé đã dùng:</strong> Vé đã được kiểm tra trước đó</li>
+                        <li class="mb-2"><i class="fas fa-times-circle text-danger"></i> <strong>Vé không hợp lệ:</strong> Không cho khách vào xem phim</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Âm thanh phản hồi -->
+<audio id="successSound" src="~/sounds/success.mp3" preload="auto"></audio>
+<audio id="warningSound" src="~/sounds/warning.mp3" preload="auto"></audio>
+<audio id="errorSound" src="~/sounds/error.mp3" preload="auto"></audio>
+
+<style>
+    .result-success #resultHeader {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .result-warning #resultHeader {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .result-danger #resultHeader {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .result-info #resultHeader {
+        background-color: #17a2b8;
+        color: white;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Chuẩn bị âm thanh
+            const successSound = document.getElementById('successSound');
+            const warningSound = document.getElementById('warningSound');
+            const errorSound = document.getElementById('errorSound');
+            let isSoundEnabled = true;
+            
+            // Phát âm thanh dựa trên kết quả
+            function playSound(type) {
+                if (!isSoundEnabled) return;
+                
+                switch(type) {
+                    case 'success':
+                        successSound.play();
+                        break;
+                    case 'warning':
+                        warningSound.play();
+                        break;
+                    case 'error':
+                        errorSound.play();
+                        break;
+                }
+            }
+            
+            // Xử lý khi nhấn nút kiểm tra
+            $("#verifyBtn").click(function() {
+                const ticketId = $("#ticketId").val();
+                const seatNumber = $("#seatNumber").val();
+                
+                // Reset kết quả
+                $('#resultContainer').hide();
+                
+                if (!ticketId) {
+                    alert("Vui lòng nhập mã vé");
+                    return;
+                }
+                
+                $.ajax({
+                    url: '@Url.Action("VerifyTicket", "AdminTicket")',
+                    type: 'POST',
+                    data: {
+                        ticketId: ticketId,
+                        seatNumber: seatNumber,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const ticket = response.ticket;
+                            
+                            let resultHtml = `
+                                <p><strong>Mã vé:</strong> <span class="badge bg-primary">#${ticket.id}</span></p>
+                                <p><strong>Khách hàng:</strong> ${ticket.customer}</p>
+                                <p><strong>Phim:</strong> ${ticket.movie}</p>
+                                <p><strong>Rạp:</strong> ${ticket.cinema} - Phòng ${ticket.room}</p>
+                                <p><strong>Suất chiếu:</strong> ${ticket.showDateTime}</p>
+                                <p><strong>Ghế:</strong> ${ticket.seats}</p>
+                            `;
+                            
+                            if (ticket.selectedSeat) {
+                                resultHtml += `<p><strong>Ghế được kiểm tra:</strong> <span class="badge bg-info">${ticket.selectedSeat}</span></p>`;
+                            }
+                            
+                            if (response.isUsed) {
+                                showResult('warning', 'Vé đã được sử dụng', resultHtml + 
+                                    `<div class="alert alert-warning mt-3">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        Vé này đã được quét trước đó vào lúc: ${response.usedTime}
+                                    </div>`);
+                                playSound('warning');
+                            } else if (response.isEarly) {
+                                showResult('warning', 'Vé hợp lệ (Đến sớm)', resultHtml + 
+                                    `<div class="alert alert-warning mt-3">
+                                        <i class="fas fa-clock"></i> 
+                                        Khách đến sớm hơn 1 giờ so với giờ chiếu. Vui lòng thông báo cho khách.
+                                    </div>`);
+                                playSound('warning');
+                            } else {
+                                showResult('success', 'Vé hợp lệ', resultHtml + 
+                                    `<div class="alert alert-success mt-3">
+                                        <i class="fas fa-check-circle"></i> 
+                                        Vé hợp lệ. Khách có thể vào xem phim.
+                                    </div>`);
+                                playSound('success');
+                            }
+                        } else {
+                            showResult('danger', 'Vé không hợp lệ', `
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-times-circle"></i> ${response.message}
+                                </div>
+                                <p>Vui lòng kiểm tra lại mã vé hoặc số ghế.</p>
+                            `);
+                            playSound('error');
+                        }
+                    },
+                    error: function() {
+                        showResult('danger', 'Lỗi hệ thống', `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i> Đã xảy ra lỗi khi kiểm tra vé
+                            </div>
+                            <p>Vui lòng thử lại sau hoặc liên hệ quản trị viên.</p>
+                        `);
+                        playSound('error');
+                    }
+                });
+            });
+            
+            // Hiển thị kết quả
+            function showResult(type, title, content) {
+                // Xóa tất cả class result- cũ
+                $('#resultContainer').removeClass(function(index, css) {
+                    return (css.match(/\bresult-\S+/g) || []).join(' ');
+                });
+                
+                // Thêm class mới dựa vào loại kết quả
+                $('#resultContainer').addClass('result-' + type);
+                $('#resultTitle').html(`<i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                                type === 'warning' ? 'exclamation-triangle' : 
+                                                type === 'danger' ? 'times-circle' : 'info-circle'}"></i> ${title}`);
+                $('#resultContent').html(content);
+                $('#resultContainer').fadeIn(300);
+            }
+            
+            // Reset khi người dùng muốn kiểm tra mới
+            $('#newScanBtn').click(function() {
+                $('#resultContainer').hide();
+                $('#ticketId').val('');
+                $('#seatNumber').val('');
+                $('#ticketId').focus();
+            });
+            
+            // Đặt focus vào ô mã vé
+            $('#ticketId').focus();
+            
+            // Khi nhập mã vé thì ẩn kết quả
+            $("#ticketId, #seatNumber").on("input", function() {
+                $('#resultContainer').fadeOut(200);
+            });
+            
+            // Hỗ trợ nhấn Enter để kiểm tra
+            $("#ticketId, #seatNumber").keypress(function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $("#verifyBtn").click();
+                }
+            });
+        });
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

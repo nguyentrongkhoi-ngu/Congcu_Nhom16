@@ -1,0 +1,169 @@
+@model CinemaBooking.Models.ViewModels.LichChieuListViewModel
+
+@{
+    ViewData["Title"] = "Lịch Chiếu Phim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var groupedByMovie = Model.LichChieus?
+        .GroupBy(l => l.Phim)
+        .OrderBy(g => g.Key?.TenPhim)
+        .ToList();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/movies.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/schedules.css" asp-append-version="true" />
+}
+
+<div class="schedule-hero-cinematic">
+    <div class="container">
+        <h1 class="cinematic-title">Lịch Chiếu Toàn Hệ Thống</h1>
+        <p class="cinematic-subtitle">Tìm kiếm suất chiếu phim yêu thích của bạn theo rạp, thời gian và định dạng mong muốn.</p>
+
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Premium Filter Panel -->
+    <div class="filter-panel-premium">
+        <form asp-action="Index" method="get">
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <label class="filter-label">Tìm theo phim/rạp</label>
+                    <input type="text" asp-for="SearchTerm" class="form-control-cinematic w-100" placeholder="Harry Potter, CGV...">
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="filter-label">Chọn rạp</label>
+                    <select asp-for="MaRap" asp-items="Model.RapList" class="form-select-cinematic w-100">
+                        <option value="">-- Tất cả rạp --</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="filter-label">Từ ngày</label>
+                    <input type="date" asp-for="NgayBatDau" class="form-control-cinematic w-100">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="filter-label">Đến ngày</label>
+                    <input type="date" asp-for="NgayKetThuc" class="form-control-cinematic w-100">
+                </div>
+                <div class="col-lg-2 col-md-12 d-flex align-items-end">
+                    <button type="submit" class="btn btn-netflix w-100 py-2">
+                        <i class="fas fa-filter me-2"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Movie-Grouped Schedule List -->
+    @if (groupedByMovie == null || !groupedByMovie.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-calendar-times fa-4x mb-4 text-white-50"></i>
+            <h3 class="text-white-50">Không tìm thấy lịch chiếu nào.</h3>
+            <p class="text-muted">Thử thay đổi bộ lọc hoặc xem danh sách phim khác.</p>
+        </div>
+    }
+    else
+    {
+        foreach (var movieGroup in groupedByMovie)
+        {
+            var phim = movieGroup.Key;
+            <div class="movie-schedule-card gsap-reveal">
+                <div class="row align-items-start">
+                    <div class="col-md-auto d-none d-md-block">
+                        <img src="@(string.IsNullOrEmpty(phim?.UrlPoster) ? "/images/no-image.jpg" : phim.UrlPoster)" 
+                             class="movie-poster-thumb" alt="@phim?.TenPhim">
+                    </div>
+                    <div class="col">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                            <div>
+                                <h2 class="text-white fw-800 mb-3">@phim?.TenPhim</h2>
+                                <div class="d-flex align-items-center flex-wrap gap-1">
+                                    <span class="movie-meta-pill"><i class="fas fa-clock"></i> @phim?.ThoiLuong phút</span>
+                                    <span class="movie-meta-pill"><i class="fas fa-tags"></i> @phim?.TheLoai</span>
+                                    <span class="movie-meta-pill"><i class="fas fa-video"></i> @phim?.DinhDang</span>
+                                </div>
+                            </div>
+                            <a href="@Url.Action("Detail", "Phim", new { id = phim?.MaPhim })" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                                <i class="fas fa-info-circle me-1"></i> Chi tiết phim
+                            </a>
+                        </div>
+
+                        <!-- Cinemas for this movie -->
+                        @{
+                            var groupedByRap = movieGroup
+                                .GroupBy(l => l.PhongChieu?.RapPhim)
+                                .OrderBy(g => g.Key?.TenRap)
+                                .ToList();
+                        }
+
+                        @foreach (var rapGroup in groupedByRap)
+                        {
+                            var rap = rapGroup.Key;
+                            <div class="cinema-group">
+                                <div class="cinema-title-badge">
+                                    <i class="fas fa-map-marker-alt"></i> @rap?.TenRap
+                                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 500;">| @rap?.DiaChi</span>
+                                </div>
+                                <div class="time-slots d-flex flex-wrap">
+                                    @foreach (var lc in rapGroup.OrderBy(l => l.NgayChieu).ThenBy(l => l.GioChieu))
+                                    {
+                                        <a href="@Url.Action("ChonGhe", "DatVe", new { maLichChieu = lc.MaLichChieu })" 
+                                           class="time-badge-premium" title="Ngày chiếu: @lc.NgayChieu.ToString("dd/MM/yyyy") | Giá vé: @lc.GiaVe.ToString("N0") VNĐ">
+                                            <span class="time-main">@lc.GioChieu.ToString(@"hh\:mm")</span>
+                                            <div class="d-flex align-items-center gap-1 mt-1">
+                                                <span class="room-sub">P.@lc.PhongChieu?.SoPhong</span>
+                                                <span class="room-sub" style="opacity: 0.8; margin-left: 5px;">| @lc.NgayChieu.ToString("dd/MM")</span>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        (function() {
+            function initSchedules() {
+                console.log("Cinezore Schedules Page Initialization Started");
+                document.body.classList.add('js-loaded');
+
+                // Set minimum date for date inputs to today
+                const today = new Date().toISOString().split('T')[0];
+                document.querySelectorAll('input[type="date"]').forEach(el => {
+                    el.setAttribute('min', today);
+                });
+
+                // GSAP Entrance Animation
+                const cards = document.querySelectorAll('.gsap-reveal');
+                if(cards.length > 0) {
+                    gsap.fromTo(cards, 
+                        { opacity: 0, y: 30 }, 
+                        { 
+                            opacity: 1, 
+                            y: 0, 
+                            duration: 0.8, 
+                            stagger: 0.1, 
+                            ease: "power2.out",
+                            clearProps: "all"
+                        }
+                    );
+                }
+            }
+
+            // Execute based on readyState
+            if (document.readyState === "complete" || document.readyState === "interactive") {
+                initSchedules();
+            } else {
+                document.addEventListener('DOMContentLoaded', initSchedules);
+            }
+        })();
+    </script>
+}

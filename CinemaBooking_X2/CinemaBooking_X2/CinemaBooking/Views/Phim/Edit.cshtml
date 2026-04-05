@@ -1,0 +1,136 @@
+@model CinemaBooking.Models.ViewModels.PhimViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa phim";
+}
+
+<div class="container mt-4">
+    <h1>Chỉnh sửa phim</h1>
+    <hr />
+    
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="MaPhim" />
+                <input type="hidden" asp-for="UrlPoster" />
+                <input type="hidden" asp-for="Trailer" />
+                
+                <div class="form-group mb-3">
+                    <label asp-for="TenPhim" class="control-label"></label>
+                    <input asp-for="TenPhim" class="form-control" />
+                    <span asp-validation-for="TenPhim" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="MoTa" class="control-label"></label>
+                    <textarea asp-for="MoTa" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="MoTa" class="text-danger"></span>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ThoiLuong" class="control-label"></label>
+                            <input asp-for="ThoiLuong" class="form-control" />
+                            <span asp-validation-for="ThoiLuong" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TheLoai" class="control-label"></label>
+                            <input asp-for="TheLoai" class="form-control" />
+                            <span asp-validation-for="TheLoai" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="NgayPhatHanh" class="control-label"></label>
+                            <input asp-for="NgayPhatHanh" class="form-control" type="date" />
+                            <span asp-validation-for="NgayPhatHanh" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="DinhDang" class="control-label"></label>
+                            <select asp-for="DinhDang" class="form-control">
+                                <option value="">-- Chọn định dạng --</option>
+                                <option value="2D">2D</option>
+                                <option value="3D">3D</option>
+                                <option value="IMAX">IMAX</option>
+                                <option value="4DX">4DX</option>
+                            </select>
+                            <span asp-validation-for="DinhDang" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PosterFile" class="control-label"></label>
+                            <input asp-for="PosterFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this, 'posterPreview')" />
+                            <span asp-validation-for="PosterFile" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống nếu không muốn thay đổi poster hiện tại</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TrailerFile" class="control-label"></label>
+                            <input asp-for="TrailerFile" class="form-control" type="file" accept="video/*" />
+                            <span asp-validation-for="TrailerFile" class="text-danger"></span>
+                            <small class="form-text text-muted">Để trống nếu không muốn thay đổi trailer hiện tại</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Poster hiện tại:</label>
+                        <img id="posterPreview" src="@(string.IsNullOrEmpty(Model.UrlPoster) ? "/images/no-image.jpg" : Model.UrlPoster)" class="img-fluid mt-2" style="max-height: 300px;" />
+                    </div>
+                    <div class="col-md-6">
+                        <label>Trailer hiện tại:</label>
+                        @if (!string.IsNullOrEmpty(Model.Trailer))
+                        {
+                            <div class="mt-2">
+                                <video style="max-width: 100%; max-height: 300px;" controls>
+                                    <source src="@Model.Trailer" type="video/mp4">
+                                    Trình duyệt của bạn không hỗ trợ video tag.
+                                </video>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="mt-2">Chưa có trailer</p>
+                        }
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu thay đổi</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#' + previewId).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+} 

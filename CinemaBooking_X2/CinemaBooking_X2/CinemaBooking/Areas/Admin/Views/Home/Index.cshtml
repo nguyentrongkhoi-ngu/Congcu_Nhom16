@@ -1,0 +1,339 @@
+@using CinemaBooking.Models.ViewModels
+@{
+    ViewData["Title"] = "Bảng điều khiển";
+    var stats = ViewBag.Stats as DashboardViewModel;
+    
+    string GetTrendClass(double trend) => trend > 0 ? "trend-up" : (trend < 0 ? "trend-down" : "trend-neutral");
+    string GetTrendIcon(double trend) => trend > 0 ? "fa-arrow-up" : (trend < 0 ? "fa-arrow-down" : "fa-minus");
+}
+
+<!-- KPI Row (PRO: Top level priority) -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card h-100">
+            <p class="text-uppercase small mb-1">Doanh thu hôm nay</p>
+            <h3>@stats.TodayRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</h3>
+            <div class="trend-indicator @GetTrendClass(stats.RevenueTrend)">
+                <i class="fas @GetTrendIcon(stats.RevenueTrend) me-1"></i>
+                @Math.Abs(stats.RevenueTrend)% <span class="ms-1 fw-normal text-muted" style="font-size: 0.75rem">so với hôm qua</span>
+            </div>
+            <div class="position-absolute end-0 bottom-0 p-3 opacity-10">
+                <i class="fas fa-wallet fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card h-100">
+            <p class="text-uppercase small mb-1">Số vé hôm nay</p>
+            <h3>@stats.TodayTickets</h3>
+            <div class="trend-indicator @GetTrendClass(stats.TicketsTrend)">
+                <i class="fas @GetTrendIcon(stats.TicketsTrend) me-1"></i>
+                @Math.Abs(stats.TicketsTrend)% <span class="ms-1 fw-normal text-muted" style="font-size: 0.75rem">so với hôm qua</span>
+            </div>
+            <div class="position-absolute end-0 bottom-0 p-3 opacity-10">
+                <i class="fas fa-ticket-alt fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card h-100">
+            <p class="text-uppercase small mb-1">Người dùng mới</p>
+            <h3>@stats.TodayUsers</h3>
+            <div class="trend-indicator @GetTrendClass(stats.UsersTrend)">
+                <i class="fas @GetTrendIcon(stats.UsersTrend) me-1"></i>
+                @Math.Abs(stats.UsersTrend)% <span class="ms-1 fw-normal text-muted" style="font-size: 0.75rem">so với hôm qua</span>
+            </div>
+            <div class="position-absolute end-0 bottom-0 p-3 opacity-10">
+                <i class="fas fa-user-plus fa-2x"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card h-100" style="background-color: var(--admin-sidebar-bg); border: none;">
+            <p class="text-uppercase small mb-1 text-white opacity-70">Tổng doanh thu</p>
+            <h3 class="text-white">@stats.TotalRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</h3>
+            <p class="small mt-2 text-white opacity-70">Toàn thời gian</p>
+            <div class="position-absolute end-0 bottom-0 p-3 opacity-20">
+                <i class="fas fa-chart-line fa-2x text-white"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row (PRO: Middle level visuals) -->
+<div class="row mb-4">
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-slate-800"><i class="fas fa-chart-area me-2 text-indigo-600"></i>Xu hướng doanh thu (7 ngày qua)</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle text-slate-400" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-area" style="height: 320px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="m-0 fw-bold text-slate-800"><i class="fas fa-fire me-2 text-red-500"></i>Phim Hot Nhất</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-pie pt-4 pb-2" style="height: 260px;">
+                    <canvas id="moviesChart"></canvas>
+                </div>
+                <div class="mt-4 text-center small">
+                    <span class="me-2"><i class="fas fa-circle text-indigo-600"></i> Phim bán chạy</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row (PRO: Detail and Action) -->
+<div class="row">
+    <div class="col-xl-8 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-slate-800"><i class="fas fa-history me-2 text-slate-500"></i>Giao dịch gần đây</h6>
+                <a asp-controller="AdminBooking" asp-action="Index" class="btn btn-sm btn-light border fw-bold text-slate-600">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Mã vé</th>
+                                <th>Khách hàng</th>
+                                <th>Phim</th>
+                                <th>Thời gian</th>
+                                <th>Số tiền</th>
+                                <th class="pe-4">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var booking in stats.RecentBookings)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-indigo-600">#@booking.MaDatVe</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2 bg-slate-100 rounded-circle text-center d-flex align-items-center justify-content-center" style="width:32px; height:32px">
+                                                <i class="fas fa-user text-slate-400 small"></i>
+                                            </div>
+                                            <span class="fw-medium">@booking.NguoiDung?.HoTen</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 150px;">@booking.LichChieu?.Phim?.TenPhim</td>
+                                    <td><span class="text-slate-500">@booking.NgayDat?.ToString("HH:mm")</span> <span class="badge bg-light text-slate-500 fw-normal border">@booking.NgayDat?.ToString("dd/MM")</span></td>
+                                    <td class="fw-bold">@booking.TongTien.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                    <td class="pe-4">
+                                        @if (booking.TrangThai == "Đã thanh toán")
+                                        {
+                                            <span class="badge bg-success">Thành công</span>
+                                        }
+                                        else if (booking.TrangThai == "Chờ thanh toán")
+                                        {
+                                            <span class="badge bg-warning">Chờ xử lý</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">@booking.TrangThai</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-slate-800"><i class="fas fa-bolt me-2 text-amber-500"></i>Thao tác nhanh</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a asp-area="Admin" asp-controller="Movies" asp-action="Create" class="quick-action-btn w-100 text-center p-3 rounded border text-decoration-none d-block">
+                            <i class="fas fa-film fa-lg mb-2 text-indigo-600"></i>
+                            <div class="small fw-bold">Thêm phim</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-controller="LichChieu" asp-action="Create" class="quick-action-btn w-100 text-center p-3 rounded border text-decoration-none d-block">
+                            <i class="fas fa-calendar-plus fa-lg mb-2 text-green-600"></i>
+                            <div class="small fw-bold">Thêm lịch</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="quick-action-btn w-100 text-center p-3 rounded border text-decoration-none d-block">
+                            <i class="fas fa-users-cog fa-lg mb-2 text-slate-600"></i>
+                            <div class="small fw-bold">Người dùng</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-controller="AdminTicket" asp-action="Verify" class="quick-action-btn w-100 text-center p-3 rounded border text-decoration-none d-block">
+                            <i class="fas fa-qrcode fa-lg mb-2 text-red-600"></i>
+                            <div class="small fw-bold">Soát vé</div>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 border rounded bg-slate-50">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-bold text-slate-600">Trạng thái hệ thống:</span>
+                        <span class="badge bg-success" style="font-size: 0.65rem">ONLINE</span>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-green-500" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span class="text-slate-400" style="font-size: 0.7rem">Cập nhật lần cuối: @DateTime.Now.ToString("HH:mm:ss")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Additional Local Context Styles for No-Gradient Policy */
+    .text-indigo-600 { color: #4f46e5 !important; }
+    .text-slate-800 { color: #1e293b !important; }
+    .text-slate-600 { color: #475569 !important; }
+    .text-slate-500 { color: #64748b !important; }
+    .text-slate-400 { color: #94a3b8 !important; }
+    .bg-slate-50 { background-color: #f8fafc !important; }
+    .bg-slate-100 { background-color: #f1f5f9 !important; }
+    .text-red-500 { color: #ef4444 !important; }
+    .text-green-600 { color: #16a34a !important; }
+    .bg-green-500 { background-color: #22c55e !important; }
+    
+    .quick-action-btn {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        color: #1e293b;
+        transition: all 0.1s ease;
+    }
+    
+    .quick-action-btn:hover {
+        background: #f8fafc;
+        border-color: #4f46e5 !important;
+        transform: translateY(-2px);
+    }
+    
+    .dropdown-toggle::after { display: none; }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Set Default Chart Theme
+        Chart.defaults.font.family = 'Inter, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+        Chart.defaults.color = '#64748b';
+
+        // Revenue Chart (Line) - Solid Professional
+        const revCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(stats.RevenueHistory.Select(h => h.DateLabel))),
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: @Html.Raw(Json.Serialize(stats.RevenueHistory.Select(h => h.Revenue))),
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'transparent',
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 6,
+                    tension: 0, // Solid straight lines for precision or 0.3 for subtlety
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.toLocaleString('vi-VN') + ' ₫';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                        ticks: {
+                            font: { size: 11 },
+                            callback: function(value) {
+                                if (value >= 1000000) return (value/1000000) + 'M';
+                                if (value >= 1000) return (value/1000) + 'k';
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Hot Movies Chart (Doughnut) - Professional Flat
+        const movCtx = document.getElementById('moviesChart').getContext('2d');
+        new Chart(movCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(stats.HotMovies.Select(m => m.MovieTitle))),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(stats.HotMovies.Select(m => m.TicketCount))),
+                    backgroundColor: [
+                        '#4f46e5', '#0f172a', '#10b981', '#f59e0b', '#ef4444'
+                    ],
+                    hoverOffset: 4,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 8,
+                            usePointStyle: true,
+                            padding: 20,
+                            font: { size: 11, weight: '500' }
+                        }
+                    }
+                },
+                cutout: '80%'
+            }
+        });
+    </script>
+}

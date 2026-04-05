@@ -1,0 +1,190 @@
+@model CinemaBooking.Models.LichChieu
+
+@{
+    ViewData["Title"] = "Đặt vé";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">@Model.Phim.TenPhim</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Rạp:</strong> @Model.PhongChieu.RapPhim.TenRap</p>
+                            <p><strong>Phòng:</strong> @Model.PhongChieu.SoPhong</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Ngày chiếu:</strong> @Model.NgayChieu.ToString("dd/MM/yyyy")</p>
+                            <p><strong>Giờ chiếu:</strong> @Model.GioChieu.ToString("HH:mm")</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Chọn ghế</h5>
+                        <div class="screen mb-3 text-center">
+                            <div class="screen-text">Màn hình</div>
+                        </div>
+                        <div class="seats-container">
+                            @{
+                                var gheDaDat = ViewBag.GheDaDat as List<string>;
+                                var rows = Model.PhongChieu.Ghes.Select(g => g.SoGhe[0]).Distinct().OrderBy(c => c);
+                                foreach (var row in rows)
+                                {
+                                    <div class="row mb-2">
+                                        <div class="col-1 text-center">
+                                            <span class="row-label">@row</span>
+                                        </div>
+                                        <div class="col-11">
+                                            <div class="d-flex justify-content-center">
+                                                @foreach (var ghe in Model.PhongChieu.Ghes.Where(g => g.SoGhe[0] == row).OrderBy(g => g.SoGhe))
+                                                {
+                                                    var isBooked = gheDaDat.Contains(ghe.SoGhe);
+                                                    <div class="seat-container">
+                                                        <input type="checkbox" 
+                                                               class="seat-checkbox" 
+                                                               id="seat-@ghe.SoGhe" 
+                                                               value="@ghe.SoGhe"
+                                                               @(isBooked ? "disabled" : "")>
+                                                        <label for="seat-@ghe.SoGhe" 
+                                                               class="seat @(isBooked ? "booked" : "")">
+                                                            @ghe.SoGhe.Substring(1)
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="maKhuyenMai" class="form-label">Mã khuyến mãi (nếu có)</label>
+                        <input type="text" class="form-control" id="maKhuyenMai" name="maKhuyenMai">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0"><strong>Giá vé:</strong> @string.Format("{0:N0} VNĐ", Model.GiaVe)</p>
+                            <p class="mb-0"><strong>Tổng tiền:</strong> <span id="totalAmount">0 VNĐ</span></p>
+                        </div>
+                        <form asp-action="Create" method="post">
+                            <input type="hidden" name="maLichChieu" value="@Model.MaLichChieu">
+                            <input type="hidden" name="selectedSeats" id="selectedSeats">
+                            <button type="submit" class="btn btn-primary" id="bookButton" disabled>
+                                <i class="fas fa-ticket-alt me-2"></i>Đặt vé
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Chú thích</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="seat available me-2"></div>
+                        <span>Ghế trống</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="seat selected me-2"></div>
+                        <span>Ghế đã chọn</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="seat booked me-2"></div>
+                        <span>Ghế đã đặt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .screen {
+            background: #e0e0e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .screen-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #666;
+        }
+        .seats-container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .seat-container {
+            display: inline-block;
+            margin: 0 5px;
+        }
+        .seat-checkbox {
+            display: none;
+        }
+        .seat {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .seat:hover {
+            background: #e9ecef;
+        }
+        .seat-checkbox:checked + .seat {
+            background: #28a745;
+            color: white;
+        }
+        .seat.booked {
+            background: #dc3545;
+            color: white;
+            cursor: not-allowed;
+        }
+        .row-label {
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var giaVe = @Model.GiaVe;
+            var selectedSeats = [];
+
+            $('.seat-checkbox').change(function() {
+                var seat = $(this).val();
+                if ($(this).is(':checked')) {
+                    selectedSeats.push(seat);
+                } else {
+                    selectedSeats = selectedSeats.filter(s => s !== seat);
+                }
+                $('#selectedSeats').val(selectedSeats.join(','));
+                updateTotal();
+            });
+
+            function updateTotal() {
+                var total = selectedSeats.length * giaVe;
+                $('#totalAmount').text(total.toLocaleString('vi-VN') + ' VNĐ');
+                $('#bookButton').prop('disabled', selectedSeats.length === 0);
+            }
+        });
+    </script>
+} 
