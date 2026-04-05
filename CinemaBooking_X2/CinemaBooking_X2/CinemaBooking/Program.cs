@@ -14,82 +14,129 @@ using CinemaBooking.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Thiết lập mã hóa UTF-8 cho console
+// Thiết lập mã hóa UTF-8 cho console để hiển thị tiếng Việt
 Console.OutputEncoding = Encoding.UTF8;
 Console.InputEncoding = Encoding.UTF8;
 
-// 2. Add services to the container.
+// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
-// Cấu hình kích thước tối đa cho upload file (100MB)
-builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; });
+// Cấu hình kích thước tối đa cho upload file
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 104857600; // 100MB
+});
+
+
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 104857600;
+    options.Limits.MaxRequestBodySize = 104857600; // 100MB
+
+    // Cấu hình Kestrel để lắng nghe trên tất cả địa chỉ IP
     options.ListenAnyIP(5153); // HTTP
-    options.ListenAnyIP(7065, listenOptions => { listenOptions.UseHttps(); }); // HTTPS
+    options.ListenAnyIP(7065, listenOptions => // HTTPS
+    {
+        listenOptions.UseHttps();
+    });
 });
+
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 104857600;
+    options.MultipartBodyLengthLimit = 104857600; // 100MB
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
-// 3. Đăng ký Database & Identity
+// Đăng ký DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
+    // Password settings
     options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+
+    // Lockout settings
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // User settings
+    options.User.AllowedUserNameCharacters =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
+
+    // Sign in settings
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+// Configure application cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.Cookie.Name = "CinemaBookingAuth";
+    options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
 });
 
-// 4. Đăng ký các Service tùy chỉnh
+// Đăng ký IPasswordHasher cho NguoiDung (để tương thích với hệ thống cũ)
 builder.Services.AddScoped<IPasswordHasher<NguoiDung>, PasswordHasher<NguoiDung>>();
+
+// Thêm dịch vụ HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
+
+// Thêm HttpClient
 builder.Services.AddHttpClient();
+
+// Thêm dịch vụ MomoService
 builder.Services.AddScoped<MomoService>();
+
+// Thêm dịch vụ PaymentLogger
 builder.Services.AddScoped<PaymentLogger>();
+
+// Thêm dịch vụ EmailService và OtpService
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<OtpService>();
+
+// Thêm dịch vụ nền xử lý lịch chiếu
 builder.Services.AddHostedService<LichChieuCleanupService>();
 
-// 5. External Auth & Authorization
+// Configure external authentication providers
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
+        options.ClientId = "YOUR_GOOGLE_CLIENT_ID";
+        options.ClientSecret = "YOUR_GOOGLE_CLIENT_SECRET";
         options.CallbackPath = "/signin-google";
     });
 
+// Configure authorization policies
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
-    options.AddPolicy("AdminOrUser", policy => policy.RequireRole("Admin", "User"));
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin"));
+
+    options.AddPolicy("UserOnly", policy =>
+        policy.RequireRole("User"));
+
+    options.AddPolicy("AdminOrUser", policy =>
+        policy.RequireRole("Admin", "User"));
 });
 
-// 6. Session
+// Thêm Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -100,33 +147,39 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// 7. Configure Middleware Pipeline
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+// Khôi phục lại chuyển hướng HTTPS cho môi trường không phải Development
+if (!app.Environment.IsDevelopment())
+{
     app.UseHttpsRedirection();
 }
 
 app.UseStaticFiles();
 
-// Static files cho thư mục uploads
-var uploadPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
-if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
-
+// Thêm thư mục uploads làm thư mục tĩnh
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(uploadPath),
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "uploads")),
     RequestPath = "/uploads"
 });
 
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<CinemaBooking.Middlewares.AdminRestrictionMiddleware>();
+
 app.UseSession();
 
-// 8. Routing
+// Configure area routing
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
@@ -137,32 +190,18 @@ app.MapControllerRoute(
 
 app.MapHub<CinemaBooking.Hubs.BookingHub>("/bookingHub");
 
-// 9. Startup & Seed Data (có try-catch để an toàn)
-try 
+// Seed dữ liệu mẫu
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-        Console.WriteLine("--- Initializing Data Seed ---");
-        // Chạy Seed truyền thống cho Phim, Rạp...
-        await SeedData.Initialize(context);
-        // Chạy Seed cho Identity (User, Roles)
-        await IdentitySeeder.SeedAsync(userManager, roleManager, context);
-    }
+    // Initialize traditional data first
+    await SeedData.Initialize(context);
 
-    app.Run();
+    // Initialize Identity data
+    await IdentitySeeder.SeedAsync(userManager, roleManager, context);
 }
-catch (Exception ex)
-{
-    Console.WriteLine($"FATAL ERROR ON STARTUP: {ex.Message}");
-    if (ex.InnerException != null) 
-    {
-        Console.WriteLine($"INNER EXCEPTION: {ex.InnerException.Message}");
-    }
-    Console.WriteLine(ex.StackTrace);
-    throw;
-}
+
+app.Run();

@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Lỗi thanh toán MoMo";
+}
+
+<div class="container" style="padding-top: 150px; min-height: 85vh;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-panel text-center py-5 px-4 shadow-lg border-bottom border-danger border-4">
+                <div class="error-icon mb-4">
+                    <img src="https://img.mservice.io/momo-payment/2020/10/pa_momo.png" alt="MoMo" height="80" class="mb-3 grayscale" style="opacity: 0.5;">
+                    <br>
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                </div>
+                
+                <h1 class="text-white fw-bold mb-3">Kết nối MoMo thất bại</h1>
+                <p class="text-white-50 fs-5 mb-5">Đã xảy ra lỗi không mong muốn khi xử lý thanh toán qua ví MoMo.</p>
+
+                <div class="alert bg-danger bg-opacity-25 text-white border-0 text-start mx-auto p-4 mb-5 rounded-4" style="max-width: 600px;">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Chi tiết lỗi:</h5>
+                    <p class="mb-4">@ViewBag.ErrorMessage</p>
+                    
+                    <h6 class="fw-bold mb-2">Bạn có thể thử các cách sau:</h6>
+                    <ul class="mb-0 x-small text-white-50">
+                        <li>Kiểm tra lại kết nối Internet trên thiết bị của bạn.</li>
+                        <li>Đảm bảo số dư trong ví MoMo đủ để thực hiện giao dịch.</li>
+                        <li>Thử lại sau vài phút hoặc chọn phương thức thanh toán khác.</li>
+                        <li>Liên hệ hotline rạp phim để được hỗ trợ xác thực vé.</li>
+                    </ul>
+                </div>
+
+                <div class="action-buttons d-flex flex-wrap justify-content-center gap-3">
+                    <a href="@Url.Action("Index", "ThanhToan", new { maDatVe = ViewBag.MaDatVe })" class="btn btn-netflix px-4 py-2">
+                        <i class="fas fa-redo me-2"></i>Thử lại ngay
+                    </a>
+                    <a href="@Url.Action("LichSuDatVe", "Home")" class="btn btn-netflix-gray px-4 py-2">
+                        <i class="fas fa-history me-2"></i>Lịch sử đặt vé
+                    </a>
+                    <a href="@Url.Action("MomoSandboxGuide", "Home")" class="btn btn-outline-info px-4 py-2">
+                        Hướng dẫn MoMo Test
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .grayscale {
+            filter: grayscale(100%);
+        }
+        .x-small {
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+    </style>
+}

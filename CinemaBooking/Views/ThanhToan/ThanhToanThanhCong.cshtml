@@ -1,0 +1,427 @@
+@model CinemaBooking.Models.DatVe
+
+@{
+    ViewData["Title"] = "Đặt vé thành công | CineZore";
+    var posterUrl = string.IsNullOrEmpty(Model.LichChieu.Phim.UrlPoster) ? "/images/no-image.jpg" : Model.LichChieu.Phim.UrlPoster;
+    var showtimeStr = $"{Model.LichChieu.GioChieu.Hours:D2}:{Model.LichChieu.GioChieu.Minutes:D2}";
+    var selectedSeats = Model.DatVeGhes != null && Model.DatVeGhes.Any() 
+                        ? string.Join(", ", Model.DatVeGhes.Select(g => g.Ghe.SoGhe)) 
+                        : "N/A";
+}
+
+<script>document.body.classList.add('immersive-page');</script>
+
+@section Styles {
+<style>
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+        --cz-bg:           #0a0a0f;
+        --cz-surface:      #111117;
+        --cz-surface-2:    #1c1c1e;
+        --cz-border:       rgba(255,255,255,0.08);
+        --cz-border-hover: rgba(255,255,255,0.15);
+        --cz-accent:       #E50914;
+        --cz-accent-glow:  rgba(229,9,20,0.5);
+        --cz-success:      #10b981;
+        --cz-warning:      #f59e0b;
+        --cz-text:         #ffffff;
+        --cz-text-sub:     rgba(255,255,255,0.75);
+        --cz-text-muted:   rgba(255,255,255,0.45);
+        --cz-ease:         cubic-bezier(0.4, 0, 0.2, 1);
+        --cz-radius:       24px;
+    }
+
+
+    body {
+        background: var(--cz-bg) !important;
+        color: var(--cz-text) !important;
+        font-family: 'Outfit', 'Inter', sans-serif !important;
+        overflow-x: hidden;
+    }
+
+    /* Cinematic Ambient Backdrop */
+    .tt-ambient {
+        position: fixed;
+        inset: 0; z-index: -1;
+        background-size: cover;
+        background-position: center 25%;
+        filter: blur(100px) brightness(0.12) saturate(1.4);
+        transform: scale(1.1);
+    }
+
+    .tt-page {
+        padding-bottom: 60px !important;
+        max-width: 650px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Context Indicator replacement */
+    .tt-status-hint {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--cz-text-muted);
+        margin-bottom: 32px;
+        display: flex; align-items: center; gap: 10px;
+        animation: heroReveal 0.8s var(--cz-ease) both;
+    }
+    .tt-status-hint i { font-size: 1rem; color: var(--cz-success); }
+
+    /* Success State */
+    .tt-success-header {
+        text-align: center;
+        margin-bottom: 40px;
+        animation: heroReveal 0.8s var(--cz-ease) 0.1s both;
+    }
+
+    .tt-success-icon {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--cz-success);
+        font-size: 2.2rem;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 24px;
+        position: relative;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+    }
+
+    .tt-success-icon::after {
+        content: '';
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 2px dashed rgba(16, 185, 129, 0.3);
+        animation: rotate 15s linear infinite;
+    }
+
+    .tt-success-title {
+        font-size: 2.2rem;
+        font-weight: 950;
+        color: var(--cz-text);
+        letter-spacing: -1px;
+        margin-bottom: 12px;
+    }
+
+    .tt-success-desc {
+        color: var(--cz-text-sub);
+        font-size: 0.95rem;
+        max-width: 420px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* PREMIUM E-TICKET CARD */
+    .tt-ticket {
+        width: 100%;
+        background: var(--cz-surface-2);
+        border: 1px solid var(--cz-border);
+        border-radius: 28px;
+        position: relative;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+        animation: ticketReveal 0.8s var(--cz-ease) 0.2s both;
+        overflow: hidden;
+    }
+
+    /* Side Cutouts */
+    .tt-cutout {
+        position: absolute;
+        width: 32px; height: 32px;
+        background: var(--cz-bg);
+        border-radius: 50%;
+        top: 155px; /* Alignment with divider */
+        z-index: 10;
+        border: 1px solid var(--cz-border);
+    }
+    .tt-cutout--left  { left: -16px; border-left: none; }
+    .tt-cutout--right { right: -16px; border-right: none; }
+
+    /* Card Header */
+    .tt-ticket-head {
+        padding: 32px;
+        display: flex;
+        gap: 24px;
+        background: linear-gradient(to right, rgba(255,255,255,0.03), transparent);
+    }
+
+    .tt-poster {
+        width: 90px;
+        height: 130px;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        flex-shrink: 0;
+    }
+
+    .tt-head-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .tt-badge {
+        align-self: flex-start;
+        background: rgba(229,9,20,0.1);
+        color: var(--cz-accent);
+        border: 1px solid rgba(229,9,20,0.2);
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 12px;
+    }
+
+    .tt-movie-name {
+        font-size: 1.5rem;
+        font-weight: 950;
+        line-height: 1.1;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    .tt-theater-name { font-size: 0.88rem; color: var(--cz-text-muted); }
+
+    /* Divider */
+    .tt-divider {
+        height: 1px;
+        width: calc(100% - 64px);
+        margin: 0 auto;
+        border-top: 2px dashed var(--cz-border);
+        position: relative;
+    }
+
+    /* Card Body */
+    .tt-ticket-body {
+        padding: 32px;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 24px;
+    }
+
+    .tt-field { display: flex; flex-direction: column; gap: 4px; }
+    .tt-label { font-size: 0.65rem; font-weight: 700; color: var(--cz-text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+    .tt-value { font-size: 1rem; font-weight: 800; color: #fff; }
+    
+    .tt-field--time .tt-value { font-size: 1.8rem; color: var(--cz-accent); line-height: 1; transition: transform 0.3s; }
+    .tt-field--time:hover .tt-value { transform: scale(1.05); }
+
+    .tt-field--seat .tt-value { 
+        background: var(--cz-warning); 
+        color: #000; 
+        padding: 2px 10px; 
+        border-radius: 4px; 
+        display: inline-block;
+        font-size: 0.88rem;
+    }
+    .tt-field--room .tt-value { color: var(--cz-warning); }
+
+    /* QR Integration Section */
+    .tt-ticket-qr {
+        background: rgba(0,0,0,0.2);
+        padding: 32px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .tt-qr-box {
+        background: #fff;
+        padding: 14px;
+        border-radius: 20px;
+        width: 180px; height: 180px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        transition: transform 0.4s var(--cz-ease);
+        cursor: zoom-in;
+    }
+    .tt-qr-box:hover { transform: scale(1.1); }
+    .tt-qr-box img { width: 100%; height: auto; }
+
+    .tt-qr-hint { font-size: 0.72rem; color: var(--cz-text-muted); font-weight: 500; }
+    .tt-ticket-id { font-family: monospace; font-size: 0.85rem; color: #fff; opacity: 0.5; letter-spacing: 2px; }
+
+    /* ACTION BUTTONS */
+    .tt-actions {
+        margin-top: 40px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        animation: heroReveal 0.8s var(--cz-ease) 0.4s both;
+    }
+
+    .tt-btn-main {
+        width: 100%;
+        background: var(--cz-accent);
+        color: #fff;
+        border: none;
+        padding: 18px;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 950;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        transition: all 0.3s var(--cz-ease);
+        text-decoration: none !important;
+        box-shadow: 0 10px 30px rgba(229,9,20,0.2);
+    }
+    .tt-btn-main:hover {
+        background: #db0812;
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(229,9,20,0.4);
+    }
+
+    .tt-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tt-btn-sub {
+        background: var(--cz-surface-2);
+        border: 1px solid var(--cz-border);
+        color: var(--cz-text-sub);
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        text-decoration: none !important;
+        transition: all 0.3s;
+    }
+    .tt-btn-sub:hover { background: var(--cz-surface); border-color: var(--cz-border-hover); color: #fff; }
+
+    /* Animations */
+    @@keyframes heroReveal {
+        from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    @@keyframes ticketReveal {
+        from { opacity: 0; transform: scale(0.95) translateY(40px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @@media (max-width: 600px) {
+        .tt-page { padding-inline: 20px; }
+        .tt-btn-row { grid-template-columns: 1fr; }
+        .tt-ticket-body { grid-template-columns: 1fr; }
+        .tt-cutout { display: none; }
+    }
+
+    #ticket-to-print {
+        background: transparent;
+    }
+</style>
+}
+
+<div class="tt-ambient" style="background-image: url('@posterUrl');"></div>
+
+<div class="tt-page">
+    
+    <div class="tt-status-hint">
+        <i class="fas fa-check-circle"></i>
+        <span>Bạn đã hoàn tất đặt vé</span>
+    </div>
+
+    <!-- Success Message -->
+    <div class="tt-success-header">
+        <div class="tt-success-icon"><i class="fas fa-check"></i></div>
+        <h1 class="tt-success-title">🎉 Đặt vé thành công!</h1>
+        <p class="tt-success-desc">Vé điện tử của bạn đã sẵn sàng. Vui lòng xuất trình mã QR này cho nhân viên khi đến rạp.</p>
+    </div>
+
+    <!-- DIGITAL TICKET BOX -->
+    <div class="tt-ticket" id="ticket-to-print">
+        
+        <div class="tt-cutout tt-cutout--left"></div>
+        <div class="tt-cutout tt-cutout--right"></div>
+
+        <!-- Ticket Head -->
+        <div class="tt-ticket-head">
+            <img src="@posterUrl" alt="Poster" class="tt-poster">
+            <div class="tt-head-info">
+                <span class="tt-badge">Vé điện tử e-ticket</span>
+                <h2 class="tt-movie-name">@Model.LichChieu.Phim.TenPhim</h2>
+                <div class="tt-theater-name">@Model.LichChieu.PhongChieu.RapPhim.TenRap</div>
+            </div>
+        </div>
+
+        <div class="tt-divider"></div>
+
+        <!-- Ticket Body -->
+        <div class="tt-ticket-body">
+            <div class="tt-field">
+                <span class="tt-label">Ngày chiếu</span>
+                <span class="tt-value">@Model.LichChieu.NgayChieu.ToString("dd/MM/yyyy")</span>
+            </div>
+            <div class="tt-field tt-field--time">
+                <span class="tt-label">Giờ bắt đầu</span>
+                <span class="tt-value">@showtimeStr</span>
+            </div>
+            <div class="tt-field tt-field--room">
+                <span class="tt-label">Phòng chiếu</span>
+                <span class="tt-value">@Model.LichChieu.PhongChieu.TenPhong</span>
+            </div>
+            <div class="tt-field tt-field--seat">
+                <span class="tt-label">Vị trí ghế</span>
+                <span class="tt-value">@selectedSeats</span>
+            </div>
+        </div>
+
+        <!-- Ticket QR Section -->
+        <div class="tt-ticket-qr">
+            <div class="tt-qr-box">
+                @* Generating QR dynamic based on MaDatVe using QRServer API *@
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=CINEZORE-TICKET-@Model.MaDatVe&bgcolor=ffffff&color=000000" alt="QR Code">
+            </div>
+            <div class="tt-qr-hint">Quét mã này tại rạp để vào phòng</div>
+            <div class="tt-ticket-id">MOD-ID: #@Model.MaDatVe.ToString("D5")</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="tt-actions">
+        <a href="javascript:window.print()" class="tt-btn-main">
+            <i class="fas fa-file-download"></i> Tải vé (Save PDF)
+        </a>
+        <div class="tt-btn-row">
+            <a href="@Url.Action("Index", "Home")" class="tt-btn-sub">
+                <i class="fas fa-home"></i> Về trang chủ
+            </a>
+            <a href="mailto:@User.Identity.Name?subject=Vé xem phim CineZore&body=Mã vé của bạn là #@Model.MaDatVe" class="tt-btn-sub">
+                <i class="fas fa-envelope"></i> Gửi email
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    // Premium reveal and confetti effect
+    window.addEventListener('DOMContentLoaded', () => {
+        const duration = 2.5 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 40 * (timeLeft / duration);
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+    });
+</script>
+}
