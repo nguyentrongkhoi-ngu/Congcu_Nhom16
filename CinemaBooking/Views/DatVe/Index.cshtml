@@ -1,0 +1,658 @@
+@model IEnumerable<CinemaBooking.Models.LichChieu>
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Đặt vé – " + (ViewBag.Phim as CinemaBooking.Models.Phim)?.TenPhim + " | CineZore";
+    var phim = ViewBag.Phim as CinemaBooking.Models.Phim;
+    var posterUrl = string.IsNullOrEmpty(phim.UrlPoster) ? "/images/no-image.jpg" : phim.UrlPoster;
+    var dates = Model.GroupBy(l => l.NgayChieu.Date).Select(g => g.Key).OrderBy(d => d).ToList();
+    var releaseYear = phim.NgayPhatHanh?.Year.ToString() ?? DateTime.Now.Year.ToString();
+    var duration = phim.ThoiLuong > 0 ? $"{phim.ThoiLuong / 60}h {phim.ThoiLuong % 60}m" : "N/A";
+}
+
+<script>document.body.classList.add('immersive-page');</script>
+
+@section Styles {
+<style>
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+        --cz-bg:           #0a0a0f;
+        --cz-surface:      #111117;
+        --cz-surface-2:    #18181f;
+        --cz-border:       rgba(255,255,255,0.08);
+        --cz-border-hover: rgba(255,255,255,0.18);
+        --cz-accent:       #E50914;
+        --cz-accent-dim:   rgba(229,9,20,0.15);
+        --cz-text:         #ffffff;
+        --cz-text-sub:     rgba(255,255,255,0.70);
+        --cz-text-muted:   rgba(255,255,255,0.40);
+        --cz-ease:         cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== BASE OVERRIDES ===== */
+    body {
+        background: var(--cz-bg) !important;
+        color: var(--cz-text) !important;
+        font-family: 'Outfit', 'Inter', sans-serif !important;
+    }
+
+    main .container,
+    .container {
+        background: transparent !important;
+        box-shadow: none !important;
+        max-width: 1320px !important;
+        padding-inline: 5% !important;
+    }
+
+    /* ===== HERO BANNER ===== */
+    .dv-banner {
+        position: relative;
+        height: 320px;
+        overflow: hidden;
+    }
+
+    .dv-banner__bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center 25%;
+        filter: blur(60px) brightness(0.35) saturate(1.2);
+        transform: scale(1.08);
+    }
+
+    .dv-banner__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(10,10,15,0.2) 0%,
+            rgba(10,10,15,0.85) 70%,
+            var(--cz-bg) 100%
+        );
+    }
+
+    .dv-banner__nav {
+        position: relative;
+        z-index: 2;
+        padding-top: 100px;
+    }
+
+    /* ===== BREADCRUMB ===== */
+    .dv-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .dv-breadcrumb a {
+        color: var(--cz-text-muted) !important;
+        text-decoration: none;
+        transition: color 0.25s var(--cz-ease);
+    }
+
+    .dv-breadcrumb a:hover { color: var(--cz-text) !important; }
+
+    .dv-breadcrumb__sep     { color: var(--cz-text-muted); font-size: 0.75rem; }
+    .dv-breadcrumb__current { color: var(--cz-text); font-weight: 700; }
+
+    /* ===== MOVIE HERO ===== */
+    .dv-hero {
+        display: flex;
+        gap: 40px;
+        align-items: flex-end;
+        position: relative;
+        z-index: 5;
+        padding-bottom: 48px;
+        margin-bottom: 56px;
+        border-bottom: 1px solid var(--cz-border);
+    }
+
+    .dv-poster        { flex: 0 0 190px; }
+    .dv-poster__img   {
+        width: 100%;
+        border-radius: 12px;
+        display: block;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+        border: 1px solid var(--cz-border);
+    }
+
+    .dv-info { flex: 1; min-width: 0; padding-bottom: 4px; }
+
+    .dv-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--cz-accent);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+    .dv-title {
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        line-height: 1.05;
+        margin-bottom: 18px;
+        color: var(--cz-text);
+    }
+
+    .dv-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.92rem;
+        color: var(--cz-text-sub);
+        font-weight: 500;
+    }
+
+    .dv-meta__dot {
+        width: 3px; height: 3px;
+        border-radius: 50%;
+        background: var(--cz-text-muted);
+    }
+
+    .dv-meta__tag {
+        background: rgba(255,255,255,0.10);
+        border: 1px solid rgba(255,255,255,0.22);
+        padding: 3px 12px;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.85);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    /* ===== SECTION LABEL ===== */
+    .dv-section-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        margin-bottom: 20px;
+    }
+
+    .dv-section-label__line {
+        flex: 1;
+        height: 1px;
+        background: var(--cz-border);
+    }
+
+    /* ===== DATE SCROLLER ===== */
+    .dv-date-scroller {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin-bottom: 56px;
+    }
+
+    .dv-date-scroller::-webkit-scrollbar { display: none; }
+
+    .dv-date-pill {
+        flex: 0 0 110px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 18px 12px;
+        background: var(--cz-surface);
+        border: 1px solid var(--cz-border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition:
+            border-color 0.25s var(--cz-ease),
+            background   0.25s var(--cz-ease),
+            transform    0.25s var(--cz-ease);
+        user-select: none;
+        outline: none;
+    }
+
+    .dv-date-pill:hover {
+        border-color: var(--cz-border-hover);
+        background: var(--cz-surface-2);
+        transform: translateY(-3px);
+    }
+
+    .dv-date-pill:focus-visible {
+        outline: 2px solid var(--cz-accent);
+        outline-offset: 2px;
+    }
+
+    .dv-date-pill.is-active {
+        border-color: var(--cz-accent);
+        background: var(--cz-accent-dim);
+        transform: translateY(-3px);
+    }
+
+    .dv-date-pill__day {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--cz-text-muted);
+        margin-bottom: 8px;
+    }
+
+    .dv-date-pill.is-active .dv-date-pill__day { color: var(--cz-accent); }
+
+    .dv-date-pill__date {
+        font-size: 1.6rem;
+        font-weight: 900;
+        line-height: 1;
+        color: var(--cz-text);
+        letter-spacing: -1px;
+    }
+
+    .dv-date-pill__month {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--cz-text-muted);
+        margin-top: 5px;
+    }
+
+    .dv-date-pill.is-active .dv-date-pill__month { color: var(--cz-text-sub); }
+
+    /* ===== SHOWTIME GROUP ===== */
+    .dv-showtime-group { display: none; }
+
+    .dv-showtime-group.is-visible {
+        display: block;
+        animation: fadeSlideIn 0.3s var(--cz-ease) both;
+    }
+
+    @@keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== SHOWTIME CARD ===== */
+    .dv-showtime-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--cz-surface);
+        border: 1px solid var(--cz-border);
+        border-radius: 14px;
+        padding: 24px;
+        text-decoration: none !important;
+        color: var(--cz-text) !important;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        transition:
+            border-color 0.25s var(--cz-ease),
+            background   0.25s var(--cz-ease),
+            transform    0.25s var(--cz-ease),
+            box-shadow   0.25s var(--cz-ease);
+    }
+
+    .dv-showtime-card::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: var(--cz-accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s var(--cz-ease);
+    }
+
+    .dv-showtime-card:hover {
+        border-color: var(--cz-border-hover);
+        background: var(--cz-surface-2);
+        transform: translateY(-5px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+        color: var(--cz-text) !important;
+    }
+
+    .dv-showtime-card:hover::after { transform: scaleX(1); }
+
+    .dv-showtime-card__price {
+        position: absolute;
+        top: 20px; right: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--cz-text-sub);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--cz-border);
+        padding: 4px 10px;
+        border-radius: 6px;
+        transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .dv-showtime-card:hover .dv-showtime-card__price {
+        background: var(--cz-accent);
+        border-color: var(--cz-accent);
+        color: #fff;
+    }
+
+    .dv-showtime-card__label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--cz-text-muted);
+        margin-bottom: 10px;
+    }
+
+    .dv-showtime-card__time {
+        font-size: 3rem;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -2px;
+        color: var(--cz-text);
+        margin-bottom: 24px;
+    }
+
+    .dv-showtime-card__divider {
+        height: 1px;
+        background: var(--cz-border);
+        margin-bottom: 18px;
+    }
+
+    .dv-showtime-card__info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 22px;
+    }
+
+    .dv-showtime-card__info-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        color: var(--cz-text-sub);
+    }
+
+    .dv-showtime-card__info-row i {
+        width: 16px;
+        text-align: center;
+        color: var(--cz-accent);
+        font-size: 0.82rem;
+    }
+
+    .dv-showtime-card__cta {
+        margin-top: auto;
+        display: block;
+        text-align: center;
+        padding: 13px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--cz-border);
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--cz-text-sub);
+        transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .dv-showtime-card:hover .dv-showtime-card__cta {
+        background: var(--cz-accent);
+        border-color: var(--cz-accent);
+        color: #fff;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .dv-empty {
+        text-align: center;
+        padding: 100px 20px;
+        border: 1px dashed var(--cz-border);
+        border-radius: 16px;
+    }
+
+    .dv-empty__icon  { font-size: 3.5rem; color: var(--cz-text-muted); margin-bottom: 24px; }
+    .dv-empty__title { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
+    .dv-empty__desc  { color: var(--cz-text-muted); margin-bottom: 30px; }
+
+    /* ===== BACK BUTTON ===== */
+    .dv-btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 28px;
+        background: var(--cz-surface);
+        border: 1px solid var(--cz-border);
+        border-radius: 10px;
+        color: var(--cz-text-sub) !important;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-decoration: none !important;
+        transition:
+            border-color 0.25s var(--cz-ease),
+            color        0.25s var(--cz-ease),
+            transform    0.25s var(--cz-ease);
+    }
+
+    .dv-btn-back:hover {
+        border-color: var(--cz-border-hover);
+        color: var(--cz-text) !important;
+        transform: translateX(-4px);
+    }
+
+    .dv-bottom-nav {
+        padding-top: 56px;
+        margin-top: 56px;
+        border-top: 1px solid var(--cz-border);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 768px) {
+        .dv-hero { flex-direction: column; align-items: center; text-align: center; }
+        .dv-poster { flex: 0 0 auto; width: 150px; }
+        .dv-title  { font-size: 1.8rem; }
+        .dv-meta   { justify-content: center; }
+    }
+</style>
+}
+
+<div class="dv-banner">
+    <div class="dv-banner__bg" style="background-image: url('@posterUrl');"></div>
+    <div class="dv-banner__overlay"></div>
+    <div class="container dv-banner__nav">
+        <nav class="dv-breadcrumb" aria-label="Điều hướng">
+            <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+            <span class="dv-breadcrumb__sep" aria-hidden="true">›</span>
+            <a asp-controller="Phim" asp-action="Detail" asp-route-id="@phim.MaPhim">@phim.TenPhim</a>
+            <span class="dv-breadcrumb__sep" aria-hidden="true">›</span>
+            <span class="dv-breadcrumb__current" aria-current="page">Đặt vé</span>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+
+    <section class="dv-hero" aria-label="Thông tin phim">
+        <div class="dv-poster">
+            <img src="@posterUrl" alt="Poster phim @phim.TenPhim" class="dv-poster__img">
+        </div>
+        <div class="dv-info">
+            <span class="dv-badge">
+                <i class="fas fa-ticket-alt" aria-hidden="true"></i>
+                Vé đang mở bán
+            </span>
+            <h1 class="dv-title">@phim.TenPhim</h1>
+            <div class="dv-meta">
+                <span><i class="far fa-calendar-alt me-1" aria-hidden="true"></i>@releaseYear</span>
+                <span class="dv-meta__dot" aria-hidden="true"></span>
+                <span><i class="far fa-clock me-1" aria-hidden="true"></i>@duration</span>
+                @if (!string.IsNullOrEmpty(phim.DinhDang))
+                {
+                    <span class="dv-meta__dot" aria-hidden="true"></span>
+                    <span class="dv-meta__tag">@phim.DinhDang</span>
+                }
+                @if (!string.IsNullOrEmpty(phim.TheLoai))
+                {
+                    <span class="dv-meta__tag">@phim.TheLoai</span>
+                }
+            </div>
+        </div>
+    </section>
+
+    @if (!Model.Any())
+    {
+        <div class="dv-empty" role="status">
+            <div class="dv-empty__icon">
+                <i class="fas fa-calendar-times" aria-hidden="true"></i>
+            </div>
+            <h2 class="dv-empty__title">Hiện chưa có lịch chiếu</h2>
+            <p class="dv-empty__desc">Xin lỗi, phim chưa được xếp lịch chiếu. Vui lòng quay lại sau.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-netflix px-5 py-3">
+                Khám phá phim khác
+            </a>
+        </div>
+    }
+    else
+    {
+        <section aria-label="Chọn ngày xem">
+            <div class="dv-section-label">
+                <span>1. Chọn ngày xem</span>
+                <div class="dv-section-label__line" aria-hidden="true"></div>
+            </div>
+            <div class="dv-date-scroller" role="tablist" aria-label="Danh sách ngày chiếu">
+                @for (int i = 0; i < dates.Count; i++)
+                {
+                    var date = dates[i];
+                    var isActiveTab = (i == 0);
+                    var dayName = date.ToString("ddd", new CultureInfo("vi-VN")).ToUpper();
+                    var monthStr = "Th." + date.Month.ToString("D2");
+
+                    <button class="dv-date-pill @(isActiveTab ? "is-active" : "")"
+                            data-date="@date.ToString("yyyy-MM-dd")"
+                            role="tab"
+                            aria-selected="@(isActiveTab ? "true" : "false")"
+                            aria-controls="panel-@date.ToString("yyyy-MM-dd")"
+                            id="tab-@date.ToString("yyyy-MM-dd")">
+                        <span class="dv-date-pill__day">@dayName</span>
+                        <span class="dv-date-pill__date">@date.ToString("dd")</span>
+                        <span class="dv-date-pill__month">@monthStr</span>
+                    </button>
+                }
+            </div>
+        </section>
+
+        <section aria-label="Chọn suất chiếu">
+            <div class="dv-section-label">
+                <span>2. Chọn suất chiếu</span>
+                <div class="dv-section-label__line" aria-hidden="true"></div>
+            </div>
+
+            @foreach (var group in Model.GroupBy(l => l.NgayChieu.Date))
+            {
+                var dateStr = group.Key.ToString("yyyy-MM-dd");
+                var isFirstGroup = (group.Key.Date == dates[0].Date);
+                <div class="dv-showtime-group @(isFirstGroup ? "is-visible" : "")"
+                     id="panel-@dateStr"
+                     role="tabpanel"
+                     aria-labelledby="tab-@dateStr">
+                    <div class="row g-3">
+                        @foreach (var item in group.OrderBy(l => l.GioChieu))
+                        {
+                            var timeStr = $"{item.GioChieu.Hours:D2}:{item.GioChieu.Minutes:D2}";
+                            var priceStr = string.Format("{0:N0}đ", item.GiaVe);
+                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                <a href="@Url.Action("ChonGhe", "DatVe", new { maLichChieu = item.MaLichChieu })"
+                                   class="dv-showtime-card"
+                                   aria-label="Suất @timeStr, phòng @item.PhongChieu.SoPhong, @item.PhongChieu.RapPhim.TenRap">
+
+                                    <span class="dv-showtime-card__price">@priceStr</span>
+                                    <div class="dv-showtime-card__label">Giờ bắt đầu</div>
+                                    <div class="dv-showtime-card__time">@timeStr</div>
+                                    <div class="dv-showtime-card__divider" aria-hidden="true"></div>
+                                    <div class="dv-showtime-card__info">
+                                        <div class="dv-showtime-card__info-row">
+                                            <i class="fas fa-door-open" aria-hidden="true"></i>
+                                            <span>Phòng <strong>@item.PhongChieu.SoPhong</strong></span>
+                                        </div>
+                                        <div class="dv-showtime-card__info-row">
+                                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                            <span>@item.PhongChieu.RapPhim.TenRap</span>
+                                        </div>
+                                    </div>
+                                    <span class="dv-showtime-card__cta" aria-hidden="true">Chọn ghế ngay</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    }
+
+    <div class="dv-bottom-nav">
+        <a asp-controller="Phim" asp-action="Detail" asp-route-id="@phim.MaPhim" class="dv-btn-back">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            Quay lại trang phim
+        </a>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        'use strict';
+
+        var pills  = document.querySelectorAll('.dv-date-pill');
+        var panels = document.querySelectorAll('.dv-showtime-group');
+
+        function switchDate(selectedDate) {
+            var exists = Array.from(pills).some(p => p.dataset.date === selectedDate);
+            if (!exists && pills.length > 0) {
+                selectedDate = pills[0].dataset.date;
+            }
+
+            pills.forEach(function (pill) {
+                var active = pill.dataset.date === selectedDate;
+                pill.classList.toggle('is-active', active);
+                pill.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+
+            panels.forEach(function (panel) {
+                var panelDate = panel.id.replace('panel-', '');
+                if (panelDate === selectedDate) {
+                    panel.classList.add('is-visible');
+                } else {
+                    panel.classList.remove('is-visible');
+                }
+            });
+        }
+
+        var initDate = '@(ViewBag.SelectedDate)';
+        if (initDate) {
+            switchDate(initDate);
+        }
+
+        pills.forEach(function (pill) {
+            pill.addEventListener('click', function () {
+                switchDate(this.dataset.date);
+            });
+            pill.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    switchDate(this.dataset.date);
+                }
+            });
+        });
+    })();
+</script>
+}
