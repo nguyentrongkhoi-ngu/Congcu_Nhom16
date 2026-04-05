@@ -1,0 +1,281 @@
+@model CinemaBooking.Models.ViewModels.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+
+<div class="profile-edit-wrapper" style="padding-top: 120px; min-height: 90vh; background: radial-gradient(circle at 90% 10%, rgba(229, 9, 20, 0.05) 0%, transparent 40%);">
+    <div class="container pb-5">
+        <!-- Breadcrumb / Header -->
+        <div class="d-flex align-items-center mb-5 animate__animated animate__fadeIn">
+            <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="text-white fw-black mb-0">Chỉnh sửa hồ sơ</h2>
+                <p class="text-white-50 mb-0">Cập nhật thông tin cá nhân và ảnh đại diện của bạn</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-lg-4 animate__animated animate__fadeInLeft">
+                <div class="glass-container p-4 h-100">
+                    <div class="text-center">
+                        <div class="edit-avatar-wrapper mx-auto mb-4">
+                            <div class="edit-avatar-preview shadow-glow">
+                                <img id="avatar-preview-img" src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)" alt="Profile">
+                                <div class="avatar-overlay" onclick="document.getElementById('AvatarFileInput').click()">
+                                    <i class="fas fa-camera mb-2"></i>
+                                    <span>Thay đổi ảnh</span>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="text-white fw-bold">@Model.HoTen</h4>
+                        <p class="text-white-50 mb-4">@Model.Email</p>
+                        
+                        <div class="nav flex-column gap-2 text-start">
+                            <a asp-action="Index" class="nav-btn">
+                                <i class="fas fa-th-large me-2"></i> Tổng quan
+                            </a>
+                            <a asp-action="Edit" class="nav-btn active">
+                                <i class="fas fa-user-edit me-2"></i> Chỉnh sửa thông tin
+                            </a>
+                            <a asp-action="ChangePassword" class="nav-btn">
+                                <i class="fas fa-key me-2"></i> Đổi mật khẩu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Form -->
+            <div class="col-lg-8 animate__animated animate__fadeInRight">
+                <div class="glass-container p-5 h-100">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="modern-profile-form">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                        <input type="hidden" asp-for="AvatarUrl" />
+                        
+                        <!-- Hidden File Input -->
+                        <input asp-for="AvatarFile" type="file" id="AvatarFileInput" accept="image/png, image/jpeg, image/gif" class="d-none" onchange="handleImagePreview(this)">
+
+                        <div class="row g-4">
+                            <div class="col-md-12">
+                                <label asp-for="HoTen" class="form-label text-white-50 small text-uppercase fw-bold letter-spacing-1">Họ và tên</label>
+                                <div class="input-group-cinematic">
+                                    <i class="fas fa-user icon"></i>
+                                    <input asp-for="HoTen" class="form-control" placeholder="Nhập họ tên của bạn">
+                                </div>
+                                <span asp-validation-for="HoTen" class="text-danger xs-small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label text-white-50 small text-uppercase fw-bold letter-spacing-1">Email</label>
+                                <div class="input-group-cinematic">
+                                    <i class="fas fa-envelope icon"></i>
+                                    <input asp-for="Email" class="form-control" placeholder="example@email.com">
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger xs-small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label text-white-50 small text-uppercase fw-bold letter-spacing-1">Số điện thoại</label>
+                                <div class="input-group-cinematic">
+                                    <i class="fas fa-phone icon"></i>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="0901234567">
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger xs-small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="AvatarUrl" class="form-label text-white-50 small text-uppercase fw-bold letter-spacing-1">Link ảnh đại diện (Tùy chọn)</label>
+                                <div class="input-group-cinematic">
+                                    <i class="fas fa-link icon"></i>
+                                    <input asp-for="AvatarUrl" id="AvatarUrlInput" class="form-control" placeholder="https://example.com/image.gif" oninput="handleUrlPreview(this.value)">
+                                </div>
+                                <p class="text-white-50 xs-small mt-2">Hỗ trợ các định dạng: <strong>JPG, PNG, GIF</strong> (bao gồm ảnh động).</p>
+                                <span asp-validation-for="AvatarUrl" class="text-danger xs-small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-12 mt-5">
+                                <hr class="border-secondary opacity-10 mb-4">
+                                <div class="d-flex gap-3 justify-content-end">
+                                    <a asp-action="Index" class="btn btn-link text-white-50 text-decoration-none px-4">Hủy bỏ</a>
+                                    <button type="submit" class="btn btn-netflix px-5 py-3 rounded-pill fw-bold">
+                                        Lưu thay đổi <i class="fas fa-save ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .fw-black { font-weight: 900; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .xs-small { font-size: 0.75rem; }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        .edit-avatar-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        .edit-avatar-preview {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .edit-avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .shadow-glow {
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.2);
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            opacity: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-avatar-wrapper:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .edit-avatar-wrapper:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Sidebar Nav */
+        .nav-btn {
+            display: block;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: rgba(229, 9, 20, 0.1);
+            color: #e50914;
+            border-left: 3px solid #e50914;
+        }
+
+        /* Cinematic Inputs */
+        .input-group-cinematic {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group-cinematic .icon {
+            position: absolute;
+            left: 18px;
+            color: rgba(255,255,255,0.3);
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-group-cinematic .form-control {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            color: #fff;
+            padding: 14px 14px 14px 50px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group-cinematic .form-control:focus {
+            background: rgba(255,255,255,0.08);
+            border-color: #e50914;
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.15);
+        }
+
+        .input-group-cinematic .form-control:focus + .icon {
+            color: #e50914;
+        }
+
+        .btn-netflix {
+            background: #e50914;
+            color: #fff;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+        }
+
+        .btn-netflix:hover {
+            background: #f40612;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+            color: #fff;
+        }
+    </style>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function handleImagePreview(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#avatar-preview-img').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+                // Clear the URL input if a file is chosen
+                document.getElementById('AvatarUrlInput').value = '';
+            }
+        }
+
+        function handleUrlPreview(url) {
+            if (url && url.length > 5) {
+                $('#avatar-preview-img').attr('src', url);
+            } else {
+                // If empty, reset to default or current known URL
+                var currentUrl = '@Model.AvatarUrl';
+                $('#avatar-preview-img').attr('src', currentUrl ? currentUrl : '/images/default-avatar.png');
+            }
+        }
+    </script>
+}

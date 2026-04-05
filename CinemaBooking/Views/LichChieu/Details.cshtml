@@ -1,0 +1,124 @@
+@model CinemaBooking.Models.LichChieu
+
+@{
+    ViewData["Title"] = "Chi tiết lịch chiếu";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết lịch chiếu</h1>
+    
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.MaLichChieu" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Chỉnh sửa
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-film me-1"></i>
+                    Thông tin phim
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img src="@(string.IsNullOrEmpty(Model.Phim?.UrlPoster) ? "/images/no-image.jpg" : Model.Phim.UrlPoster)" 
+                             class="img-fluid rounded" style="max-height: 300px;" alt="@Model.Phim?.TenPhim" />
+                    </div>
+                    <h4 class="text-center">@Model.Phim?.TenPhim</h4>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-5">Thể loại:</dt>
+                        <dd class="col-sm-7">@Model.Phim?.TheLoai</dd>
+                        
+                        <dt class="col-sm-5">Thời lượng:</dt>
+                        <dd class="col-sm-7">@Model.Phim?.ThoiLuong phút</dd>
+                        
+                        <dt class="col-sm-5">Định dạng:</dt>
+                        <dd class="col-sm-7">@Model.Phim?.DinhDang</dd>
+                        
+                        <dt class="col-sm-5">Ngày phát hành:</dt>
+                        <dd class="col-sm-7">@Model.Phim?.NgayPhatHanh?.ToString("dd/MM/yyyy")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    Thông tin lịch chiếu
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Mã lịch chiếu:</dt>
+                        <dd class="col-sm-8">@Model.MaLichChieu</dd>
+                        
+                        <dt class="col-sm-4">Rạp:</dt>
+                        <dd class="col-sm-8">@Model.PhongChieu?.RapPhim?.TenRap</dd>
+                        
+                        <dt class="col-sm-4">Địa chỉ:</dt>
+                        <dd class="col-sm-8">@Model.PhongChieu?.RapPhim?.DiaChi, @Model.PhongChieu?.RapPhim?.ThanhPho</dd>
+                        
+                        <dt class="col-sm-4">Phòng chiếu:</dt>
+                        <dd class="col-sm-8">@Model.PhongChieu?.SoPhong</dd>
+                        
+                        <dt class="col-sm-4">Sức chứa:</dt>
+                        <dd class="col-sm-8">@Model.PhongChieu?.SucChua chỗ ngồi</dd>
+                        
+                        <dt class="col-sm-4">Ngày chiếu:</dt>
+                        <dd class="col-sm-8">@Model.NgayChieu.ToString("dd/MM/yyyy")</dd>
+                        
+                        <dt class="col-sm-4">Giờ chiếu:</dt>
+                        <dd class="col-sm-8">@Model.GioChieu.ToString(@"hh\:mm")</dd>
+                        
+                        <dt class="col-sm-4">Thời gian kết thúc:</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                var thoiGianBatDau = Model.NgayChieu.Add(Model.GioChieu);
+                                var thoiGianKetThuc = thoiGianBatDau.AddMinutes(Model.Phim?.ThoiLuong ?? 0);
+                            }
+                            @thoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")
+                        </dd>
+                        
+                        <dt class="col-sm-4">Giá vé:</dt>
+                        <dd class="col-sm-8">@Model.GiaVe.ToString("N0") VNĐ</dd>
+                        
+                        <dt class="col-sm-4">Ngôn ngữ:</dt>
+                        <dd class="col-sm-8">@(Model.NgonNguPhim?.NgonNgu ?? "Không có thông tin")</dd>
+                        
+                        <dt class="col-sm-4">Phụ đề:</dt>
+                        <dd class="col-sm-8">@(Model.NgonNguPhim?.PhuDe ?? "Không có thông tin")</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-ticket-alt me-1"></i>
+                    Thông tin đặt vé
+                </div>
+                <div class="card-body">
+                    <a asp-controller="DatVe" asp-action="Index" asp-route-maLichChieu="@Model.MaLichChieu" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt"></i> Xem trang đặt vé
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load FontAwesome nếu chưa có
+            if (!$('link[href*="fontawesome"]').length) {
+                $('head').append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">');
+            }
+        });
+    </script>
+} 

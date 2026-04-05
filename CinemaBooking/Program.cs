@@ -118,8 +118,8 @@ builder.Services.AddHostedService<LichChieuCleanupService>();
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "YOUR_CLIENT_ID";
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "YOUR_CLIENT_SECRET";
+        options.ClientId = "1031430131056-vajolnvhs7vjm6bi468h43mcg87mmp4v.apps.googleusercontent.com";
+        options.ClientSecret = "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";
         options.CallbackPath = "/signin-google";
     });
 

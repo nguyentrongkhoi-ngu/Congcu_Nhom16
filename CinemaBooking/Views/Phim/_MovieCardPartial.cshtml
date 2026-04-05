@@ -1,0 +1,59 @@
+@model CinemaBooking.Models.Phim
+@{
+    string statusBadge = ViewData["StatusBadge"]?.ToString() ?? "";
+    bool isNowShowing = statusBadge == "NowShowing";
+    bool isComingSoon = statusBadge == "ComingSoon";
+}
+
+<!-- Attached data attributes for searching and filtering -->
+<div class="movie-card-rich gsap-reveal" 
+     data-title="@Model.TenPhim.ToLower()" 
+     data-genre="@(string.IsNullOrEmpty(Model.TheLoai) ? "" : Model.TheLoai.ToLower())"
+     onclick="location.href='@Url.Action("Detail", "Phim", new { id = Model.MaPhim })'">
+    
+
+    @if(isNowShowing)
+    {
+        <div class="status-badge status-now">
+            <i class="fas fa-play-circle me-1"></i> Đang chiếu
+        </div>
+    }
+    else if(isComingSoon)
+    {
+        <div class="status-badge status-soon">
+            <i class="fas fa-calendar-alt me-1"></i> Sắp chiếu
+        </div>
+    }
+
+    <div class="poster-wrapper">
+        <img src="@(string.IsNullOrEmpty(Model.UrlPoster) ? "/images/no-image.jpg" : Model.UrlPoster)" 
+             alt="@Model.TenPhim" loading="lazy">
+        <div class="card-overlay"></div>
+    </div>
+
+    <div class="card-body-rich">
+        <h5>@Model.TenPhim</h5>
+        
+        <div class="meta-info">
+            <span><i class="fas fa-clock mr-1"></i> @Model.ThoiLuong phút</span>
+            <span><i class="fas fa-tags mr-1"></i> @(string.IsNullOrEmpty(Model.TheLoai) ? "Phim" : Model.TheLoai)</span>
+        </div>
+
+        <div class="card-actions">
+            <div class="d-flex gap-2 w-100">
+                @if(isComingSoon) {
+                    <a href="@Url.Action("Detail", "Phim", new { id = Model.MaPhim })" 
+                       class="btn-book-rich btn-detail-soon flex-grow-1" onclick="event.stopPropagation()">
+                        <i class="fas fa-info-circle"></i> Xem chi tiết
+                    </a>
+                } else {
+                    <a href="@Url.Action("Index", "DatVe", new { maPhim = Model.MaPhim })" 
+                       class="btn-book-rich flex-grow-1" onclick="event.stopPropagation()">
+                        <i class="fas fa-ticket-alt"></i> Đặt vé
+                    </a>
+                }
+                
+            </div>
+        </div>
+    </div>
+</div>

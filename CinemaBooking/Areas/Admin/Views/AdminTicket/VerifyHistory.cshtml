@@ -1,0 +1,129 @@
+@model IEnumerable<CinemaBooking.Models.LichSuGiaoDich>
+@{
+    ViewData["Title"] = "Lịch sử kiểm tra vé";
+}
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2><i class="fas fa-history"></i> Lịch sử kiểm tra vé</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Verify", "AdminTicket")" class="btn btn-primary">
+                <i class="fas fa-qrcode"></i> Quay lại kiểm tra vé
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Các lần kiểm tra gần đây</h5>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="verifyHistoryTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">STT</th>
+                            <th scope="col">Thời gian</th>
+                            <th scope="col">Mã vé</th>
+                            <th scope="col">Thông tin</th>
+                            <th scope="col">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            int stt = 1;
+                            foreach (var log in Model)
+                            {
+                                <tr>
+                                    <td>@stt</td>
+                                    <td>@(log.NgayGiaoDich?.ToString("dd/MM/yyyy HH:mm:ss"))</td>
+                                    <td>
+                                        @{
+                                            // Trích xuất mã vé từ nội dung
+                                            string ticketId = "";
+                                            var match = System.Text.RegularExpressions.Regex.Match(log.NoiDung, @"Vé #(\d+)");
+                                            if (match.Success)
+                                            {
+                                                ticketId = match.Groups[1].Value;
+                                                <span class="badge bg-primary">#@ticketId</span>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td>@log.NoiDung</td>
+                                    <td>
+                                        @if (log.TrangThai.Contains("Thành công"))
+                                        {
+                                            if (log.TrangThai.Contains("Sớm"))
+                                            {
+                                                <span class="badge bg-warning text-dark">@log.TrangThai</span>
+                                            }
+                                            else if (log.TrangThai.Contains("Đã dùng"))
+                                            {
+                                                <span class="badge bg-info">@log.TrangThai</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">@log.TrangThai</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">@log.TrangThai</span>
+                                        }
+                                    </td>
+                                </tr>
+                                stt++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4">Không có dữ liệu lịch sử kiểm tra vé</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="text-muted small">Hiển thị 50 bản ghi gần nhất</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý tìm kiếm
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#verifyHistoryTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+            
+            // Cũng thực hiện tìm kiếm khi nhấn nút search
+            $("#searchBtn").click(function() {
+                var value = $("#searchInput").val().toLowerCase();
+                $("#verifyHistoryTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+} 

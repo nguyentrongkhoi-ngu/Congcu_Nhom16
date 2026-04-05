@@ -1,0 +1,161 @@
+@model CinemaBooking.Models.ViewModels.PhimViewModel
+
+@{
+    ViewData["Title"] = "Thêm phim mới";
+}
+
+<div class="container mt-4">
+    <h1>Thêm phim mới</h1>
+    <hr />
+    
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <strong>Có lỗi xảy ra:</strong>
+                        <ul>
+                            @foreach (var modelState in ViewData.ModelState.Values)
+                            {
+                                foreach (var error in modelState.Errors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
+                
+                <div class="form-group mb-3">
+                    <label asp-for="TenPhim" class="control-label"></label>
+                    <input asp-for="TenPhim" class="form-control" />
+                    <span asp-validation-for="TenPhim" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="MoTa" class="control-label"></label>
+                    <textarea asp-for="MoTa" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="MoTa" class="text-danger"></span>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ThoiLuong" class="control-label"></label>
+                            <input asp-for="ThoiLuong" class="form-control" />
+                            <span asp-validation-for="ThoiLuong" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TheLoai" class="control-label"></label>
+                            <input asp-for="TheLoai" class="form-control" />
+                            <span asp-validation-for="TheLoai" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="NgayPhatHanh" class="control-label"></label>
+                            <input asp-for="NgayPhatHanh" class="form-control" type="date" />
+                            <span asp-validation-for="NgayPhatHanh" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="DinhDang" class="control-label"></label>
+                            <select asp-for="DinhDang" class="form-control">
+                                <option value="">-- Chọn định dạng --</option>
+                                <option value="2D">2D</option>
+                                <option value="3D">3D</option>
+                                <option value="IMAX">IMAX</option>
+                                <option value="4DX">4DX</option>
+                            </select>
+                            <span asp-validation-for="DinhDang" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PosterFile" class="control-label"></label>
+                            <input asp-for="PosterFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this, 'posterPreview')" required />
+                            <span asp-validation-for="PosterFile" class="text-danger"></span>
+                            <small class="form-text text-muted">Chọn ảnh poster cho phim (JPG, PNG) - <span class="text-danger">Bắt buộc</span></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="TrailerFile" class="control-label"></label>
+                            <input asp-for="TrailerFile" class="form-control" type="file" accept="video/*" required />
+                            <span asp-validation-for="TrailerFile" class="text-danger"></span>
+                            <small class="form-text text-muted">Chọn file video trailer (MP4, WebM) - <span class="text-danger">Bắt buộc</span></small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <img id="posterPreview" src="/images/no-image.jpg" class="img-fluid mt-2" style="max-height: 300px;" />
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu phim</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#' + previewId).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        $(document).ready(function () {
+            $('form').on('submit', function (e) {
+                var posterFile = $('#PosterFile')[0].files;
+                var trailerFile = $('#TrailerFile')[0].files;
+                
+                var isValid = true;
+                
+                // Kiểm tra đã chọn ảnh poster chưa
+                if (!posterFile || posterFile.length === 0) {
+                    $('[data-valmsg-for="PosterFile"]').text('Vui lòng chọn ảnh poster cho phim');
+                    isValid = false;
+                } else {
+                    $('[data-valmsg-for="PosterFile"]').text('');
+                }
+                
+                // Kiểm tra đã chọn trailer chưa
+                if (!trailerFile || trailerFile.length === 0) {
+                    $('[data-valmsg-for="TrailerFile"]').text('Vui lòng chọn file trailer cho phim');
+                    isValid = false;
+                } else {
+                    $('[data-valmsg-for="TrailerFile"]').text('');
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+} 

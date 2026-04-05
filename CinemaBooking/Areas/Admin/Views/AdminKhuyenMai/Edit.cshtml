@@ -1,0 +1,89 @@
+@model CinemaBooking.Models.KhuyenMai
+
+@{
+    ViewData["Title"] = "Chỉnh sửa mã giảm giá";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden animate__animated animate__fadeIn">
+            <div class="card-header bg-white py-3 border-bottom border-light">
+                <h6 class="m-0 fw-bold text-slate-800">
+                    <i class="fas fa-edit text-primary me-2"></i> Chỉnh sửa mã: <span class="text-danger fw-black">@Model.MaCode</span>
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit">
+                    <input type="hidden" asp-for="MaKhuyenMai" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger-subtle text-danger border-0 small py-2 mb-4 rounded-3"></div>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label asp-for="MaCode" class="form-label small fw-bold text-slate-600">Mã Code</label>
+                            <input asp-for="MaCode" class="form-control rounded-3 border-light-subtle bg-slate-50 py-2" placeholder="Nhập mã..." />
+                            <span asp-validation-for="MaCode" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label asp-for="PhanTramGiam" class="form-label small fw-bold text-slate-600">Giảm (%)</label>
+                            <div class="input-group">
+                                <input asp-for="PhanTramGiam" class="form-control rounded-start-3 border-light-subtle bg-slate-50 py-2" placeholder="0" type="number" min="1" max="100" />
+                                <span class="input-group-text rounded-end-3 bg-white border-light-subtle text-slate-400">%</span>
+                            </div>
+                            <span asp-validation-for="PhanTramGiam" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="GiaTriToiThieu" class="form-label small fw-bold text-slate-600">Đơn tối thiểu (VNĐ)</label>
+                            <div class="input-group">
+                                <input asp-for="GiaTriToiThieu" class="form-control rounded-start-3 border-light-subtle bg-slate-50 py-2" placeholder="0" type="number" />
+                                <span class="input-group-text rounded-end-3 bg-white border-light-subtle text-slate-400">đ</span>
+                            </div>
+                            <span asp-validation-for="GiaTriToiThieu" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="NgayBatDau" class="form-label small fw-bold text-slate-600">Ngày bắt đầu hiệu lực</label>
+                            <input asp-for="NgayBatDau" class="form-control rounded-3 border-light-subtle bg-slate-50 py-2" type="date" value="@Model.NgayBatDau.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="NgayBatDau" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="NgayKetThuc" class="form-label small fw-bold text-slate-600">Ngày kết thúc hiệu lực</label>
+                            <input asp-for="NgayKetThuc" class="form-control rounded-3 border-light-subtle bg-slate-50 py-2" type="date" value="@Model.NgayKetThuc.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="NgayKetThuc" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="MoTa" class="form-label small fw-bold text-slate-600">Mô tả chi tiết</label>
+                            <textarea asp-for="MoTa" class="form-control rounded-3 border-light-subtle bg-slate-50 py-2" rows="3" placeholder="Nhập mô tả cho chương trình khuyến mãi..."></textarea>
+                            <span asp-validation-for="MoTa" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-light d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-sm border-0">
+                            <i class="fas fa-save me-2"></i> Lưu thay đổi
+                        </button>
+                        <a asp-action="Index" class="btn btn-light px-4 py-2 rounded-pill fw-bold text-slate-600 shadow-sm border border-light">
+                            Hủy bỏ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .bg-slate-50 { background-color: #f8fafc; }
+        .text-slate-500 { color: #64748b; }
+        .text-slate-800 { color: #1e293b; }
+        .text-slate-700 { color: #334155; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-400 { color: #94a3b8; }
+        .border-light-subtle { border-color: #e2e8f0 !important; }
+    </style>
+}
