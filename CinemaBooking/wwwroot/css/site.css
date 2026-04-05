@@ -1,0 +1,1528 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #000912; /* Màu nền tối cho phù hợp với hình rạp chiếu phim */
+  background-image: url('../images/cinema-background.jpg?v=2'); /* Thêm tham số truy vấn để buộc trình duyệt tải lại ảnh */
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow-x: hidden;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* Ẩn overflow khi hiển thị form auth */
+body.auth-page {
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 9, 18, 0.7), rgba(0, 9, 18, 0.5));
+  z-index: -1;
+  opacity: 0.9;
+}
+
+main {
+  flex: 1 0 auto;
+  padding-top: 3px;
+  padding-bottom: 30px;
+}
+
+/* Global clearance for immersive pages to skip fixed navbar */
+body.immersive-page main {
+  padding-top: 90px !important;
+}
+
+/* Đảm bảo nội dung có độ tương phản tốt trên background */
+.container {
+  /* Mặc định không có background cho container */
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Chỉ áp dụng background cho container trong main của trang chủ */
+body.home-page main .container {
+  background-color: rgba(11, 20, 30, 0.85);
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+body.home-page main .container h1,
+body.home-page main .container h2,
+body.home-page main .container h3,
+body.home-page main .container h4,
+body.home-page main .container h5,
+body.home-page main .container h6 {
+  color: #fff;
+}
+
+/* Điều chỉnh màu cho text trong container của trang chủ */
+body.home-page main .container p,
+body.home-page main .container div,
+body.home-page main .container span,
+body.home-page main .container label,
+body.home-page main .container a:not(.btn) {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Điều chỉnh màu hero section cho phù hợp với nền tối */
+body.home-page .hero-section {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Điều chỉnh movie section */
+body.home-page .movie-section {
+  background-color: rgba(11, 20, 30, 0.85);
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  margin-top: 20px;
+  color: #fff;
+}
+
+/* Điều chỉnh màu cho section title */
+body.home-page .section-title {
+  color: #fff;
+}
+
+body.home-page .section-title:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  height: 3px;
+  width: 50px;
+  background-color: #e50914;
+}
+
+/* --- Toàn bộ CSS Navbar cũ đã được dọn dẹp để nâng cấp chuẩn 2026 --- */
+
+/* Đảm bảo container của footer không có padding top và bottom */
+.footer .container-fluid {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 20px !important;
+}
+
+/* Đảm bảo tương thích với các phần container khác */
+.container-fluid.px-4 {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+/* Tối ưu hiển thị form đăng nhập/đăng ký */
+.form-control-sm {
+  min-height: calc(1.5em + 0.5rem + 2px);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0.2rem;
+}
+
+.form-label.small {
+  margin-bottom: 0.2rem;
+}
+
+.card-header.py-2 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.card-body.py-2, .card-body.py-3 {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+/* CSS để hiển thị form đăng nhập và đăng ký tối ưu trên màn hình nhỏ */
+@media (max-width: 576px) {
+  .container.mt-2 {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .form-control-sm {
+    font-size: 1rem;
+  }
+}
+
+/* Loại bỏ hiệu ứng hover nảy lên và định vị form đăng nhập/đăng ký */
+.login-register-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.login-register-card .card-header {
+  background-color: #e50914 !important;
+  padding: 15px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-register-card .card-body {
+  padding: 25px 20px;
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
+.login-register-card .card-footer {
+  background-color: rgba(255, 255, 255, 0.98);
+  padding: 15px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.login-register-card button[type="submit"] {
+  background-color: #e50914;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  height: auto;
+}
+
+.login-register-card button[type="submit"]:hover {
+  background-color: #b20710;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(229, 9, 20, 0.3);
+}
+
+.login-register-card a {
+  color: #e50914;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.login-register-card a:hover {
+  color: #e50914;
+  text-decoration: none;
+}
+
+.form-control-sm {
+  font-size: 15px;
+  height: 38px;
+  border-radius: 5px;
+}
+
+.container.mt-2 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 0 20px;
+  max-width: 500px;
+  width: 100%;
+  z-index: 10;
+}
+
+.container.mt-2 > .row {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.container.mt-2#login-container {
+  margin-top: 5rem !important;
+}
+
+.container.mt-2#register-container {
+  margin-top: 4rem !important;
+}
+
+.login-register-card .form-control-sm {
+  height: 40px;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  transition: all 0.2s ease-in-out;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.login-register-card .form-control-sm:focus {
+  background-color: #fff;
+  border-color: #e50914;
+  box-shadow: 0 0 0 0.25rem rgba(229, 9, 20, 0.25);
+  outline: none;
+}
+
+.login-register-card label,
+.login-register-card .form-check-label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.login-register-card .card-footer p,
+.login-register-card .card-footer small {
+  margin-bottom: 0;
+  color: #6c757d;
+}
+
+.login-register-card .card-footer a {
+  color: #e50914;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.login-register-card .card-footer a:hover {
+  color: #e50914;
+  text-decoration: none;
+}
+
+.btn[type="submit"] {
+  padding: 8px 16px;
+  height: 40px;
+  background-color: #e50914;
+  border: none;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.btn[type="submit"]:hover {
+  background-color: #b20710;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(229, 9, 20, 0.3);
+}
+
+.text-center.mb-3 {
+  margin-bottom: 1.5rem !important;
+  position: relative;
+  z-index: 5;
+}
+
+.text-center.mb-3 img {
+  max-width: 150px;
+  animation: pulse 2s infinite;
+  filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.3));
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.3));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.3));
+  }
+}
+
+.form-check-input:checked {
+  background-color: #e50914;
+  border-color: #e50914;
+}
+
+/* Đảm bảo background của container */
+main .container {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Điều chỉnh form cho màn hình nhỏ */
+@media (max-width: 768px) {
+  .container.mt-2#login-container,
+  .container.mt-2#register-container {
+    padding-top: 10px;
+  }
+
+  .text-center.mb-3 img {
+    max-width: 100px !important;
+  }
+}
+
+/* Đảm bảo vị trí của form trên các màn hình khác nhau */
+@media (min-height: 800px) {
+  .container.mt-2#login-container {
+    padding-top: 30px;
+  }
+
+  .container.mt-2#register-container {
+    padding-top: 20px;
+  }
+}
+
+@media (max-height: 600px) {
+  .container.mt-2#login-container,
+  .container.mt-2#register-container {
+    padding-top: 10px;
+  }
+
+  .text-center.mb-3 img {
+    max-width: 80px !important;
+  }
+}
+
+.btn-detail {
+  background-color: #0d6efd;
+  border: none;
+  margin-top: 8px;
+  transition: all 0.3s;
+  font-size: 14px;
+  padding: 5px 15px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-detail:hover {
+  background-color: #0a58ca;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(13, 110, 253, 0.3);
+}
+
+.btn-detail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: 0.5s;
+  z-index: -1;
+}
+
+.btn-detail:hover::before {
+  left: 100%;
+}
+
+.btn-danger {
+  background-color: #e50914;
+  border-color: #e50914;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: #b20710;
+  border-color: #b20710;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(229, 9, 20, 0.3);
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0a58ca;
+  border-color: #0a53be;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+/* Đảm bảo form vẫn có nền sáng để dễ đọc */
+.login-register-card {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.login-register-card .card-body,
+.login-register-card .card-footer {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.login-register-card label,
+.login-register-card .form-check-label {
+  color: #333;
+}
+
+/* Chỉnh sửa màu chữ cho các liên kết trong nền tối */
+a:not(.btn) {
+  color: #4dabf7;
+  text-decoration: none;
+}
+
+a:not(.btn):hover {
+  color: #74c0fc;
+  text-decoration: underline;
+}
+
+/* Tạo hiệu ứng ánh sáng xanh cho phù hợp với hình nền */
+.movie-card {
+  box-shadow: 0 4px 20px rgba(32, 156, 255, 0.2);
+}
+
+.movie-card:hover {
+  box-shadow: 0 15px 30px rgba(32, 156, 255, 0.3);
+}
+
+/* Điều chỉnh màu nút để phù hợp với chủ đề xanh dương */
+.btn-detail {
+  background-color: #0d6efd;
+  border: none;
+}
+
+.btn-detail:hover {
+  background-color: #0a58ca;
+}
+
+.btn-detail::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+/* Thiết kế nâng cao cho form đăng nhập và đăng ký */
+.auth-section {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0 40px;
+  position: relative;
+  margin-top: 20px;
+}
+
+.auth-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('../images/cinema-background.jpg') center/cover no-repeat fixed;
+  opacity: 0.05;
+  z-index: -1;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card {
+  background-color: rgba(255, 255, 255, 0.98);
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.auth-header {
+  background-color: #e50914;
+  color: white;
+  padding: 20px 25px;
+  position: relative;
+}
+
+.auth-header h4 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.auth-header p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}
+
+.auth-body {
+  padding: 25px;
+  position: relative;
+}
+
+.auth-footer {
+  padding: 15px 25px;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  background: rgba(249, 249, 249, 0.7);
+}
+
+.auth-footer p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #555;
+}
+
+.auth-footer a {
+  color: #e50914;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-form .form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.auth-form .form-row .form-floating {
+  flex: 1;
+}
+
+.auth-form .form-floating {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.auth-form .form-control {
+  height: 54px;
+  padding: 1rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.auth-form .form-control:focus {
+  border-color: #e50914;
+  outline: none;
+}
+
+.auth-form .form-floating > label {
+  padding: 0.8rem 0.75rem;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.auth-form .form-floating > .form-control:focus ~ label {
+  color: #e50914;
+}
+
+.auth-form .form-check {
+  margin-bottom: 16px;
+}
+
+.auth-form .form-check-input {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15rem;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.auth-form .form-check-input:checked {
+  background-color: #e50914;
+  border-color: #e50914;
+}
+
+.auth-form .form-remember {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.auth-form .form-check-label {
+  color: #555;
+  user-select: none;
+  font-size: 0.92rem;
+  padding-left: 4px;
+}
+
+.auth-form .forgot-link {
+  color: #e50914;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.auth-form .text-danger {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  color: #e50914;
+}
+
+.btn-auth-submit {
+  width: 100%;
+  background-color: #e50914;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 12px;
+  cursor: pointer;
+  height: auto;
+  margin-top: 5px;
+  letter-spacing: 0.5px;
+}
+
+.btn-auth-submit i {
+  margin-right: 6px;
+  font-size: 1.05rem;
+}
+
+/* Form đăng ký chỉnh sửa riêng */
+.auth-form.register .form-floating {
+  margin-bottom: 12px;
+}
+
+/* Alert styling */
+.auth-form .alert {
+  border-radius: 6px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: none;
+  position: relative;
+}
+
+.auth-form .alert-danger {
+  background-color: rgba(229, 9, 20, 0.1);
+  color: #e50914;
+  border-left: 3px solid #e50914;
+}
+
+/* Responsive cho form */
+@media (max-width: 768px) {
+  .auth-container {
+    max-width: 92%;
+  }
+
+  .auth-header {
+    padding: 18px 22px;
+  }
+
+  .auth-body {
+    padding: 22px;
+  }
+
+  .auth-footer {
+    padding: 15px 22px;
+  }
+
+  .auth-form .form-row {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .auth-form .form-floating {
+    margin-bottom: 12px;
+  }
+
+  .auth-form .form-control {
+    height: 50px;
+  }
+}
+
+/* Phù hợp với nền tối */
+body.dark-theme .auth-card {
+  background-color: rgba(22, 28, 36, 0.95);
+}
+
+body.dark-theme .auth-footer {
+  background-color: rgba(16, 20, 26, 0.7);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+body.dark-theme .auth-form .form-control {
+  background-color: rgba(30, 36, 44, 0.8);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .auth-form .form-control:focus {
+  border-color: #e50914;
+}
+
+body.dark-theme .auth-footer p,
+body.dark-theme .auth-form .form-check-label,
+body.dark-theme .auth-form .form-floating > label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+body.dark-theme .auth-form .text-danger {
+  color: #ff6b6b;
+}
+
+body.dark-theme .auth-form .alert-danger {
+  background-color: rgba(229, 9, 20, 0.15);
+  color: #ff6b6b;
+}
+
+/* Glass morphism option for card */
+.glass-card .auth-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-card.dark-theme .auth-card {
+  background-color: rgba(22, 28, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Thêm CSS riêng cho trang privacy và các trang thường */
+/* --- Removed restrictive global white-background rules that caused conflicts --- */
+
+
+/* CSS sửa lại màu nền cho container */
+main .container {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Màu cho dropdown menu */
+.dropdown-menu {
+  background-color: #343a40;
+}
+
+.dropdown-item {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dropdown-item:hover {
+  background-color: #212529;
+  color: #fff;
+}
+
+/* Ngăn hiệu ứng gạch chân cho brand CineZore */
+.navbar-brand::after {
+  display: none !important;
+}
+
+.navbar-brand:hover::after {
+  width: 0 !important;
+}
+
+/* Feedback Icon */
+.feedback-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #E30613;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 1050;
+    transition: all 0.3s ease;
+}
+
+.feedback-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    background-color: #FF0000;
+}
+
+.feedback-icon i {
+    transition: transform 0.3s ease;
+}
+
+.feedback-icon:hover i {
+    transform: scale(1.2);
+}
+
+.feedback-icon.active {
+    transform: scale(0.9);
+    background-color: #C10000;
+}
+
+/* Feedback Panel - Chat Style */
+.feedback-panel {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    background-color: #ffffff;
+    color: #333;
+    border-radius: 15px;
+    box-shadow: 0 5px 40px rgba(0, 0, 0, 0.2);
+    z-index: 1040;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    visibility: hidden;
+    max-height: 500px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.feedback-panel::before {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 20px;
+    width: 20px;
+    height: 20px;
+    background-color: #ffffff;
+    transform: rotate(45deg);
+    z-index: -1;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-panel.active {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #E30613;
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.feedback-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.feedback-header .btn-close {
+    background-color: transparent;
+    opacity: 0.8;
+    filter: brightness(5);
+}
+
+.feedback-header .btn-close:hover {
+    opacity: 1;
+}
+
+.feedback-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Chat Messages Container */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    min-height: 250px;
+    max-height: 350px;
+    background-color: #f0f2f5;
+}
+
+/* Chat Message Bubbles */
+.chat-message {
+    display: flex;
+    margin-bottom: 10px;
+    max-width: 85%;
+}
+
+.chat-message.sent {
+    margin-left: auto;
+    justify-content: flex-end;
+}
+
+.chat-message.received {
+    margin-right: auto;
+    justify-content: flex-start;
+}
+
+.message-content {
+    padding: 10px 15px;
+    border-radius: 18px;
+    font-size: 14px;
+    word-break: break-word;
+    position: relative;
+    max-width: 100%;
+}
+
+.chat-message.sent .message-content {
+    background-color: #E30613;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message.received .message-content {
+    background-color: #e4e6eb;
+    color: #333;
+    border-bottom-left-radius: 4px;
+}
+
+/* Attachment in chat */
+.message-content.attachment-message {
+    padding: 5px;
+    overflow: hidden;
+}
+
+.message-content.attachment-message img {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    display: block;
+}
+
+/* Chat Input Area */
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f0f2f5;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.chat-input {
+    flex: 1;
+    border: none;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 14px;
+    resize: none;
+    max-height: 80px;
+    min-height: 40px;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chat-actions {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.attachment-label {
+    cursor: pointer;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+    transition: background-color 0.2s;
+}
+
+.attachment-label:hover {
+    background-color: #e4e6eb;
+}
+
+.attachment-label i {
+    color: #E30613;
+    font-size: 16px;
+}
+
+.chat-send-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: #E30613;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-send-btn:hover {
+    background-color: #C10000;
+}
+
+.chat-send-btn i {
+    font-size: 16px;
+}
+
+/* File Preview */
+.attachment-preview {
+    padding: 0 15px 10px;
+    background-color: #f0f2f5;
+}
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.file-preview img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.file-preview i {
+    font-size: 24px;
+    color: #E30613;
+    margin-right: 10px;
+}
+
+.file-preview span {
+    flex: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.remove-file {
+    background-color: #e4e6eb;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.remove-file:hover {
+    background-color: #ddd;
+}
+
+.remove-file i {
+    font-size: 12px;
+    color: #555;
+    margin: 0;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    float: left;
+    margin: 0 1px;
+    background-color: #9E9EA1;
+    display: block;
+    border-radius: 50%;
+    opacity: 0.4;
+}
+
+.typing-indicator span:nth-of-type(1) {
+    animation: typing 1s infinite 0.1s;
+}
+
+.typing-indicator span:nth-of-type(2) {
+    animation: typing 1s infinite 0.2s;
+}
+
+.typing-indicator span:nth-of-type(3) {
+    animation: typing 1s infinite 0.3s;
+}
+
+@keyframes typing {
+    0% {
+        transform: translateY(0px);
+    }
+    28% {
+        transform: translateY(-5px);
+    }
+    44% {
+        transform: translateY(0px);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+    .feedback-panel {
+        width: calc(100% - 40px);
+        max-width: 350px;
+        right: 10px;
+        bottom: 80px;
+    }
+
+    .feedback-icon {
+        right: 10px;
+        bottom: 10px;
+        width: 55px;
+        height: 55px;
+        font-size: 22px;
+    }
+
+    .chat-messages {
+        min-height: 200px;
+    }
+}
+
+.email-input-container {
+    padding: 10px 15px 0;
+    background-color: #f0f2f5;
+}
+
+.chat-email-input {
+    width: 100%;
+    border: none;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 14px;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+}
+
+/* Movies Grid Layout 5x2 */
+.movies-grid-container {
+    margin: 2rem 0;
+}
+
+.movies-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 2rem;
+    padding: 10px;
+    min-height: 600px; /* Đảm bảo chiều cao tối thiểu cho 2 hàng */
+    align-items: stretch; /* Đảm bảo tất cả items có cùng chiều cao */
+}
+
+.movie-grid-item {
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.movie-grid-item:hover {
+    transform: translateY(-8px) scale(1.02);
+    z-index: 10;
+    box-shadow: 0 15px 35px rgba(0, 123, 255, 0.3);
+}
+
+.movie-grid-item .movie-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Pagination styles */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem 0;
+    gap: 10px;
+}
+
+.pagination-info {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.pagination .page-link:hover {
+    background: rgba(0, 123, 255, 0.3);
+    color: white;
+    border-color: rgba(0, 123, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.pagination .page-link.active {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-color: #007bff;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+}
+
+.pagination .page-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pagination .page-link i {
+    font-size: 0.8rem;
+}
+
+/* Animation for grid items */
+.movie-grid-item {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.movie-grid-item:nth-child(1) { animation-delay: 0.1s; }
+.movie-grid-item:nth-child(2) { animation-delay: 0.2s; }
+.movie-grid-item:nth-child(3) { animation-delay: 0.3s; }
+.movie-grid-item:nth-child(4) { animation-delay: 0.4s; }
+.movie-grid-item:nth-child(5) { animation-delay: 0.5s; }
+.movie-grid-item:nth-child(6) { animation-delay: 0.6s; }
+.movie-grid-item:nth-child(7) { animation-delay: 0.7s; }
+.movie-grid-item:nth-child(8) { animation-delay: 0.8s; }
+.movie-grid-item:nth-child(9) { animation-delay: 0.9s; }
+.movie-grid-item:nth-child(10) { animation-delay: 1.0s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth page transition */
+.movies-grid-container {
+    transition: all 0.3s ease;
+}
+
+/* Loading state for pagination */
+.pagination .page-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination .page-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.pagination .page-link:hover::before {
+    left: 100%;
+}
+
+/* Loading overlay for page transitions */
+.page-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 9, 18, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.page-loading.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* New badge for latest movies */
+.new-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    animation: pulse-new 2s infinite;
+}
+
+@keyframes pulse-new {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Responsive grid layout for 5x2 */
+@media (max-width: 1400px) {
+    .movies-grid {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr); /* 4x3 = 12 phim */
+        gap: 18px;
+        min-height: 700px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .movies-grid {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr); /* 4x3 = 12 phim */
+        gap: 16px;
+        min-height: 650px;
+    }
+}
+
+@media (max-width: 992px) {
+    .movies-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 1fr); /* 3x4 = 12 phim */
+        gap: 15px;
+        min-height: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .movies-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(5, 1fr); /* 2x5 = 10 phim */
+        gap: 12px;
+        min-height: 1000px;
+    }
+}
+
+@media (max-width: 576px) {
+    .movies-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(5, 1fr); /* 2x5 = 10 phim */
+        gap: 10px;
+        min-height: 900px;
+    }
+}
+
+@media (max-width: 400px) {
+    .movies-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(10, 1fr); /* 1x10 = 10 phim */
+        gap: 15px;
+        min-height: 1500px;
+    }
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+    .pagination {
+        padding: 8px 15px;
+        gap: 6px;
+    }
+
+    .pagination .page-link {
+        width: 35px;
+        height: 35px;
+        font-size: 0.85rem;
+    }
+
+    .pagination-info {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+
+    .pagination .page-link {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ═══════════════ CINEMATIC UI UTILITIES (2026) ═══════════════ */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2.5rem;
+  padding: 2rem 0;
+}
+
+@media (max-width: 768px) {
+}
+
+/* --- Cleanup of redundant styles moved to movies.css & schedules.css --- */
+

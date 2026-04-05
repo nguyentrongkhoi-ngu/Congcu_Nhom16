@@ -1,0 +1,120 @@
+@model CinemaBooking.Models.DatVe
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "In vé";
+    Layout = "_PrintLayout";
+}
+
+<div class="print-container animate__animated animate__fadeIn">
+    <!-- Actions -->
+    <div class="print-actions d-print-none mb-4">
+        <button onclick="window.print()" class="btn btn-danger px-4 fw-bold">
+            <i class="fas fa-print me-2"></i> In vé ngay
+        </button>
+        <a href="@Url.Action("LichSuDatVe", "Home")" class="btn btn-outline-dark px-4">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại
+        </a>
+    </div>
+
+    <!-- Ticket -->
+    <div class="ticket-container">
+        <div class="ticket-main">
+            <!-- Left Side: Visual -->
+            <div class="ticket-visual">
+                @if (!string.IsNullOrEmpty(Model.LichChieu.Phim.HinhAnh))
+                {
+                    <img src="@Model.LichChieu.Phim.HinhAnh" alt="Poster" class="ticket-poster" />
+                }
+                else
+                {
+                    <div class="ticket-poster bg-dark d-flex align-items-center justify-content-center text-white-50">
+                        <i class="fas fa-film fa-3x"></i>
+                    </div>
+                }
+            </div>
+
+            <!-- Right Side: Body -->
+            <div class="ticket-body">
+                <div class="ticket-badge">CineZore Official Ticket</div>
+                <h1 class="ticket-movie-title">@Model.LichChieu.Phim.TenPhim</h1>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Rạp / Cinema</label>
+                        <span>@Model.LichChieu.PhongChieu.RapPhim.TenRap</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Phòng / Room</label>
+                        <span>Phòng @Model.LichChieu.PhongChieu.SoPhong</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Ngày / Date</label>
+                        <span>@Model.LichChieu.NgayChieu.ToString("dd MMMM, yyyy", new CultureInfo("vi-VN"))</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Giờ chiếu / Time</label>
+                        <span>@Model.LichChieu.GioChieu.ToString(@"hh\:mm")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Ghế / Seats</label>
+                        <span>
+                            @if (Model.DatVeGhes != null && Model.DatVeGhes.Any())
+                            {
+                                @string.Join(", ", Model.DatVeGhes.Select(c => c.Ghe.SoGhe))
+                            }
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>Mã vé / ID</label>
+                        <span>#@Model.MaDatVe.ToString("D8")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perforation -->
+        <div class="ticket-perforation"></div>
+
+        <!-- Stub -->
+        <div class="ticket-stub-new">
+            <div class="stub-info">
+                <label class="d-block text-muted small text-uppercase fw-bold mb-1">Kiểm soát vé / Control Stub</label>
+                <h4>@Model.LichChieu.Phim.TenPhim</h4>
+                <p class="mb-0 text-muted">
+                    @Model.LichChieu.NgayChieu.ToString("dd/MM/yyyy") | @Model.LichChieu.GioChieu.ToString(@"hh\:mm") | Ghế: @string.Join(", ", Model.DatVeGhes.Select(c => c.Ghe.SoGhe))
+                </p>
+                <div class="mt-2 text-dark small fw-bold">
+                    Khách: @Model.NguoiDung.HoTen
+                </div>
+            </div>
+            <div class="stub-qr-wrapper text-center">
+                <div id="qrcode" class="stub-qr"></div>
+                <div class="mt-1 small fw-bold text-uppercase" style="font-size: 0.6rem;">Scan to verify</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes for Print -->
+    <div class="text-center text-muted mt-4 small d-none d-print-block">
+        <p>© 2026 CineZore Cinema System. Vé này có giá trị vào cổng một lần duy nhất.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var qrText = "CINEZORE-TICKET-@Model.MaDatVe-@Model.LichChieu.MaLichChieu";
+            
+            new QRCode(document.getElementById("qrcode"), {
+                text: qrText,
+                width: 90,
+                height: 90,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        });
+    </script>
+}

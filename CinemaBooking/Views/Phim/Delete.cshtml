@@ -1,0 +1,49 @@
+@model CinemaBooking.Models.Phim
+
+@{
+    ViewData["Title"] = "Xóa phim";
+}
+
+<div class="container mt-4">
+    <h1>Xóa phim</h1>
+    <div class="alert alert-danger">
+        <h3>Bạn có chắc chắn muốn xóa phim này?</h3>
+        <p>Việc xóa sẽ không thể hoàn tác và các dữ liệu liên quan cũng có thể bị ảnh hưởng.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="@(string.IsNullOrEmpty(Model.UrlPoster) ? "/images/no-image.jpg" : Model.UrlPoster)" 
+                             class="img-fluid rounded-start" alt="@Model.TenPhim"
+                             style="max-height: 300px; width: 100%; object-fit: cover;">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">@Model.TenPhim</h5>
+                            <p class="card-text">
+                                <strong>Thể loại:</strong> @Model.TheLoai <br />
+                                <strong>Thời lượng:</strong> @Model.ThoiLuong phút <br />
+                                <strong>Định dạng:</strong> @Model.DinhDang <br />
+                                <strong>Ngày phát hành:</strong> @(Model.NgayPhatHanh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")
+                            </p>
+                            <p class="card-text">
+                                <small class="text-muted">@Model.MoTa</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="MaPhim" />
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Xác nhận xóa</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

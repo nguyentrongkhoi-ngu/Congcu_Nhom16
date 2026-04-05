@@ -1,0 +1,896 @@
+@model CinemaBooking.Models.ViewModels.PhimDanhGiaViewModel
+
+@{
+    ViewData["Title"] = Model.Phim.TenPhim + " | CineZore";
+    var posterUrl = string.IsNullOrEmpty(Model.Phim.UrlPoster) ? "/images/no-image.jpg" : Model.Phim.UrlPoster;
+    var hasScreenings = ViewBag.HasFutureScreenings == true;
+    var releaseYear = Model.Phim.NgayPhatHanh?.Year.ToString() ?? DateTime.Now.Year.ToString();
+    var duration = Model.Phim.ThoiLuong > 0 ? $"{Model.Phim.ThoiLuong / 60}h {Model.Phim.ThoiLuong % 60}m" : "N/A";
+    var genres = string.IsNullOrEmpty(Model.Phim.TheLoai)
+        ? new string[0]
+        : Model.Phim.TheLoai.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+    // Group showtimes by Cinema
+    var showtimesByCinema = Model.Phim.LichChieus?
+        .Where(l => (l.NgayChieu.Date > DateTime.Now.Date) || (l.NgayChieu.Date == DateTime.Now.Date && l.GioChieu > DateTime.Now.TimeOfDay))
+        .OrderBy(l => l.NgayChieu).ThenBy(l => l.GioChieu)
+        .GroupBy(l => l.PhongChieu?.RapPhim)
+        .Where(g => g.Key != null)
+        .ToList();
+
+    // Detect trailer type
+    var trailerUrl = Model.Phim.Trailer ?? "";
+    var isYouTube = trailerUrl.Contains("youtube.com") || trailerUrl.Contains("youtu.be");
+    string? youtubeEmbedUrl = null;
+    if (isYouTube)
+    {
+        if (trailerUrl.Contains("watch?v="))
+            youtubeEmbedUrl = trailerUrl.Replace("watch?v=", "embed/");
+        else if (trailerUrl.Contains("youtu.be/"))
+            youtubeEmbedUrl = "https://www.youtube.com/embed/" + trailerUrl.Split('/').Last();
+        else
+            youtubeEmbedUrl = trailerUrl;
+    }
+}
+
+<div class="rd-page">
+
+    <!-- ═══════════════ HERO SECTION ═══════════════ -->
+    <section class="rd-hero">
+        <!-- Background -->
+        <div class="rd-hero-bg" style="background-image: url('@posterUrl')"></div>
+        <div class="rd-hero-gradient"></div>
+        <div class="rd-hero-blur"></div>
+
+        <!-- Content -->
+        <div class="rd-hero-content">
+            <div class="rd-hero-inner">
+
+                <!-- Poster (hidden on mobile) -->
+                <div class="rd-poster-col">
+                    <div class="rd-poster-frame">
+                        <img src="@posterUrl" alt="@Model.Phim.TenPhim" class="rd-poster-img"
+                             onerror="this.src='/images/no-image.jpg'" />
+                        @if (hasScreenings)
+                        {
+                            <span class="rd-status-badge rd-badge-showing">Đang chiếu</span>
+                        }
+                        else
+                        {
+                            <span class="rd-status-badge rd-badge-soon">Sắp chiếu</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="rd-info-col">
+                    <!-- Badges row -->
+                    <div class="rd-badges-row">
+                        @if (hasScreenings)
+                        {
+                            <span class="rd-badge rd-badge-green">Đang chiếu</span>
+                        }
+                        else
+                        {
+                            <span class="rd-badge rd-badge-red">Sắp chiếu</span>
+                        }
+                        @foreach (var g in genres.Take(2))
+                        {
+                            <span class="rd-badge rd-badge-secondary">@g.Trim()</span>
+                        }
+                    </div>
+
+                    <!-- Title -->
+                    <h1 class="rd-title">@Model.Phim.TenPhim</h1>
+
+                    <!-- Stats -->
+                    <div class="rd-stats">
+                        <div class="rd-stat">
+                            <i class="fas fa-star rd-icon-gold"></i>
+                            <span class="rd-stat-val">@Model.DiemTrungBinh.ToString("0.0")</span>
+                            <span class="rd-stat-sub">/5</span>
+                        </div>
+                        <div class="rd-stat-sep"></div>
+                        <div class="rd-stat">
+                            <i class="far fa-clock"></i>
+                            <span class="rd-stat-val">@duration</span>
+                        </div>
+                        <div class="rd-stat-sep"></div>
+                        <div class="rd-stat">
+                            <i class="far fa-calendar-alt"></i>
+                            <span class="rd-stat-val">@releaseYear</span>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="rd-actions">
+                        @if (hasScreenings)
+                        {
+                            <a href="#showtimes" class="rd-btn rd-btn-primary">
+                                <i class="fas fa-ticket-alt"></i>
+                                Đặt vé ngay
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(trailerUrl))
+                        {
+                            <a href="#trailer" class="rd-btn rd-btn-outline">
+                                <i class="fas fa-play"></i>
+                                Xem Trailer
+                            </a>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════ CONTENT SECTION ═══════════════ -->
+    <section class="rd-content">
+        <div class="rd-container">
+            <div class="rd-grid">
+
+                <!-- ── LEFT COLUMN ── -->
+                <div class="rd-left">
+
+                    <!-- Synopsis -->
+                    <div class="rd-block">
+                        <h2 class="rd-block-title">
+                            <i class="fas fa-film"></i>
+                            Nội dung phim
+                        </h2>
+                        <p class="rd-synopsis">
+                            @(string.IsNullOrEmpty(Model.Phim.MoTa)
+                                ? "Đang cập nhật nội dung phim. Vui lòng quay lại sau."
+                                : Model.Phim.MoTa)
+                        </p>
+                    </div>
+
+                    <!-- Trailer -->
+                    @if (!string.IsNullOrEmpty(trailerUrl))
+                    {
+                        <div id="trailer" class="rd-block">
+                            <h2 class="rd-block-title">
+                                <i class="fas fa-play-circle"></i>
+                                Trailer chính thức
+                            </h2>
+                            <div class="rd-trailer-wrap">
+                                @if (isYouTube && youtubeEmbedUrl != null)
+                                {
+                                    <iframe src="@youtubeEmbedUrl"
+                                            frameborder="0"
+                                            allowfullscreen
+                                            class="rd-trailer-frame"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
+                                    </iframe>
+                                }
+                                else
+                                {
+                                    <video controls class="rd-trailer-frame">
+                                        <source src="@trailerUrl" type="video/mp4">
+                                        Trình duyệt của bạn không hỗ trợ video.
+                                    </video>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Reviews -->
+                    <div class="rd-block">
+                        <div class="rd-block-header">
+                            <h2 class="rd-block-title mb-0">
+                                <i class="fas fa-comments"></i>
+                                Đánh giá từ khán giả
+                            </h2>
+                            <div class="rd-rating-badge">
+                                <span class="rd-rating-score">@Model.DiemTrungBinh.ToString("0.0")</span>
+                                <div class="rd-rating-stars">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="@(i <= Math.Round(Model.DiemTrungBinh) ? "fas" : "far") fa-star"></i>
+                                    }
+                                </div>
+                                <span class="rd-rating-count">(@Model.TongSoDanhGia)</span>
+                            </div>
+                        </div>
+
+                        @if (Model.DanhSachDanhGia != null && Model.DanhSachDanhGia.Any())
+                        {
+                            <div class="rd-reviews">
+                                @foreach (var r in Model.DanhSachDanhGia.Take(5))
+                                {
+                                    <div class="rd-review-card">
+                                        <div class="rd-review-header">
+                                            <div class="rd-avatar">
+                                                @(r.NguoiDung?.HoTen?.Length > 0 ? r.NguoiDung.HoTen[0].ToString().ToUpper() : "?")
+                                            </div>
+                                            <div class="rd-review-meta">
+                                                <div class="rd-review-name">@(r.NguoiDung?.HoTen ?? "Người dùng ẩn danh")</div>
+                                                <div class="rd-review-stars">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="@(i <= (r.DiemSo ?? 0) ? "fas" : "far") fa-star"></i>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="rd-review-date">@r.NgayDanhGia?.ToString("dd/MM/yyyy")</div>
+                                        </div>
+                                        <p class="rd-review-text">@r.BinhLuan</p>
+                                    </div>
+                                }
+                            </div>
+                            <div class="text-center mt-4">
+                                <a asp-controller="DanhGia" asp-action="DanhSachDanhGia" asp-route-id="@Model.Phim.MaPhim" class="rd-link-more">
+                                    Xem tất cả đánh giá <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="rd-empty">
+                                <i class="far fa-comment-dots"></i>
+                                <p>Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+                                <a asp-controller="DanhGia" asp-action="CreateDanhGia" asp-route-id="@Model.Phim.MaPhim" class="rd-btn rd-btn-outline rd-btn-sm mt-3">
+                                    Viết đánh giá
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+                <!-- ── RIGHT COLUMN ── -->
+                <div class="rd-right">
+
+                    <!-- Showtimes card -->
+                    <div id="showtimes" class="rd-sidebar-card">
+                        <div class="rd-sidebar-head">
+                            <i class="fas fa-ticket-alt"></i>
+                            Lịch chiếu
+                        </div>
+                        <div class="rd-sidebar-body">
+                            @if (showtimesByCinema != null && showtimesByCinema.Any())
+                            {
+                                @foreach (var group in showtimesByCinema)
+                                {
+                                    <div class="rd-cinema-item">
+                                        <div class="rd-cinema-header">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <div>
+                                                <h3 class="rd-cinema-name">@group.Key.TenRap</h3>
+                                                <p class="rd-cinema-addr">@group.Key.DiaChi</p>
+                                            </div>
+                                        </div>
+                                        <div class="rd-time-grid">
+                                            @foreach (var show in group.OrderBy(s => s.NgayChieu).ThenBy(s => s.GioChieu))
+                                            {
+                                                <a href="/DatVe/ChonGhe?maLichChieu=@show.MaLichChieu" class="rd-time-btn">
+                                                    @show.GioChieu.ToString(@"hh\:mm")
+                                                    <span class="rd-time-date">@show.NgayChieu.ToString("dd/MM")</span>
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="rd-no-show">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <p>Hiện tại chưa có lịch chiếu.</p>
+                                    <p class="rd-no-show-sub">Vui lòng quay lại sau.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Note card -->
+                    <div class="rd-note-card">
+                        <h3 class="rd-note-title">
+                            <i class="fas fa-info-circle"></i>
+                            Lưu ý
+                        </h3>
+                        <p class="rd-note-text">
+                            Vui lòng có mặt tại rạp ít nhất <strong>15 phút</strong> trước giờ chiếu để nhận vé.
+                            Giá vé có thể thay đổi tùy theo loại ghế và định dạng phòng chiếu.
+                        </p>
+                        <ul class="rd-info-list">
+                            <li>
+                                <span class="rd-info-label">Định dạng</span>
+                                <span class="rd-info-val">@(string.IsNullOrEmpty(Model.Phim.DinhDang) ? "2D" : Model.Phim.DinhDang)</span>
+                            </li>
+                            <li>
+                                <span class="rd-info-label">Ngôn ngữ</span>
+                                <span class="rd-info-val">Phụ đề tiếng Việt</span>
+                            </li>
+                            <li>
+                                <span class="rd-info-label">Độ tuổi</span>
+                                <span class="rd-info-val">T16+</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<style>
+/* ═══════════════════════════════════════════════════
+   CINEZORE – MOVIE DETAIL PAGE  (Inspired by Web_Dat_Ve_Xem_Phim)
+   ═══════════════════════════════════════════════════ */
+
+/* ── Variables ── */
+:root {
+    --rd-bg:      #0d0d12;
+    --rd-card:    #14141c;
+    --rd-card2:   #1a1a26;
+    --rd-border:  #28283a;
+    --rd-text:    #f0f0f8;
+    --rd-muted:   #8888a0;
+    --rd-primary: #e5431a;      /* warm red-orange like reference */
+    --rd-accent:  #f5c518;      /* gold star */
+    --rd-green:   #22c55e;
+    --rd-radius:  0.75rem;
+}
+
+/* ── Page wrapper ── */
+.rd-page {
+    background: var(--rd-bg);
+    color: var(--rd-text);
+    font-family: 'Outfit', 'Inter', sans-serif;
+    min-height: 100vh;
+}
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.rd-hero {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.rd-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center top;
+    transform: scale(1.05);
+    filter: blur(2px);
+    transition: transform 8s ease;
+}
+.rd-hero:hover .rd-hero-bg { transform: scale(1.08); }
+
+.rd-hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        var(--rd-bg) 0%,
+        rgba(13,13,18,0.75) 45%,
+        rgba(13,13,18,0.15) 100%
+    );
+    z-index: 1;
+}
+
+.rd-hero-blur {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(2px);
+    background: rgba(13,13,18,0.15);
+    z-index: 1;
+}
+
+.rd-hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    padding-bottom: 64px;
+    padding-top: 120px;
+}
+
+.rd-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 40px;
+}
+
+/* ── Poster col ── */
+.rd-poster-col {
+    flex-shrink: 0;
+}
+
+.rd-poster-frame {
+    width: 240px;
+    aspect-ratio: 2/3;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+    border: 1px solid var(--rd-border);
+    position: relative;
+}
+
+.rd-poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+}
+.rd-poster-frame:hover .rd-poster-img { transform: scale(1.04); }
+
+/* Status badge on poster */
+.rd-status-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+.rd-badge-showing { background: var(--rd-green); color: #fff; }
+.rd-badge-soon    { background: var(--rd-primary); color: #fff; }
+
+/* ── Info col ── */
+.rd-info-col {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 8px;
+}
+
+.rd-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.rd-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.rd-badge-green     { background: var(--rd-green); color: #fff; }
+.rd-badge-red       { background: var(--rd-primary); color: #fff; }
+.rd-badge-secondary {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.rd-title {
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0 0 24px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+/* Stats row */
+.rd-stats {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+    color: var(--rd-muted);
+}
+
+.rd-stat {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.rd-stat-val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--rd-text);
+}
+
+.rd-stat-sub { font-size: 0.85rem; color: var(--rd-muted); }
+.rd-icon-gold { color: var(--rd-accent); }
+
+.rd-stat-sep {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.2);
+}
+
+/* Action buttons */
+.rd-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.rd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-decoration: none !important;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.rd-btn-primary {
+    background: var(--rd-primary);
+    color: #fff;
+    border: 2px solid var(--rd-primary);
+    box-shadow: 0 8px 24px rgba(229,67,26,0.35);
+}
+.rd-btn-primary:hover {
+    background: #ff5530;
+    border-color: #ff5530;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(229,67,26,0.5);
+    color: #fff;
+}
+
+.rd-btn-outline {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(6px);
+}
+.rd-btn-outline:hover {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.rd-btn-sm {
+    padding: 8px 18px;
+    font-size: 0.8rem;
+}
+
+
+/* ══════════════════════════════════════
+   CONTENT SECTION
+══════════════════════════════════════ */
+.rd-content {
+    padding: 64px 0;
+}
+
+.rd-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* 2/3 + 1/3 grid like reference */
+.rd-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 40px;
+    align-items: start;
+}
+
+/* ── Common block ── */
+.rd-block {
+    background: var(--rd-card);
+    border: 1px solid var(--rd-border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 28px;
+}
+.rd-block:last-child { margin-bottom: 0; }
+
+.rd-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.rd-block-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--rd-text);
+    margin-bottom: 24px;
+}
+.rd-block-title i { color: var(--rd-primary); }
+.rd-block-title.mb-0 { margin-bottom: 0; }
+
+/* Synopsis */
+.rd-synopsis {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--rd-muted);
+}
+
+/* Trailer */
+.rd-trailer-wrap {
+    aspect-ratio: 16/9;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid var(--rd-border);
+}
+.rd-trailer-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* Rating summary */
+.rd-rating-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.rd-rating-score {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--rd-accent);
+}
+.rd-rating-stars { color: var(--rd-accent); font-size: 0.9rem; }
+.rd-rating-count { font-size: 0.85rem; color: var(--rd-muted); }
+
+/* Review cards */
+.rd-reviews { margin-top: 8px; }
+
+.rd-review-card {
+    background: var(--rd-card2);
+    border: 1px solid var(--rd-border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    transition: border-color 0.25s;
+}
+.rd-review-card:hover { border-color: rgba(229,67,26,0.3); }
+
+.rd-review-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.rd-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--rd-primary) 0%, #91060d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.rd-review-meta { flex: 1; }
+.rd-review-name { font-weight: 700; font-size: 0.95rem; }
+.rd-review-stars { color: var(--rd-accent); font-size: 0.8rem; margin-top: 3px; }
+.rd-review-date { font-size: 0.78rem; color: var(--rd-muted); white-space: nowrap; }
+.rd-review-text { color: #b0b0c8; line-height: 1.65; margin: 0; font-size: 0.95rem; }
+
+.rd-link-more {
+    color: var(--rd-primary);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.25s;
+}
+.rd-link-more:hover { opacity: 0.75; }
+
+/* Empty state */
+.rd-empty {
+    text-align: center;
+    padding: 48px 0 24px;
+}
+.rd-empty i { font-size: 3rem; color: var(--rd-border); margin-bottom: 16px; display: block; }
+.rd-empty p { color: var(--rd-muted); font-size: 0.95rem; margin-bottom: 0; }
+
+
+/* ══════════════════════════════════════
+   RIGHT SIDEBAR
+══════════════════════════════════════ */
+.rd-right {
+    position: sticky;
+    top: 90px;
+}
+
+/* Showtimes card */
+.rd-sidebar-card {
+    background: var(--rd-card);
+    border: 1px solid var(--rd-border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    margin-bottom: 24px;
+}
+
+.rd-sidebar-head {
+    background: var(--rd-primary);
+    padding: 18px 24px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+}
+
+.rd-sidebar-body {
+    padding: 24px;
+}
+
+/* Cinema item */
+.rd-cinema-item {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rd-border);
+}
+.rd-cinema-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.rd-cinema-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.rd-cinema-header > i {
+    color: var(--rd-primary);
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+.rd-cinema-name { font-weight: 700; font-size: 0.95rem; margin: 0; line-height: 1.3; }
+.rd-cinema-addr { font-size: 0.75rem; color: var(--rd-muted); margin: 4px 0 0; }
+
+/* Time grid */
+.rd-time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.rd-time-btn {
+    background: var(--rd-card2);
+    border: 1px solid var(--rd-border);
+    border-radius: 10px;
+    padding: 10px 4px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--rd-text);
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.2s ease;
+}
+.rd-time-btn:hover {
+    background: var(--rd-primary);
+    border-color: var(--rd-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(229,67,26,0.35);
+    color: #fff !important;
+}
+
+.rd-time-date {
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: var(--rd-muted);
+}
+.rd-time-btn:hover .rd-time-date { color: rgba(255,255,255,0.75); }
+
+/* No showtimes */
+.rd-no-show {
+    text-align: center;
+    padding: 40px 0;
+}
+.rd-no-show i { font-size: 2.5rem; color: var(--rd-border); display: block; margin-bottom: 14px; }
+.rd-no-show p { margin: 0; font-weight: 600; color: #555; font-size: 0.95rem; }
+.rd-no-show-sub { font-size: 0.82rem !important; color: #444 !important; margin-top: 6px !important; }
+
+/* Note card */
+.rd-note-card {
+    background: rgba(229,67,26,0.07);
+    border: 1px solid rgba(229,67,26,0.2);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+.rd-note-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--rd-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rd-note-text {
+    font-size: 0.88rem;
+    color: rgba(229,67,26,0.75);
+    line-height: 1.65;
+    margin: 0 0 16px;
+}
+
+.rd-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.rd-info-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(229,67,26,0.12);
+    font-size: 0.875rem;
+}
+.rd-info-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.rd-info-label { color: rgba(229,67,26,0.6); font-weight: 600; }
+.rd-info-val { font-weight: 700; color: var(--rd-text); }
+
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@@media (max-width: 1024px) {
+    .rd-grid {
+        grid-template-columns: 1fr;
+    }
+    .rd-right {
+        position: static;
+    }
+}
+
+@@media (max-width: 768px) {
+    .rd-hero { min-height: 60vh; }
+    .rd-poster-col { display: none; }
+    .rd-hero-inner { padding: 0 16px; }
+    .rd-title { font-size: 2rem; }
+    .rd-content { padding: 40px 0; }
+    .rd-block { padding: 20px; }
+    .rd-container { padding: 0 16px; }
+}
+
+@@media (max-width: 480px) {
+    .rd-actions { flex-direction: column; }
+    .rd-btn { justify-content: center; }
+    .rd-time-grid { grid-template-columns: repeat(2, 1fr); }
+    .rd-stats { gap: 10px; }
+    .rd-stat-sep { display: none; }
+}
+</style>

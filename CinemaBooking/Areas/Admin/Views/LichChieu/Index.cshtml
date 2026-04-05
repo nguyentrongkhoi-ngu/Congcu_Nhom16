@@ -1,0 +1,199 @@
+@model CinemaBooking.Models.ViewModels.LichChieuListViewModel
+
+@{
+    ViewData["Title"] = "Quản lý lịch chiếu";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <style>
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-upcoming { background-color: #d1e7dd; color: #0f5132; }
+        .status-past { background-color: #f8d7da; color: #842029; }
+        .movie-thumb {
+            width: 40px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+}
+
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Quản lý lịch chiếu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item active">Lịch chiếu</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-1"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-1"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <div>
+                <i class="fas fa-calendar-alt me-1"></i>
+                Danh sách lịch chiếu
+            </div>
+            <a asp-action="Create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Thêm lịch chiếu mới
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Filter Section -->
+            <form asp-action="Index" method="get" class="mb-4 p-3 bg-light rounded shadow-sm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Tìm kiếm</label>
+                        <input type="text" asp-for="SearchTerm" class="form-control form-control-sm" placeholder="Tên phim, rạp...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Dự án</label>
+                        <select asp-for="MaPhim" asp-items="Model.PhimList" class="form-select form-select-sm">
+                            <option value="">-- Tất cả phim --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Rạp</label>
+                        <select asp-for="MaRap" asp-items="Model.RapList" class="form-select form-select-sm">
+                            <option value="">-- Tất cả rạp --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Từ ngày</label>
+                        <input type="date" asp-for="NgayBatDau" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-dark btn-sm">
+                                <i class="fas fa-filter"></i> Lọc
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-undo"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border" id="schedulesTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Phim</th>
+                            <th>Rạp / Phòng</th>
+                            <th>Thời gian</th>
+                            <th>Giá vé</th>
+                            <th>Ngôn ngữ</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.LichChieus == null || !Model.LichChieus.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                                    <p>Không tìm thấy lịch chiếu nào phù hợp</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.LichChieus)
+                            {
+                                var isPast = item.NgayChieu < DateTime.Today || (item.NgayChieu == DateTime.Today && item.GioChieu < DateTime.Now.TimeOfDay);
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(string.IsNullOrEmpty(item.Phim.UrlPoster) ? "/images/no-image.jpg" : item.Phim.UrlPoster)" 
+                                                 class="movie-thumb shadow-sm" alt="@item.Phim.TenPhim">
+                                            <div>
+                                                <div class="fw-bold">@item.Phim.TenPhim</div>
+                                                <small class="text-muted">@item.Phim.ThoiLuong phút</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">@item.PhongChieu.RapPhim.TenRap</div>
+                                        <div class="small">Phòng: @item.PhongChieu.SoPhong</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold"><i class="far fa-calendar-alt me-1 text-primary"></i> @item.NgayChieu.ToString("dd/MM/yyyy")</div>
+                                        <div><i class="far fa-clock me-1 text-primary"></i> @item.GioChieu.ToString(@"hh\:mm")</div>
+                                    </td>
+                                    <td class="fw-bold text-success">
+                                        @item.GiaVe.ToString("N0")đ
+                                    </td>
+                                    <td>
+                                        @(item.NgonNguPhim != null ? $"{item.NgonNguPhim.NgonNgu}" : "N/A")
+                                        @if (item.NgonNguPhim?.PhuDe != null)
+                                        {
+                                            <div class="small text-muted">(@item.NgonNguPhim.PhuDe)</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isPast)
+                                        {
+                                            <span class="status-badge status-past">Đã chiếu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-upcoming">Sắp chiếu</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Edit" asp-route-id="@item.MaLichChieu" class="btn btn-outline-warning" title="Sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="Details" asp-route-id="@item.MaLichChieu" class="btn btn-outline-info" title="Chi tiết">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.MaLichChieu" class="btn btn-outline-danger" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Success/Error alerts auto-dismiss
+            setTimeout(function() {
+                $(".alert").fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

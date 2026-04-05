@@ -1,0 +1,640 @@
+@model CinemaBooking.Models.LichChieu
+
+@{
+    ViewData["Title"] = "Chọn Combo – " + Model.Phim.TenPhim + " | CineZore";
+    var posterUrl = string.IsNullOrEmpty(Model.Phim.UrlPoster) ? "/images/no-image.jpg" : Model.Phim.UrlPoster;
+    var combos = ViewBag.Combos as List<CinemaBooking.Models.Combo> ?? new List<CinemaBooking.Models.Combo>();
+    var selectedSeats = ViewBag.SelectedSeats as string;
+    var seatTotal = (decimal)ViewBag.SeatTotal;
+    var discountPercent = (decimal)ViewBag.DiscountPercent;
+}
+
+@section Styles {
+<style>
+    :root {
+        --cz-bg:           #0a0a0f;
+        --cz-surface:      #111117;
+        --cz-surface-2:    #18181f;
+        --cz-border:       rgba(255,255,255,0.08);
+        --cz-border-hover: rgba(255,255,255,0.18);
+        --cz-accent:       #E50914;
+        --cz-accent-dim:   rgba(229,9,20,0.12);
+        --cz-text:         #ffffff;
+        --cz-text-sub:     rgba(255,255,255,0.70);
+        --cz-text-muted:   rgba(255,255,255,0.40);
+        --cz-ease:         cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: var(--cz-bg) !important;
+        color: var(--cz-text) !important;
+        font-family: 'Outfit', 'Inter', sans-serif !important;
+    }
+
+    .cg-ambient {
+        position: fixed;
+        inset: 0; z-index: -1;
+        background-size: cover;
+        background-position: center;
+        filter: blur(80px) brightness(0.15) saturate(1.4);
+        transform: scale(1.1);
+    }
+
+    .cg-page {
+        padding-top: 140px !important;
+        padding-bottom: 80px !important;
+    }
+
+    .cg-panel {
+        background: rgba(17,17,23,0.75);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--cz-border);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    /* ===== CATEGORY TABS ===== */
+    .cg-tabs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+
+    .cg-tab-btn {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--cz-border);
+        color: var(--cz-text-sub);
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .cg-tab-btn:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: var(--cz-border-hover);
+        color: white;
+    }
+
+    .cg-tab-btn.active {
+        background: var(--cz-accent);
+        border-color: var(--cz-accent);
+        color: white;
+        box-shadow: 0 4px 15px rgba(229,9,20,0.3);
+    }
+
+    /* ===== COMBO LIST ===== */
+    .combo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 8px; /* Offset for custom scrollbar if needed */
+    }
+
+    .combo-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--cz-border);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s var(--cz-ease);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .combo-card:hover {
+        transform: translateY(-10px);
+        background: rgba(255,255,255,0.06);
+        border-color: var(--cz-border-hover);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+
+    .combo-image {
+        position: relative;
+        height: 130px;
+        overflow: hidden;
+    }
+
+    .combo-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s var(--cz-ease);
+    }
+
+    .combo-card:hover .combo-image img {
+        transform: scale(1.15);
+    }
+
+    .combo-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: linear-gradient(45deg, #FFD700, #FFA500);
+        color: #000;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.65rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .combo-badge.hot {
+        background: linear-gradient(45deg, #FF4500, #E50914);
+        color: #fff;
+    }
+
+    .combo-price-tag {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        padding: 24px 15px 12px;
+        color: white;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-align: right;
+    }
+
+    .combo-content {
+        padding: 14px 16px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .combo-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--cz-text);
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .combo-desc {
+        font-size: 0.8rem;
+        color: var(--cz-text-sub);
+        line-height: 1.6;
+        margin-bottom: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* ===== QUANTITY PICKER ===== */
+    .qty-picker {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 6px;
+        border: 1px solid var(--cz-border);
+    }
+
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .qty-btn:hover {
+        background: var(--cz-accent);
+        box-shadow: 0 4px 10px rgba(229,9,20,0.3);
+    }
+
+    .qty-value {
+        font-weight: 800;
+        font-size: 1rem;
+        color: white;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .cg-sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .cg-info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--cz-text-muted);
+        margin-bottom: 6px;
+    }
+
+    .cg-info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .cg-divider {
+        height: 1px;
+        background: var(--cz-border);
+        margin: 16px 0;
+    }
+
+    .cg-price-box {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--cz-border);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .cg-price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        color: var(--cz-text-sub);
+    }
+
+    .cg-price-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        border-top: 1px solid var(--cz-border);
+        margin-top: 12px;
+    }
+
+    .cg-price-total__amount {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: white;
+        letter-spacing: -1px;
+    }
+
+    .cg-btn-submit {
+        width: 100%;
+        padding: 18px;
+        background: var(--cz-accent);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(229,9,20,0.3);
+    }
+
+    .cg-btn-submit:hover {
+        background: #f40a16;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(229,9,20,0.5);
+    }
+
+    /* Coupon Input */
+    .cg-coupon {
+        display: flex;
+        gap: 8px;
+    }
+
+    .cg-coupon__input {
+        flex: 1;
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid var(--cz-border) !important;
+        border-radius: 10px !important;
+        color: white !important;
+        padding: 8px 14px !important;
+    }
+
+    .cg-coupon__btn {
+        background: var(--cz-surface-2);
+        border: 1px solid var(--cz-border);
+        padding: 8px 16px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+    }
+</style>
+}
+
+<div class="cg-ambient" style="background-image: url('@posterUrl');"></div>
+
+<div class="container cg-page" style="margin-top: 110px;">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="cg-panel">
+                <div class="mb-4 d-flex align-items-center justify-content-between">
+                    <h3 class="m-0 text-white fw-bold d-flex align-items-center">
+                        <span class="me-2 fs-3">🍿</span> Đồ ăn & Thức uống
+                    </h3>
+                </div>
+
+                <!-- Category Tabs -->
+                <div id="cg-tabs-container" class="cg-tabs">
+                    <button class="cg-tab-btn active" data-filter="all">Tất cả</button>
+                    <button class="cg-tab-btn" data-filter="Combo">Combo Ưu đãi</button>
+                    <button class="cg-tab-btn" data-filter="Bắp">Bắp rang</button>
+                    <button class="cg-tab-btn" data-filter="Nước">Nước uống</button>
+                </div>
+                
+                <div id="combo-grid-container" class="combo-grid">
+                    @foreach (var combo in combos)
+                    {
+                        var isOutOfStock = combo.SoLuongTon <= 0;
+                        var hasNhan = !string.IsNullOrEmpty(combo.Nhan);
+                        var nhanUpper = hasNhan ? combo.Nhan.ToUpper() : "";
+                        var isHotStyle = hasNhan && (nhanUpper.Contains("HOT") || 
+                                                       nhanUpper.Contains("MỚI") || 
+                                                       nhanUpper.Contains("NEW"));
+                        
+                        <div class="combo-card item-card @(isOutOfStock ? "is-sold-out" : "")" data-id="@combo.MaCombo" data-price="@combo.Gia" data-category="@combo.Loai">
+                            <div class="combo-image" style="@(isOutOfStock ? "filter: grayscale(1); opacity: 0.6;" : "")">
+                                <img src="@combo.HinhAnh" alt="@combo.TenCombo" loading="lazy">
+                                @if (isOutOfStock) {
+                                    <div class="position-absolute top-50 start-50 translate-middle badge bg-danger fs-6 px-3 py-1 shadow-lg border border-light" style="z-index: 10;">HẾT HÀNG</div>
+                                }
+                                else if (hasNhan) {
+                                    <div class="combo-badge @(isHotStyle ? "hot" : "")">@(isHotStyle ? "🔥 " : "")@combo.Nhan</div>
+                                }
+                                <div class="combo-price-tag">@string.Format("{0:N0}₫", combo.Gia)</div>
+                            </div>
+                            <div class="combo-content">
+                                <h3 class="combo-title" title="@combo.TenCombo">@combo.TenCombo</h3>
+                                @if (!string.IsNullOrEmpty(combo.KichThuoc)) {
+                                    <div class="text-white-50 small mb-2 d-flex align-items-center gap-1">
+                                        <i class="fas fa-arrows-alt" style="font-size: 0.7rem;"></i> Size: <span class="fw-bold">@combo.KichThuoc.ToUpper()</span>
+                                    </div>
+                                }
+                                <p class="combo-desc" title="@combo.MoTa">@combo.MoTa</p>
+                                <div class="qty-picker @(isOutOfStock ? "opacity-50" : "")">
+                                    <button type="button" class="qty-btn btn-minus" data-id="@combo.MaCombo" @(isOutOfStock ? "disabled" : "")>
+                                        <i class="fas fa-minus small"></i>
+                                    </button>
+                                    <span class="qty-value" id="qty-@combo.MaCombo">0</span>
+                                    <button type="button" class="qty-btn btn-plus" data-id="@combo.MaCombo" @(isOutOfStock ? "disabled" : "")>
+                                        <i class="fas fa-plus small"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="cg-panel sticky-top" style="top: 100px;">
+                <h3 class="cg-sidebar-title">Chi tiết đơn hàng</h3>
+                
+                <div>
+                    <p class="cg-info-label">Phim</p>
+                    <p class="cg-info-value">@Model.Phim.TenPhim</p>
+                    <p class="cg-info-sub text-muted small mt-1">@Model.PhongChieu.RapPhim.TenRap — Phòng @Model.PhongChieu.SoPhong</p>
+                </div>
+
+                <div class="cg-divider"></div>
+
+                <div>
+                    <p class="cg-info-label">Ghế đã chọn</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach(var seat in selectedSeats.Split(',')) {
+                            <span class="badge bg-danger">@seat</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="cg-divider"></div>
+
+                <div>
+                    <p class="cg-info-label">Combo đã chọn</p>
+                    <div id="selected-combos-list" class="text-white small">
+                        <span class="text-muted italic">Chưa chọn combo nào...</span>
+                    </div>
+                </div>
+
+                <div class="cg-divider"></div>
+
+                <div class="cg-price-box">
+                    <div class="cg-price-row">
+                        <span>Tiền vé</span>
+                        <span>@string.Format("{0:N0}đ", seatTotal)</span>
+                    </div>
+                    <div class="cg-price-row">
+                        <span>Tiền combo</span>
+                        <span id="combo-total-display">0đ</span>
+                    </div>
+                    @if (discountPercent > 0) {
+                        <div class="cg-price-row text-success">
+                            <span>Giảm giá thành viên (@discountPercent%)</span>
+                            <span id="member-discount-display">-0đ</span>
+                        </div>
+                    }
+                    <div class="cg-price-row text-success" id="coupon-row" style="display:none">
+                        <span id="coupon-label">Mã giảm giá</span>
+                        <span id="coupon-discount-display">-0đ</span>
+                    </div>
+                    <div class="cg-price-total">
+                        <span class="cg-info-label mb-0">TỔNG TIỀN</span>
+                        <span class="cg-price-total__amount" id="final-total">0đ</span>
+                    </div>
+                </div>
+
+                <form asp-action="LuuDatVe" method="post" id="final-booking-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maLichChieu" value="@Model.MaLichChieu">
+                    <input type="hidden" name="selectedSeats" value="@selectedSeats">
+                    <input type="hidden" name="selectedCombos" id="hidden-combos">
+                    <input type="hidden" name="maKhuyenMai" id="hidden-coupon">
+                    
+                    <button type="submit" class="cg-btn-submit">
+                        Thanh toán ngay
+                    </button>
+                    
+                    <div class="mt-3">
+                        <div class="cg-coupon">
+                            <input type="text" id="coupon-input" class="cg-coupon__input" placeholder="Mã giảm giá/Voucher">
+                            <button type="button" id="btn-apply-coupon" class="cg-coupon__btn">Áp dụng</button>
+                        </div>
+                        <div id="coupon-msg" class="small mt-1"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const seatTotal = parseFloat('@seatTotal');
+        const memberDiscountPercent = parseFloat('@discountPercent') || 0;
+        let comboTotal = 0;
+        let couponDiscount = 0;
+        let selectedCombos = {}; // maCombo: { name, qty, price }
+
+        const combosData = @Html.Raw(Json.Serialize(combos));
+        const combosMap = {};
+        combosData.forEach(c => combosMap[c.maCombo] = c);
+
+        function updateUI() {
+            // Calculate totals
+            comboTotal = 0;
+            const comboListEl = document.getElementById('selected-combos-list');
+            comboListEl.innerHTML = '';
+            
+            let hasCombo = false;
+            let combosJson = [];
+
+            for (const id in selectedCombos) {
+                if (selectedCombos[id].qty > 0) {
+                    hasCombo = true;
+                    const item = selectedCombos[id];
+                    comboTotal += item.qty * item.price;
+                    
+                    // Add to UI list
+                    const div = document.createElement('div');
+                    div.className = 'd-flex justify-content-between mb-1';
+                    const sizeHtml = item.size ? `<span class="text-muted ms-1">(${item.size})</span>` : '';
+                    div.innerHTML = `<span>${item.qty}x ${item.name}${sizeHtml}</span><span>${(item.qty * item.price).toLocaleString()}đ</span>`;
+                    comboListEl.appendChild(div);
+
+                    combosJson.push({ MaCombo: parseInt(id), SoLuong: item.qty });
+                }
+            }
+
+            if (!hasCombo) {
+                comboListEl.innerHTML = '<span class="text-muted italic">Chưa chọn combo nào...</span>';
+            }
+
+            // Update subtotal displays
+            document.getElementById('combo-total-display').textContent = comboTotal.toLocaleString() + 'đ';
+            
+            const subtotal = seatTotal + comboTotal;
+            const memberDiscount = subtotal * (memberDiscountPercent / 100);
+            
+            if (document.getElementById('member-discount-display')) {
+                document.getElementById('member-discount-display').textContent = '-' + memberDiscount.toLocaleString() + 'đ';
+            }
+
+            const totalAfterMember = subtotal - memberDiscount;
+            const finalTotal = Math.max(0, totalAfterMember - couponDiscount);
+            
+            document.getElementById('final-total').textContent = finalTotal.toLocaleString() + 'đ';
+            document.getElementById('hidden-combos').value = JSON.stringify(combosJson);
+        }
+
+        // Quantity click handlers
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const isPlus = this.classList.contains('btn-plus');
+                const combo = combosMap[id];
+                
+                if (!selectedCombos[id]) {
+                    selectedCombos[id] = { 
+                        name: combo.tenCombo, 
+                        qty: 0, 
+                        price: combo.gia,
+                        size: combo.kichThuoc
+                    };
+                }
+
+                if (isPlus) {
+                    selectedCombos[id].qty++;
+                } else {
+                    if (selectedCombos[id].qty > 0) selectedCombos[id].qty--;
+                }
+
+                document.getElementById('qty-' + id).textContent = selectedCombos[id].qty;
+                updateUI();
+            });
+        });
+
+        // Tab Filtering Logic
+        const tabBtns = document.querySelectorAll('.cg-tab-btn');
+        const items = document.querySelectorAll('.item-card');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                items.forEach(item => {
+                    if (filter === 'all' || item.dataset.category === filter) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Coupon Logic
+        document.getElementById('btn-apply-coupon').addEventListener('click', function() {
+            const code = document.getElementById('coupon-input').value.trim();
+            if (!code) return;
+
+            const subtotal = seatTotal + comboTotal;
+            const memberDiscount = subtotal * (memberDiscountPercent / 100);
+            const totalForCoupon = subtotal - memberDiscount;
+
+            fetch('/DatVe/KiemTraKhuyenMai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `maKhuyenMai=${encodeURIComponent(code)}&tongTien=${totalForCoupon}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                const msgEl = document.getElementById('coupon-msg');
+                if (data.isValid) {
+                    couponDiscount = totalForCoupon * (data.phanTramGiam / 100);
+                    document.getElementById('hidden-coupon').value = code;
+                    document.getElementById('coupon-row').style.display = 'flex';
+                    document.getElementById('coupon-label').textContent = `Mã giảm giá (${data.phanTramGiam}%)`;
+                    document.getElementById('coupon-discount-display').textContent = '-' + couponDiscount.toLocaleString() + 'đ';
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'small mt-1 text-success';
+                    updateUI();
+                } else {
+                    couponDiscount = 0;
+                    document.getElementById('hidden-coupon').value = '';
+                    document.getElementById('coupon-row').style.display = 'none';
+                    msgEl.textContent = data.message;
+                    msgEl.className = 'small mt-1 text-danger';
+                    updateUI();
+                }
+            });
+        });
+
+        updateUI(); // Initial call
+    });
+</script>
+}

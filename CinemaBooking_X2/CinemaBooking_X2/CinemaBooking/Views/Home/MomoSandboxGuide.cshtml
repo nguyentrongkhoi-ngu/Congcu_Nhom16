@@ -1,0 +1,98 @@
+@{
+    ViewData["Title"] = "Hướng dẫn Sandbox MoMo";
+}
+
+<div class="container" style="padding-top: 120px; min-height: 85vh;">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-panel p-4 p-md-5">
+                <div class="d-flex align-items-center mb-5">
+                    <div class="bg-white rounded p-3 me-3">
+                        <img src="https://img.mservice.io/momo-payment/2020/10/pa_momo.png" alt="MoMo" height="40">
+                    </div>
+                    <div>
+                        <h1 class="text-white fw-bold mb-0">Hướng dẫn MoMo Sandbox</h1>
+                        <p class="text-white-50 mb-0">Tài liệu dành cho kiểm thử thanh toán trực tuyến.</p>
+                    </div>
+                </div>
+
+                <div class="alert bg-info bg-opacity-10 text-info border-info border-opacity-25 mb-5 p-4 rounded-4">
+                    <h5 class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Lưu ý quan trọng</h5>
+                    <p class="mb-0 small">Đây là môi trường **Sandbox (thử nghiệm)**. Tuyệt đối không sử dụng tài khoản MoMo thật có tiền thật để thanh toán trong môi trường này.</p>
+                </div>
+
+                <div class="row g-5">
+                    <!-- Config Section -->
+                    <div class="col-md-6">
+                        <h4 class="text-netflix fw-bold mb-4"><i class="fas fa-cog me-2"></i>Cấu hình hệ thống</h4>
+                        <div class="glass-panel p-3 mb-4" style="background: rgba(255,255,255,0.03);">
+                            <div class="mb-3">
+                                <span class="text-white-50 x-small d-block">Partner Code</span>
+                                <code class="text-white">MOMOBKUN20180529</code>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-white-50 x-small d-block">Access Key</span>
+                                <code class="text-white">klm05TvNBzhg7h7j</code>
+                            </div>
+                            <div class="mb-0">
+                                <span class="text-white-50 x-small d-block">Secret Key</span>
+                                <code class="text-white">at67qH...Ei2bsa</code>
+                            </div>
+                        </div>
+
+                        <h4 class="text-netflix fw-bold mb-4"><i class="fas fa-user-shield me-2"></i>Tài khoản Test</h4>
+                        <div class="glass-panel p-3" style="background: rgba(255,255,255,0.03);">
+                            <div class="mb-3 d-flex justify-content-between">
+                                <span class="text-white-50 small">Số điện thoại</span>
+                                <code class="text-white">0909123123</code>
+                            </div>
+                            <div class="mb-3 d-flex justify-content-between">
+                                <span class="text-white-50 small">Mật khẩu / OTP</span>
+                                <code class="text-white">000000</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Steps Section -->
+                    <div class="col-md-6 border-start border-secondary border-opacity-25">
+                        <h4 class="text-white fw-bold mb-4"><i class="fas fa-list-ol me-2 text-netflix"></i>Quy trình thực hiện</h4>
+                        <div class="step-list text-white-50 small">
+                            <div class="step-item mb-3">
+                                <span class="badge bg-netflix me-2">1</span> Mở ứng dụng **MoMo Sandbox** trên điện thoại.
+                            </div>
+                            <div class="step-item mb-3">
+                                <span class="badge bg-netflix me-2">2</span> Đăng nhập bằng số điện thoại test bên cạnh.
+                            </div>
+                            <div class="step-item mb-3">
+                                <span class="badge bg-netflix me-2">3</span> Tiến hành đặt vé trên website CineZore.
+                            </div>
+                            <div class="step-item mb-3">
+                                <span class="badge bg-netflix me-2">4</span> Quét mã QR hiện ra bằng app MoMo Sandbox.
+                            </div>
+                            <div class="step-item mb-3">
+                                <span class="badge bg-netflix me-2">5</span> Xác nhận thanh toán và kiểm tra kết quả tại web.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-4 border-top border-secondary border-opacity-25 text-center">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-netflix-gray px-5">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+    </style>
+}

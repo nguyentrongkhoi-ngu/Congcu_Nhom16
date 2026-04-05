@@ -1,0 +1,83 @@
+@model CinemaBooking.Models.ViewModels.SearchViewModel
+
+@{
+    ViewData["Title"] = "Tìm kiếm phim";
+    ViewData["MetaDescription"] = "Khám phá và tìm kiếm những bộ phim yêu thích của bạn tại CineZore. Hàng ngàn lựa chọn phim đặc sắc đang chờ đón.";
+}
+
+<div class="container" style="padding-top: 120px; min-height: 80vh;">
+    <div class="glass-panel mb-5">
+        <h2 class="text-white fw-bold mb-4">Tìm kiếm phim</h2>
+        <form asp-action="Index" method="get">
+            <div class="row g-3">
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-netflix-medium-gray border-secondary border-opacity-25 text-white-50"><i class="fas fa-search"></i></span>
+                        <input type="text" asp-for="SearchTerm" class="form-control" placeholder="Tên phim, thể loại, diễn viên...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" asp-for="SearchDate" class="form-control" style="height: 48px;">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-netflix w-100 h-100">TÌM KIẾM</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Results != null && Model.Results.Any())
+    {
+        <div class="mb-4 d-flex justify-content-between align-items-end">
+            <h4 class="text-white mb-0">Kết quả tìm kiếm (@Model.Results.Count)</h4>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+            @foreach (var phim in Model.Results)
+            {
+                <div class="col">
+                    <div class="movie-card w-100" onclick="location.href='@Url.Action("Detail", "Phim", new { id = phim.MaPhim })'">
+                        <img src="@(string.IsNullOrEmpty(phim.UrlPoster) ? "/images/no-image.jpg" : phim.UrlPoster)" 
+                             alt="@phim.TenPhim" loading="lazy">
+                        <div class="card-content">
+                            <h6 class="mb-1 text-white">@phim.TenPhim</h6>
+                            <div class="small text-white-50">@phim.TheLoai • @phim.ThoiLuong m</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.SearchDate.HasValue)
+    {
+        <div class="glass-panel text-center py-5 mt-5">
+            <i class="fas fa-search display-1 text-white-50 mb-3"></i>
+            <h4 class="text-white">Không tìm thấy kết quả</h4>
+            <p class="text-white-50">Hãy thử tìm kiếm với từ khóa khác.</p>
+        </div>
+    }
+    else
+    {
+        <div class="glass-panel text-center py-5 mt-5">
+            <i class="fas fa-film display-1 text-white-50 mb-3"></i>
+            <h4 class="text-white">Bắt đầu khám phá</h4>
+            <p class="text-white-50">Nhập tên phim hoặc thể loại để bắt đầu tìm kiếm.</p>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .search-bar-modern {
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            border-radius: 4px;
+        }
+        .search-bar-modern input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+}

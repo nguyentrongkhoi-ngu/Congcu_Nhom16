@@ -1,0 +1,505 @@
+@model IEnumerable<CinemaBooking.Models.RapPhim>
+
+@{
+    ViewData["Title"] = "Quản lý rạp phim";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-md-center gap-3 mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold text-slate-800">Quản lý rạp phim</h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                <li class="breadcrumb-item active">Rạp phim</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <div id="ajax-toast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;">
+            <div class="toast align-items-center text-white bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="toast-message"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="position-relative">
+            <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-slate-400"></i>
+            <input type="text" id="cinemaSearch" class="form-control ps-5 shadow-sm border-0" placeholder="Tìm tên rạp, địa chỉ..." style="width: 280px;">
+        </div>
+        <button type="button" class="btn btn-admin shadow-sm" data-bs-toggle="modal" data-bs-target="#cinemaModal" onclick="prepareCreate()">
+            <i class="fas fa-plus me-2"></i>Thêm rạp mới
+        </button>
+    </div>
+</div>
+
+<div class="row g-4" id="cinemaGrid">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-xl-4 col-md-6 cinema-card-wrapper" id="cinema-card-@item.MaRap" data-title="@item.TenRap.ToLower()" data-address="@item.DiaChi.ToLower()">
+                <div class="card h-100 border-0 shadow-sm cinema-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                                <i class="fas fa-building fa-2x"></i>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-slate-400 p-0" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                    <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="editCinema(@item.MaRap)"><i class="fas fa-edit me-2 text-indigo-500"></i> Chỉnh sửa</a></li>
+                                    <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="viewDetails(@item.MaRap)"><i class="fas fa-info-circle me-2 text-sky-500"></i> Chi tiết & Phòng</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 text-danger" href="javascript:void(0)" onclick="confirmDelete(@item.MaRap, '@item.TenRap')"><i class="fas fa-trash-alt me-2"></i> Xóa rạp</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h5 class="fw-bold text-slate-800 mb-1">@item.TenRap</h5>
+                        <p class="text-slate-500 small mb-3"><i class="fas fa-location-dot me-1 text-danger"></i> @item.DiaChi, @item.ThanhPho</p>
+                        
+                        <div class="d-flex align-items-center gap-3 pt-3 border-top border-slate-50">
+                            <div class="flex-grow-1">
+                                <div class="small text-slate-400 mb-1">Số phòng chiếu</div>
+                                <div class="fw-bold text-slate-700 cinema-room-count">@item.PhongChieus.Count Phòng</div>
+                            </div>
+                            <button class="btn btn-sm btn-white text-indigo-600 shadow-sm px-3" onclick="viewDetails(@item.MaRap)">
+                                Quản lý phòng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4">
+                <div class="py-5">
+                    <i class="fas fa-building fa-4x text-slate-200 mb-4"></i>
+                    <h5 class="text-slate-800 fw-bold">Chưa có rạp phim nào</h5>
+                    <p class="text-slate-500 mb-4">Bắt đầu bằng cách thêm rạp đầu tiên của bạn</p>
+                    <button class="btn btn-admin px-4" data-bs-toggle="modal" data-bs-target="#cinemaModal" onclick="prepareCreate()">
+                        <i class="fas fa-plus me-2"></i>Thêm rạp mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Cinema Modal (Create/Edit) -->
+<div class="modal fade" id="cinemaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom bg-slate-50 py-3 px-4">
+                <h6 class="modal-title fw-bold text-slate-800" id="cinemaModalLabel">Thêm rạp mới</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="cinemaForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="MaRap" id="modalMaRap" />
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-slate-600">Tên rạp</label>
+                        <input type="text" name="TenRap" id="modalTenRap" class="form-control" required placeholder="CineZore Center..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-slate-600">Địa chỉ</label>
+                        <input type="text" name="DiaChi" id="modalDiaChi" class="form-control" required placeholder="Số 123, Đường..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-slate-600">Thành phố</label>
+                        <input type="text" name="ThanhPho" id="modalThanhPho" class="form-control" placeholder="Hồ Chí Minh, Hà Nội..." />
+                    </div>
+                </div>
+                <div class="modal-footer bg-slate-50 border-top py-3 px-4">
+                    <button type="button" class="btn btn-sm btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-admin px-4 shadow-sm" id="btnSubmit">Lưu thông tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom py-3 px-4">
+                <h6 class="modal-title fw-bold text-slate-800">Thông tin chi tiết rạp</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="p-4 border-bottom bg-light bg-opacity-50">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="icon-box bg-white text-primary rounded-circle shadow-sm border p-3">
+                                <i class="fas fa-building fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h4 class="fw-bold text-slate-800 mb-0" id="detailTitle"></h4>
+                            <p class="text-slate-500 mb-0" id="detailAddress"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="fw-bold text-slate-800 m-0">Danh sách phòng chiếu</h6>
+                        <button class="btn btn-sm btn-outline-primary" onclick="prepareCreateRoom()">
+                            <i class="fas fa-plus me-1"></i>Thêm phòng
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border-top">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="border-0 small fw-bold text-slate-600">Số phòng</th>
+                                    <th class="border-0 small fw-bold text-slate-600">Loại phòng</th>
+                                    <th class="border-0 small fw-bold text-slate-600 text-center">Sức chứa</th>
+                                    <th class="border-0 small fw-bold text-slate-600 text-end">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roomsTableBody">
+                                <!-- Rooms will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-slate-50 border-top py-3">
+                <button type="button" class="btn btn-sm btn-light border px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Room Modal (Create/Edit) -->
+<div class="modal fade" id="roomModal" tabindex="-1" style="z-index: 1056;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom py-3 px-4">
+                <h6 class="modal-title fw-bold text-slate-800" id="roomModalLabel">Thêm phòng chiếu</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="roomForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="MaPhong" id="modalMaPhong" />
+                <input type="hidden" name="MaRap" id="modalRoomMaRap" />
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Số/Tên phòng</label>
+                            <input type="text" name="SoPhong" id="modalSoPhong" class="form-control" required placeholder="VD: 01, 10..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-slate-600">Loại phòng</label>
+                            <select name="LoaiPhong" id="modalLoaiPhong" class="form-select">
+                                <option value="Tiêu chuẩn">Tiêu chuẩn</option>
+                                <option value="IMAX">IMAX</option>
+                                <option value="Gold Class">Gold Class</option>
+                                <option value="3D ScreenX">3D ScreenX</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-slate-600">Sức chứa (số ghế)</label>
+                            <input type="number" name="SucChua" id="modalSucChua" class="form-control" required min="1" value="100" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-3 px-4">
+                    <button type="button" class="btn btn-sm btn-light border px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-sm btn-primary px-4 shadow-sm" id="btnSaveRoom">Lưu phòng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <i class="fas fa-exclamation-triangle fa-3x text-red-500 mb-3"></i>
+                <h6 class="fw-bold text-slate-800">Xác nhận xóa rạp</h6>
+                <p class="small text-slate-500 px-2">Xóa rạp <strong id="deleteCinemaName" class="text-slate-800"></strong> cùng tất cả phòng chiếu và lịch chiếu liên quan?</p>
+                <form id="deleteForm" asp-action="Delete" method="post" class="mt-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteCinemaId" />
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger shadow-sm">Xác nhận xóa</button>
+                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy bỏ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentCinemaId = 0;
+
+        $(document).ready(function() {
+            // Search functionality
+            $("#cinemaSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".cinema-card-wrapper").filter(function() {
+                    var searchable = $(this).data("title") + " " + $(this).data("address");
+                    $(this).toggle(searchable.indexOf(value) > -1);
+                });
+            });
+
+            // Room Form Submit
+            $("#roomForm").on("submit", function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/Admin/Cinemas/UpsertRoom',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            showToast(res.message);
+                            bootstrap.Modal.getInstance($("#roomModal")).hide();
+                            viewDetails(currentCinemaId); // Refresh details modal
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+        });
+
+        function showToast(message) {
+            $("#toast-message").text(message);
+            var toast = new bootstrap.Toast($("#ajax-toast .toast"));
+            toast.show();
+        }
+
+        function prepareCreate() {
+            $("#cinemaModalLabel").text("Thêm rạp mới");
+            $("#btnSubmit").text("Lưu thông tin");
+            $("#cinemaForm").attr("action", "/Admin/Cinemas/Create");
+            $("#modalMaRap").val(0);
+            $("#cinemaForm")[0].reset();
+        }
+
+        function editCinema(cinemaId) {
+            fetch(`/Admin/Cinemas/GetCinema/${cinemaId}`)
+                .then(res => res.json())
+                .then(data => {
+                    $("#cinemaModalLabel").text("Chỉnh sửa rạp phim");
+                    $("#btnSubmit").text("Cập nhật");
+                    $("#cinemaForm").attr("action", "/Admin/Cinemas/Edit/" + cinemaId);
+                    
+                    $("#modalMaRap").val(data.maRap);
+                    $("#modalTenRap").val(data.tenRap);
+                    $("#modalDiaChi").val(data.diaChi);
+                    $("#modalThanhPho").val(data.thanhPho);
+                    
+                    new bootstrap.Modal($("#cinemaModal")).show();
+                });
+        }
+
+        function viewDetails(cinemaId) {
+            currentCinemaId = cinemaId;
+            fetch(`/Admin/Cinemas/GetCinema/${cinemaId}`)
+                .then(res => res.json())
+                .then(data => {
+                    $("#detailTitle").text(data.tenRap);
+                    $("#detailAddress").text(data.diaChi + ", " + data.thanhPho);
+                    
+                    const tableBody = $("#roomsTableBody");
+                    tableBody.empty();
+                    
+                    // Update room count in the card background
+                    $(`#cinema-card-${cinemaId} .cinema-room-count`).text(`${data.phongs.length} Phòng`);
+
+                    if (data.phongs && data.phongs.length > 0) {
+                        data.phongs.forEach(room => {
+                            let badgeClass = "badge-std";
+                            if (room.loaiPhong === "IMAX") badgeClass = "badge-imax";
+                            else if (room.loaiPhong === "Gold Class") badgeClass = "badge-gold";
+                            else if (room.loaiPhong === "3D ScreenX") badgeClass = "badge-screenx";
+
+                            tableBody.append(`
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-slate-700">Phòng ${room.soPhong}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge ${badgeClass}">${room.loaiPhong}</span>
+                                    </td>
+                                    <td class="text-center font-monospace">${room.sucChua}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-white text-indigo-600" title="Sửa" onclick="editRoom(${room.maPhong})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-white text-red-500" title="Xóa" onclick="deleteRoom(${room.maPhong}, '${room.soPhong}')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        tableBody.append(`
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-slate-400 font-italic">Chưa có phòng chiếu nào được thiết lập.</td>
+                            </tr>
+                        `);
+                    }
+                    
+                    var modalEl = document.getElementById('detailsModal');
+                    var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.show();
+                });
+        }
+
+        // Room CRUD
+        function prepareCreateRoom() {
+            $("#roomModalLabel").text("Thêm phòng chiếu mới");
+            $("#modalMaPhong").val(0);
+            $("#modalRoomMaRap").val(currentCinemaId);
+            $("#roomForm")[0].reset();
+            new bootstrap.Modal($("#roomModal")).show();
+        }
+
+        function editRoom(roomId) {
+            fetch(`/Admin/Cinemas/GetRoom/${roomId}`)
+                .then(res => res.json())
+                .then(data => {
+                    $("#roomModalLabel").text(`Chỉnh sửa phòng ${data.soPhong}`);
+                    $("#modalMaPhong").val(data.maPhong);
+                    $("#modalRoomMaRap").val(data.maRap);
+                    $("#modalSoPhong").val(data.soPhong);
+                    $("#modalLoaiPhong").val(data.loaiPhong || "Tiêu chuẩn");
+                    $("#modalSucChua").val(data.sucChua);
+                    
+                    new bootstrap.Modal($("#roomModal")).show();
+                });
+        }
+
+        function deleteRoom(roomId, roomName) {
+            if (confirm(`Bạn có chắc chắn muốn xóa phòng ${roomName}? Thao tác này sẽ xóa các lịch chiếu liên quan.`)) {
+                $.ajax({
+                    url: '/Admin/Cinemas/DeleteRoom/' + roomId,
+                    type: 'POST',
+                    data: {
+                        "__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            showToast(res.message);
+                            viewDetails(currentCinemaId);
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            }
+        }
+
+        function confirmDelete(cinemaId, cinemaName) {
+            $("#deleteCinemaName").text(cinemaName);
+            $("#deleteCinemaId").val(cinemaId);
+            new bootstrap.Modal($("#deleteModal")).show();
+        }
+
+        $("#deleteForm").on("submit", function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var cinemaId = $("#deleteCinemaId").val();
+            
+            $.ajax({
+                url: form.attr("action"),
+                type: "POST",
+                data: form.serialize(),
+                success: function(res) {
+                    if (res.success) {
+                        showToast(res.message);
+                        $(`#cinema-card-${cinemaId}`).fadeOut(400, function() {
+                            $(this).remove();
+                            if ($(".cinema-card-wrapper").length === 0) location.reload();
+                        });
+                        bootstrap.Modal.getInstance($("#deleteModal")).hide();
+                    } else {
+                        alert(res.message);
+                    }
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        .cinema-card { 
+            border: 1px solid #f1f5f9 !important; 
+            transition: all 0.3s ease; 
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .cinema-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 25px -8px rgba(0,0,0,0.1) !important; 
+        }
+        .icon-box { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .btn-white { 
+            background: #fff; 
+            border: 1px solid #e2e8f0; 
+            color: #1e293b; 
+            font-weight: 500; 
+            font-size: 0.8rem; 
+        }
+        .btn-white:hover { 
+            background: #f8fafc; 
+            color: #4f46e5; 
+            border-color: #4f46e5; 
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "\f105";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        .form-control, .form-select {
+            padding: 0.6rem 0.75rem;
+            border-color: #e2e8f0;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Room Type Badges */
+        .badge {
+            padding: 0.5em 0.8em;
+            font-weight: 500;
+            border-radius: 6px;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+        .badge-std { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .badge-imax { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; box-shadow: 0 0 10px rgba(3, 105, 161, 0.1); }
+        .badge-gold { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; box-shadow: 0 0 10px rgba(146, 64, 14, 0.1); }
+        .badge-screenx { background-color: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; box-shadow: 0 0 10px rgba(91, 33, 182, 0.1); }
+    </style>
+}

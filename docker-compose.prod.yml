@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  cinemabooking:
+    image: ${DOCKERHUB_USERNAME}/cinemabooking:latest
+    container_name: cinemabooking_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      - db
+    networks:
+      - cinemabooking_net
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cinemabooking_db
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    volumes:
+      - db_data:/var/opt/mssql
+    networks:
+      - cinemabooking_net
+
+volumes:
+  uploads_data:
+  db_data:
+
+networks:
+  cinemabooking_net:
+    driver: bridge

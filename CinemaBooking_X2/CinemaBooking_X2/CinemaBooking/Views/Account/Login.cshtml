@@ -1,0 +1,254 @@
+@{
+    Layout = null;
+}
+@using CinemaBooking.Models.ViewModels
+@model LoginViewModel
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập – CineZore 2026</title>
+    <meta name="description" content="Đăng nhập vào CineZore để đặt vé xem phim và quản lý tài khoản." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/auth-obsidian.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="auth-page">
+    <!-- Particles -->
+    <div class="auth-particles">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Grid -->
+    <div class="spatial-grid"></div>
+
+    <div class="auth-viewport">
+        <div class="obsidian-card" id="loginCard">
+            <!-- Scan line texture -->
+            <div class="auth-scanline"></div>
+
+            <!-- Corner accents -->
+            <div class="corner-accent corner-tl"></div>
+            <div class="corner-accent corner-tr"></div>
+            <div class="corner-accent corner-bl"></div>
+            <div class="corner-accent corner-br"></div>
+
+            <!-- Brand -->
+            <div class="auth-brand">
+                <div class="auth-brand-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                CINE<span>ZORE</span>
+            </div>
+
+            <!-- Header -->
+            <div class="auth-header">
+                <h1>Đăng nhập</h1>
+                <div class="auth-trust-row">
+                    <span class="auth-trust-badge">
+                        <i class="fas fa-shield-halved ico-green"></i> Bảo mật SSL
+                    </span>
+                    <span class="auth-trust-badge">
+                        <i class="fas fa-users ico-blue"></i> 10K+ thành viên
+                    </span>
+                    <span class="auth-trust-badge">
+                        <i class="fas fa-star ico-gold"></i> Ưu đãi thành viên
+                    </span>
+                </div>
+            </div>
+
+            <!-- Errors -->
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Count > 0)
+            {
+                <div class="alert-precision-error">
+                    <i class="fas fa-circle-exclamation"></i>
+                    @ViewData.ModelState[""].Errors[0].ErrorMessage
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert-precision-success">
+                    <i class="fas fa-circle-check"></i>
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <!-- Form -->
+            <form asp-action="Login" method="post" id="loginForm">
+                <div asp-validation-summary="None"></div>
+
+                <!-- Username -->
+                <div class="obsidian-input-group">
+                    <label for="inputUsername" class="obsidian-label">
+                        <i class="fas fa-user" style="color:var(--crimson);font-size:0.58rem;"></i>
+                        Tên đăng nhập / Email
+                    </label>
+                    <div class="input-icon-wrap has-icon-prefix">
+                        <i class="fas fa-user input-prefix-icon"></i>
+                        <input asp-for="TenDangNhap"
+                               class="obsidian-input"
+                               placeholder="Email hoặc tên đăng nhập"
+                               autocomplete="username"
+                               id="inputUsername" />
+                    </div>
+                    <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="obsidian-input-group">
+                    <label for="inputPassword" class="obsidian-label">
+                        <i class="fas fa-lock" style="color:var(--crimson);font-size:0.58rem;"></i>
+                        Mật khẩu
+                    </label>
+                    <div class="input-icon-wrap has-icon-prefix has-action">
+                        <i class="fas fa-lock input-prefix-icon"></i>
+                        <div class="input-with-action" style="width:100%;">
+                            <input asp-for="MatKhau"
+                                   type="password"
+                                   class="obsidian-input"
+                                   placeholder="Nhập mật khẩu của bạn"
+                                   autocomplete="current-password"
+                                   id="inputPassword"
+                                   style="padding-left:40px;" />
+                            <button type="button" class="input-action-btn" onclick="togglePassword()" title="Hiện/ẩn mật khẩu">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <span asp-validation-for="MatKhau" class="text-danger"></span>
+                </div>
+
+                <!-- Remember + Forgot -->
+                <div class="auth-extra-row">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
+                    </div>
+                    <a href="@Url.Action("ForgotPassword", "Account")" class="auth-forgot-link">
+                        <i class="fas fa-key" style="font-size:0.55rem;"></i>
+                        Quên mật khẩu?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-precision" id="btnLogin">
+                    <span id="btnLoginText">
+                        <i class="fas fa-arrow-right-to-bracket" style="margin-right:8px;"></i>Đăng nhập
+                    </span>
+                </button>
+            </form>
+
+            <!-- Google Login -->
+            <div class="social-login-sep">
+                <span>Hoặc tiếp tục với</span>
+            </div>
+
+            <a href="@Url.Action("GoogleLogin", "Account")" class="btn-google-precision" id="btnGoogle">
+                <i class="fab fa-google"></i>
+                Đăng nhập với Google
+            </a>
+
+            <!-- Nav -->
+            <div class="auth-nav-links">
+                Chưa có tài khoản?
+                <a href="@Url.Action("Register", "Account")">Tạo tài khoản</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        /* ── Password toggle ── */
+        function togglePassword() {
+            const pwd  = document.getElementById('inputPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        /* ── Ripple on button ── */
+        function addRipple(btn, e) {
+            const rect = btn.getBoundingClientRect();
+            const r = document.createElement('span');
+            r.className = 'btn-ripple';
+            const size = Math.max(rect.width, rect.height);
+            r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+            btn.appendChild(r);
+            r.addEventListener('animationend', () => r.remove());
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.querySelector('#loginCard');
+
+            /* ═══ ENTRANCE ANIMATION (GSAP optional fallback) ═══ */
+            if (typeof gsap !== 'undefined') {
+                const tl = gsap.timeline({
+                    defaults: { ease: 'expo.out' },
+                    onComplete: () => {
+                        gsap.set([card, '#btnLogin', '#btnGoogle', '.obsidian-input-group'], { clearProps: 'all' });
+                    }
+                });
+
+                tl.from(card, { opacity: 0, y: 30, scale: 0.99, duration: 1.0 })
+                  .from('.auth-brand', { opacity: 0, y: -10, duration: 0.8 }, '-=0.7')
+                  .from('.auth-header', { opacity: 0, y: 10, duration: 0.8 }, '-=0.7')
+                  .from('.obsidian-input-group, .auth-extra-row, .btn-precision, .social-login-sep, .btn-google-precision, .auth-nav-links', {
+                      opacity: 0, 
+                      y: 10, 
+                      stagger: 0.08, 
+                      duration: 0.7 
+                  }, '-=0.6');
+            } else {
+                card.style.opacity = '1';
+            }
+
+            /* ═══ LIVE VALIDATION ═══ */
+            const emailInput = document.getElementById('inputUsername');
+            if (emailInput) {
+                emailInput.addEventListener('input', () => {
+                    const val = emailInput.value.trim();
+                    if (/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(val) || val.length >= 3) {
+                        emailInput.classList.add('is-valid');
+                        emailInput.classList.remove('is-error');
+                    } else {
+                        emailInput.classList.remove('is-valid');
+                    }
+                });
+            }
+
+            /* ═══ RIPPLE ═══ */
+            const loginBtn = document.querySelector('#btnLogin');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', (e) => addRipple(loginBtn, e));
+            }
+
+            /* ═══ LOADING STATE ═══ */
+            const form    = document.querySelector('#loginForm');
+            const btnText = document.querySelector('#btnLoginText');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    if ($(form).valid()) {
+                        btnText.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px;"></i>Đang xác thực...';
+                        loginBtn.style.opacity = '0.8';
+                        loginBtn.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

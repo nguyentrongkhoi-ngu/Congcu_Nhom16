@@ -1,0 +1,104 @@
+@model CinemaBooking.Models.ViewModels.LichChieuViewModel
+
+@{
+    ViewData["Title"] = "Thêm lịch chiếu mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Thêm lịch chiếu mới</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Lịch chiếu</a></li>
+        <li class="breadcrumb-item active">Thêm mới</li>
+    </ol>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+            <i class="fas fa-plus me-1"></i>
+            Thông tin lịch chiếu mới
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="MaPhim" class="form-label fw-bold">Phim</label>
+                            <select asp-for="MaPhim" asp-items="Model.PhimList" class="form-select select2">
+                                <option value="">-- Chọn phim --</option>
+                            </select>
+                            <span asp-validation-for="MaPhim" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="MaPhong" class="form-label fw-bold">Phòng chiếu</label>
+                            <select asp-for="MaPhong" asp-items="Model.PhongList" class="form-select select2">
+                                <option value="">-- Chọn phòng chiếu --</option>
+                            </select>
+                            <span asp-validation-for="MaPhong" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="MaNgonNgu" class="form-label fw-bold">Ngôn ngữ</label>
+                            <select asp-for="MaNgonNgu" asp-items="Model.NgonNguList" class="form-select select2">
+                                <option value="">-- Chọn ngôn ngữ --</option>
+                            </select>
+                            <span asp-validation-for="MaNgonNgu" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="NgayChieu" class="form-label fw-bold">Ngày chiếu</label>
+                            <input asp-for="NgayChieu" type="date" class="form-control" />
+                            <span asp-validation-for="NgayChieu" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="GioChieu" class="form-label fw-bold">Giờ chiếu</label>
+                            <input asp-for="GioChieu" type="time" class="form-control" />
+                            <span asp-validation-for="GioChieu" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="GiaVe" class="form-label fw-bold">Giá vé</label>
+                            <div class="input-group">
+                                <input asp-for="GiaVe" type="number" class="form-control" min="0" step="1000" />
+                                <span class="input-group-text">VNĐ</span>
+                            </div>
+                            <span asp-validation-for="GiaVe" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info py-2 small mt-4">
+                    <i class="fas fa-info-circle me-1"></i> Hệ thống sẽ tự động kiểm tra xung đột lịch chiếu (trùng phòng, chồng lấn thời gian).
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                        <i class="fas fa-times me-1"></i> Hủy
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-1"></i> Lưu lịch chiếu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Set min date for showtime as today
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementsByName("NgayChieu")[0].setAttribute('min', today);
+        });
+    </script>
+}
