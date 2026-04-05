@@ -1,0 +1,178 @@
+@model IEnumerable<CinemaBooking.Models.KhuyenMai>
+
+@{
+    ViewData["Title"] = "Quản lý mã giảm giá";
+    Layout = "_Layout";
+}
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between border-bottom border-light">
+        <h6 class="m-0 fw-bold text-slate-800">
+            <i class="fas fa-tags text-primary me-2"></i> Danh sách mã giảm giá
+        </h6>
+        <a asp-action="Create" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">
+            <i class="fas fa-plus me-1"></i> Tạo mã mới
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-slate-50 text-slate-500 small text-uppercase fw-bold">
+                    <tr>
+                        <th class="ps-4 border-0">Mã Code</th>
+                        <th class="border-0">Giảm & Min Order</th>
+                        <th class="border-0">Thời gian áp dụng</th>
+                        <th class="border-0">Trạng thái</th>
+                        <th class="border-0">Mô tả</th>
+                        <th class="border-0 text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-ticket-alt d-block mb-3 fs-3 opacity-25"></i>
+                                Chưa có mã giảm giá nào được tạo.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            var now = DateTime.Now.Date;
+                            string statusClass = "bg-secondary";
+                            string statusName = "Chưa biết";
+                            
+                            if (now < item.NgayBatDau.Date)
+                            {
+                                statusClass = "bg-info-subtle text-info border border-info-subtle";
+                                statusName = "Sắp diễn ra";
+                            }
+                            else if (now > item.NgayKetThuc.Date)
+                            {
+                                statusClass = "bg-danger-subtle text-danger border border-danger-subtle";
+                                statusName = "Hết hạn";
+                            }
+                            else
+                            {
+                                statusClass = "bg-success-subtle text-success border border-success-subtle";
+                                statusName = "Đang hoạt động";
+                            }
+
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-slate-700">@item.MaCode</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="badge rounded-pill bg-primary px-3 py-1" style="width: fit-content;">-@item.PhanTramGiam%</span>
+                                        @if (item.GiaTriToiThieu > 0)
+                                        {
+                                            <span class="small text-muted fw-bold">Min: @item.GiaTriToiThieu.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))đ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="small text-muted italic">No Min Order</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <div class="text-slate-600">
+                                            <i class="far fa-calendar-check me-1 text-slate-400"></i> @item.NgayBatDau.ToString("dd/MM/yyyy")
+                                        </div>
+                                        <div class="text-slate-600">
+                                            <i class="far fa-calendar-times me-1 text-slate-400"></i> @item.NgayKetThuc.ToString("dd/MM/yyyy")
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-3 py-2 @statusClass" style="font-size: 0.75rem">
+                                        @statusName
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="text-truncate small text-slate-500" style="max-width: 200px;" title="@item.MoTa">
+                                        @(string.IsNullOrEmpty(item.MoTa) ? "Không có mô tả" : item.MoTa)
+                                    </div>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a asp-action="Edit" asp-route-id="@item.MaKhuyenMai" class="btn btn-light btn-icon rounded-circle shadow-sm" title="Sửa">
+                                            <i class="fas fa-edit text-info"></i>
+                                        </a>
+                                        <button onclick="confirmDelete(@item.MaKhuyenMai)" class="btn btn-light btn-icon rounded-circle shadow-sm" title="Xóa">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: "Dữ liệu khuyến mãi sẽ không thể khôi phục!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e50914',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Đồng ý, xóa ngay!',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "AdminKhuyenMai")',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                Swal.fire('Đã xóa!', res.message, 'success').then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Lỗi!', res.message, 'error');
+                            }
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bg-slate-50 { background-color: #f8fafc; }
+        .text-slate-500 { color: #64748b; }
+        .text-slate-800 { color: #1e293b; }
+        .text-slate-700 { color: #334155; }
+        .text-slate-600 { color: #475569; }
+        .text-slate-400 { color: #94a3b8; }
+    </style>
+}
+
+@Html.AntiForgeryToken()

@@ -1,0 +1,380 @@
+@model CinemaBooking.Models.ViewModels.DanhGiaViewModel
+
+@{
+    ViewData["Title"] = "Đánh giá phim: " + Model.TenPhim;
+}
+
+<div class="review-wrapper">
+    <!-- Immersive Background -->
+    <div class="review-backdrop" style="background-image: url('@(string.IsNullOrEmpty(Model.UrlPoster) ? "/images/no-image.jpg" : Model.UrlPoster)');"></div>
+    <div class="review-overlay"></div>
+
+    <div class="container pb-5 review-content">
+        <div class="row align-items-center justify-content-center min-vh-100" style="padding-top: 80px;">
+            <!-- Movie Poster & Info -->
+            <div class="col-lg-3 d-none d-lg-block mb-4 mb-lg-0 poster-section">
+                <div class="poster-card">
+                    <img src="@(string.IsNullOrEmpty(Model.UrlPoster) ? "/images/no-image.jpg" : Model.UrlPoster)" 
+                         class="img-fluid rounded-4 shadow-lg" alt="@Model.TenPhim">
+                    <div class="poster-glow"></div>
+                </div>
+                <div class="mt-3 movie-info-text text-center text-lg-start">
+                    <h1 class="fs-4 fw-bold text-white mb-1">@Model.TenPhim</h1>
+                    <p class="text-white-50 small mb-0"><i class="bi bi-camera-reels me-2"></i>CineZore Choice</p>
+                </div>
+            </div>
+
+            <!-- Review Form -->
+            <div class="col-lg-5 col-md-10 form-section">
+                <div class="glass-container p-4 p-md-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="icon-circle bg-netflix shadow-glow" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                            <i class="bi bi-star-fill text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="h4 fw-bold mb-0">Viết đánh giá</h2>
+                            <p class="small text-white-50 mb-0">Chia sẻ trải nghiệm điện ảnh</p>
+                        </div>
+                    </div>
+
+                    @if (TempData["DanhGiaMessage"] != null)
+                    {
+                        <div class="alert alert-glass border-info border-opacity-25 mb-4 animate__animated animate__fadeIn">
+                            <i class="bi bi-info-circle me-2"></i> @TempData["DanhGiaMessage"]
+                        </div>
+                    }
+
+                    <form asp-action="CreateDanhGia" method="post" id="reviewForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="MaPhim" />
+                        <input type="hidden" asp-for="TenPhim" />
+                        <input type="hidden" asp-for="UrlPoster" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-white-50 mb-2">Chấm điểm phim</label>
+                            <div class="rating-stars-container d-flex flex-column align-items-center bg-black bg-opacity-25 rounded-4 p-3 border border-white border-opacity-10">
+                                <div class="rating-stars">
+                                    <input type="radio" asp-for="DiemSo" value="5" id="star-5" class="d-none" />
+                                    <label for="star-5" title="Tuyệt vời"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" asp-for="DiemSo" value="4" id="star-4" class="d-none" />
+                                    <label for="star-4" title="Tốt"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" asp-for="DiemSo" value="3" id="star-3" class="d-none" />
+                                    <label for="star-3" title="Bình thường"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" asp-for="DiemSo" value="2" id="star-2" class="d-none" />
+                                    <label for="star-2" title="Khá tệ"><i class="fa-solid fa-star"></i></label>
+                                    
+                                    <input type="radio" asp-for="DiemSo" value="1" id="star-1" class="d-none" />
+                                    <label for="star-1" title="Rất tệ"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <div id="rating-label" class="mt-2 small fw-bold text-netflix">&nbsp;</div>
+                            </div>
+                            <span asp-validation-for="DiemSo" class="text-danger mt-1 d-block small"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="BinhLuan" class="form-label small fw-semibold text-white-50 mb-2">Cảm nhận của bạn</label>
+                            <div class="input-glass-group">
+                                <textarea asp-for="BinhLuan" class="form-control glass-textarea" rows="3" 
+                                          placeholder="Viết vài dòng chia sẻ..."></textarea>
+                                <div class="input-focus-line"></div>
+                            </div>
+                            <span asp-validation-for="BinhLuan" class="text-danger mt-1 d-block small"></span>
+                        </div>
+                        
+                        <div class="d-flex flex-column flex-sm-row gap-3 pt-1">
+                            <button type="submit" class="btn btn-netflix-action flex-grow-1 py-2 fw-bold rounded-pill shadow-glow">
+                                <i class="bi bi-send-fill me-2"></i> Gửi đánh giá
+                            </button>
+                            <a asp-controller="Phim" asp-action="Detail" asp-route-id="@Model.MaPhim" 
+                               class="btn btn-outline-glass px-4 py-2 rounded-pill fw-medium">
+                                Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --netflix-red: #E50914;
+        --netflix-red-hover: #ff0f1a;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --shadow-glow: 0 0 20px rgba(229, 9, 20, 0.4);
+    }
+
+    /* Immersive Layout */
+    .review-wrapper {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        background: #080808;
+    }
+
+    .review-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        filter: blur(80px) saturate(1.5);
+        opacity: 0.35;
+        z-index: 0;
+        transform: scale(1.1);
+    }
+
+    .review-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, transparent 0%, #000 85%);
+        z-index: 1;
+    }
+
+    .review-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Glass Container */
+    .glass-container {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--glass-border);
+        border-radius: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Poster Section */
+    .poster-card {
+        position: relative;
+        transition: transform 0.4s ease;
+    }
+
+    .poster-card:hover {
+        transform: scale(1.02);
+    }
+
+    .poster-glow {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 20px;
+        background: var(--netflix-red);
+        filter: blur(40px);
+        opacity: 0.4;
+        z-index: -1;
+    }
+
+    /* Star Rating */
+    .rating-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 10px;
+    }
+
+    .rating-stars label {
+        font-size: 1.8rem;
+        color: rgba(255, 255, 255, 0.15);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .rating-stars input:checked ~ label,
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label {
+        color: #ffc107;
+        text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+        transform: scale(1.15);
+    }
+
+    /* Glass Inputs */
+    .input-glass-group {
+        position: relative;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 1rem;
+        border: 1px solid var(--glass-border);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .input-glass-group:focus-within {
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-textarea {
+        background: transparent !important;
+        border: none !important;
+        color: white !important;
+        padding: 1.25rem !important;
+        resize: none;
+    }
+
+    .glass-textarea:focus {
+        box-shadow: none !important;
+    }
+
+    .input-focus-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--netflix-red);
+        transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .input-glass-group:focus-within .input-focus-line {
+        width: 100%;
+    }
+
+    /* Buttons */
+    .btn-netflix-action {
+        background: var(--netflix-red);
+        border: none;
+        color: white;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-netflix-action:hover {
+        background: var(--netflix-red-hover);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(229, 9, 20, 0.5);
+        color: white;
+    }
+
+    .btn-outline-glass {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        color: #e5e5e5;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-glass:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .alert-glass {
+        background: rgba(13, 202, 240, 0.05);
+        backdrop-filter: blur(10px);
+        color: #0dcaf0;
+        border-radius: 12px;
+    }
+
+    .shadow-glow {
+        box-shadow: var(--shadow-glow);
+    }
+
+    .min-vh-80 {
+        min-height: 80vh;
+    }
+
+    /* Animation initial states */
+    .poster-section, .form-section {
+        opacity: 0;
+        visibility: hidden;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // GSAP Entrance Animation
+            const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+            
+            tl.to(".review-backdrop", { opacity: 0.35, duration: 2, scale: 1.05 })
+              .fromTo(".poster-section", 
+                { y: 20, opacity: 0, visibility: "visible" }, 
+                { y: 0, opacity: 1, duration: 1 }, "-=1.5")
+              .fromTo(".form-section", 
+                { y: 50, opacity: 0, visibility: "visible" }, 
+                { y: 0, opacity: 1, duration: 1 }, "-=0.8")
+              .from(".glass-container > *", { 
+                y: 20, 
+                opacity: 0, 
+                stagger: 0.1, 
+                duration: 0.8 
+              }, "-=0.5");
+
+            // Rating Label Logic
+            const ratingInputs = document.querySelectorAll('.rating-stars input');
+            const ratingLabel = document.getElementById('rating-label');
+            const ratingMessages = {
+                '5': 'Tuyệt vời - Rất hài lòng',
+                '4': 'Tốt - Đáng xem',
+                '3': 'Bình thường - Tạm được',
+                '2': 'Khá tệ - Hơi thất vọng',
+                '1': 'Rất tệ - Không đáng xem'
+            };
+
+            function updateLabel(value) {
+                if (value) {
+                    ratingLabel.textContent = ratingMessages[value];
+                    gsap.fromTo(ratingLabel, { opacity: 0, y: 5 }, { opacity: 1, y: 0, duration: 0.3 });
+                }
+            }
+
+            // Set initial label if any
+            const checkedRating = document.querySelector('.rating-stars input:checked');
+            if (checkedRating) updateLabel(checkedRating.value);
+
+            ratingInputs.forEach(input => {
+                input.addEventListener('change', (e) => {
+                    updateLabel(e.target.value);
+                    gsap.from(e.target.nextElementSibling, { scale: 1.5, duration: 0.4, ease: "back.out(2)" });
+                });
+            });
+
+            // Hover effects for rating stars
+            const stars = document.querySelectorAll('.rating-stars label');
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', () => {
+                    const val = star.getAttribute('for').split('-')[1];
+                    ratingLabel.textContent = ratingMessages[val];
+                    ratingLabel.style.opacity = "0.6";
+                });
+                star.addEventListener('mouseleave', () => {
+                    const checked = document.querySelector('.rating-stars input:checked');
+                    if (checked) {
+                        ratingLabel.textContent = ratingMessages[checked.value];
+                        ratingLabel.style.opacity = "1";
+                    } else {
+                        ratingLabel.textContent = '\u00A0';
+                    }
+                });
+            });
+        });
+    </script>
+} 

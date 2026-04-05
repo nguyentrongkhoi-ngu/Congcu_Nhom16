@@ -1,0 +1,300 @@
+@model IEnumerable<CinemaBooking.Models.Phim>
+
+@{
+    ViewData["Title"] = "Danh Sách Phim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var nowShowing = ViewBag.NowShowingMovies as IEnumerable<CinemaBooking.Models.Phim>;
+    var comingSoon = ViewBag.ComingSoonMovies as IEnumerable<CinemaBooking.Models.Phim>;
+    
+    // Extract unique genres for filtering
+    var genres = Model.Where(m => !string.IsNullOrEmpty(m.TheLoai))
+                      .SelectMany(m => m.TheLoai.Split(new[] { ',', '-' }, StringSplitOptions.RemoveEmptyEntries))
+                      .Select(g => g.Trim())
+                      .Distinct()
+                      .OrderBy(g => g)
+                      .ToList();
+}
+
+
+
+<div class="container pb-5">
+    @if (ViewBag.SelectedMaRap != null)
+    {
+        <div class="cinema-filter-alert mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="alert-icon-cz"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="alert-text-cz">
+                        <span class="label">Đang xem lịch chiếu tại:</span>
+                        <span class="cinema-name">@ViewBag.SelectedCinemaName</span>
+                    </div>
+                </div>
+                <a asp-action="Index" class="btn-clear-filter">Tất cả rạp <i class="fas fa-times ms-2"></i></a>
+            </div>
+        </div>
+    }
+    
+    <!-- Search and Filter Bar -->
+    <div class="movie-filter-section">
+        <div class="filter-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="movieSearch" class="filter-input" placeholder="Tìm kiếm tên phim..." autocomplete="off">
+        </div>
+        
+        <select id="genreFilter" class="filter-select">
+            <option value="">Tất cả Thể loại</option>
+            @foreach (var genre in genres)
+            {
+                <option value="@genre.ToLower()">@genre</option>
+            }
+        </select>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-pills nav-pills-movie mb-5 justify-content-center border-bottom border-secondary pb-3" id="movieTab" role="tablist">
+        <li class="nav-item mx-2" role="presentation">
+            <button class="nav-link active rounded-pill" id="now-showing-tab" data-bs-toggle="pill" data-bs-target="#now-showing" type="button" role="tab" aria-controls="now-showing" aria-selected="true">
+                <i class="fas fa-play-circle text-success font-weight-bold"></i>Phim Đang Chiếu
+            </button>
+        </li>
+        <li class="nav-item mx-2" role="presentation">
+            <button class="nav-link rounded-pill" id="coming-soon-tab" data-bs-toggle="pill" data-bs-target="#coming-soon" type="button" role="tab" aria-controls="coming-soon" aria-selected="false">
+                <i class="fas fa-calendar-alt text-info"></i>Phim Sắp Ra Mắt
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="movieTabContent">
+        
+        <!-- ĐANG CHIẾU TAB -->
+        <div class="tab-pane fade show active" id="now-showing" role="tabpanel" aria-labelledby="now-showing-tab">
+            @if (nowShowing == null || !nowShowing.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-film fa-4x mb-3 text-secondary"></i>
+                    <h3 class="text-white-50">Hiện tại chưa có phim nào đang chiếu.</h3>
+                </div>
+            }
+            else
+            {
+                <div class="movie-grid">
+                    @foreach (var item in nowShowing)
+                    {
+                        @await Html.PartialAsync("_MovieCardPartial", item, new ViewDataDictionary(ViewData) { { "StatusBadge", "NowShowing" } })
+                    }
+                </div>
+                <div class="no-results-message text-center py-5" style="display: none;">
+                    <i class="fas fa-search-minus fa-3x mb-3 text-secondary"></i>
+                    <h4 class="text-white-50">Không tìm thấy phim phù hợp</h4>
+                </div>
+            }
+        </div>
+
+        <!-- SẮP CHIẾU TAB -->
+        <div class="tab-pane fade" id="coming-soon" role="tabpanel" aria-labelledby="coming-soon-tab">
+            @if (comingSoon == null || !comingSoon.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x mb-3 text-secondary"></i>
+                    <h3 class="text-white-50">Chưa có thông tin phim sắp chiếu.</h3>
+                </div>
+            }
+            else
+            {
+                <div class="movie-grid">
+                    @foreach (var item in comingSoon)
+                    {
+                        @await Html.PartialAsync("_MovieCardPartial", item, new ViewDataDictionary(ViewData) { { "StatusBadge", "ComingSoon" } })
+                    }
+                </div>
+                <div class="no-results-message text-center py-5" style="display: none;">
+                    <i class="fas fa-search-minus fa-3x mb-3 text-secondary"></i>
+                    <h4 class="text-white-50">Không tìm thấy phim phù hợp</h4>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/movies.css" asp-append-version="true" />
+    <style>
+        /* Force override any remaining white background conflicts */
+        body.immersive-page, 
+        body.immersive-page main,
+        body.immersive-page main > .container {
+            background-color: #0b141e !important;
+            background-image: none !important;
+            color: #fff !important;
+        }
+
+        /* --- CINEMA FILTER ALERT --- */
+        .cinema-filter-alert {
+            background: rgba(229, 9, 20, 0.1);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            border-radius: 12px;
+            padding: 15px 25px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .alert-icon-cz {
+            background: var(--netflix-red);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 4px 10px rgba(229, 9, 20, 0.3);
+        }
+
+        .alert-text-cz .label {
+            display: block;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 2px;
+        }
+
+        .alert-text-cz .cinema-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .btn-clear-filter {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none !important;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear-filter:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: translateX(-5px);
+        }
+    </style>
+}
+
+@section Scripts {
+    <!-- GSAP for robust animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        (function() {
+            function initMoviesPage() {
+                console.log("Cinezore Movies Page Initialization Started");
+                document.body.classList.add('js-loaded');
+                
+                const searchInput = document.getElementById('movieSearch');
+                const genreSelect = document.getElementById('genreFilter');
+                const tabElms = document.querySelectorAll('button[data-bs-toggle="pill"]');
+                
+                // Get searchString from URL parameters if available
+                const urlParams = new URLSearchParams(window.location.search);
+                const querySearchString = urlParams.get('searchString');
+                
+                if (querySearchString && searchInput) {
+                    searchInput.value = querySearchString;
+                }
+                
+                const animateCards = (pane) => {
+                    if(!pane) return;
+                    const visibleCards = Array.from(pane.querySelectorAll('.movie-card-rich:not(.hidden)'));
+                    console.log(`Animating ${visibleCards.length} cards`);
+                    
+                    if(visibleCards.length === 0) return;
+                    
+                    if (window.gsap) {
+                        try {
+                            gsap.fromTo(visibleCards, 
+                                { opacity: 0, y: 30 }, 
+                                { 
+                                    opacity: 1, 
+                                    y: 0, 
+                                    duration: 0.6, 
+                                    stagger: 0.08, 
+                                    ease: "power2.out",
+                                    clearProps: "all" 
+                                }
+                            );
+                        } catch(e) {
+                            console.error("GSAP Animation Error:", e);
+                            visibleCards.forEach(c => c.style.opacity = '1');
+                        }
+                    } else {
+                        visibleCards.forEach(c => c.style.opacity = '1');
+                    }
+                };
+
+                // Tab switch handling
+                tabElms.forEach(tab => {
+                    tab.addEventListener('shown.bs.tab', function (e) {
+                        const targetId = e.target.getAttribute('data-bs-target');
+                        const targetPane = document.querySelector(targetId);
+                        filterCards(); 
+                        animateCards(targetPane);
+                    });
+                });
+
+                const filterCards = () => {
+                    const activeTab = document.querySelector('.tab-pane.show.active');
+                    if(!activeTab) return;
+
+                    const searchTerm = (searchInput?.value || "").toLowerCase().trim();
+                    const genreTerm = (genreSelect?.value || "").toLowerCase().trim();
+                    const allCards = activeTab.querySelectorAll('.movie-card-rich');
+                    const noResultsMsg = activeTab.querySelector('.no-results-message');
+                    let foundAny = false;
+
+                    allCards.forEach(card => {
+                        const title = (card.getAttribute('data-title') || "").toLowerCase();
+                        const genres = (card.getAttribute('data-genre') || "").toLowerCase();
+                        const matchSearch = title.includes(searchTerm);
+                        const matchGenre = genreTerm === "" || genres.includes(genreTerm);
+                        
+                        if (matchSearch && matchGenre) {
+                            card.classList.remove('hidden');
+                            foundAny = true;
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    });
+
+                    if(noResultsMsg) noResultsMsg.style.display = foundAny ? 'none' : 'block';
+                };
+
+                // Initial load
+                const initialTab = document.querySelector('.tab-pane.show.active');
+                if(initialTab) {
+                    if (querySearchString) {
+                         filterCards();
+                    }
+                    setTimeout(() => animateCards(initialTab), 500);
+                }
+
+                if(searchInput) searchInput.addEventListener('input', filterCards);
+                if(genreSelect) {
+                    genreSelect.addEventListener('change', () => {
+                        filterCards();
+                        animateCards(document.querySelector('.tab-pane.show.active'));
+                    });
+                }
+            }
+
+            // Execute
+            if (document.readyState === "complete" || document.readyState === "interactive") {
+                initMoviesPage();
+            } else {
+                document.addEventListener('DOMContentLoaded', initMoviesPage);
+            }
+        })();
+    </script>
+}

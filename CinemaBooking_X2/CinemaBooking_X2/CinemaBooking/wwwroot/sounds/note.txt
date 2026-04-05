@@ -1,0 +1,12 @@
+Các file âm thanh dùng cho chức năng quét vé:
+
+1. success.mp3: Âm thanh thành công khi vé hợp lệ
+2. warning.mp3: Âm thanh cảnh báo khi vé hợp lệ nhưng có vấn đề (đến sớm, đã quét)
+3. error.mp3: Âm thanh lỗi khi vé không hợp lệ
+
+Bạn cần tải các file âm thanh ngắn dạng MP3 và đặt vào thư mục này. Các file âm thanh nên có độ dài 1-2 giây và kích thước nhỏ để tải nhanh.
+
+Gợi ý nguồn tải: 
+- https://freesound.org/ 
+- https://mixkit.co/free-sound-effects/
+- https://www.zapsplat.com/sound-effect-categories/ 

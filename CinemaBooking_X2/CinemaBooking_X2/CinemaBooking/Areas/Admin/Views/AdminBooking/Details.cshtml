@@ -1,0 +1,266 @@
+@model CinemaBooking.Models.DatVe
+
+@{
+    ViewData["Title"] = "Chi tiết đặt vé #" + Model.MaDatVe;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Chi tiết đặt vé #@Model.MaDatVe</h1>
+        <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin đặt vé</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Phim:</h6>
+                            <p>@Model.LichChieu.Phim.TenPhim</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Người đặt:</h6>
+                            <p>@Model.NguoiDung.HoTen (@Model.NguoiDung.Email)</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Rạp phim:</h6>
+                            <p>@Model.LichChieu.PhongChieu.RapPhim.TenRap</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Phòng chiếu:</h6>
+                            <p>@Model.LichChieu.PhongChieu.TenPhong</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Ngày chiếu:</h6>
+                            <p>@Model.LichChieu.NgayChieu.ToString("dd/MM/yyyy")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Giờ chiếu:</h6>
+                            <p>@Model.LichChieu.GioChieu.ToString(@"hh\:mm")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Ngày đặt vé:</h6>
+                            <p>@(Model.NgayDat.HasValue ? Model.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Mã khuyến mãi:</h6>
+                            <p>@(Model.KhuyenMai != null ? $"{Model.KhuyenMai.MaCode} (-{Model.KhuyenMai.PhanTramGiam}%)" : "Không áp dụng")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Tổng tiền:</h6>
+                            <p class="fs-5 fw-bold text-danger">@Model.TongTien.ToString("N0") VNĐ</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Trạng thái:</h6>
+                            <p>
+                                <span class="badge rounded-pill
+                                    @(Model.TrangThai == "Đã thanh toán" ? "bg-success" :
+                                    Model.TrangThai == "Đã hủy" ? "bg-danger" :
+                                    Model.TrangThai == "Chờ thanh toán" ? "bg-warning" : "bg-info")">
+                                    @Model.TrangThai
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h6 class="fw-bold mb-3">Cập nhật trạng thái:</h6>
+                        <form method="post" action="@Url.Action("CapNhatTrangThai", new { id = Model.MaDatVe })" class="d-flex align-items-center">
+                            @Html.AntiForgeryToken()
+                            <select name="trangThai" class="form-select me-2" style="max-width: 200px;">
+                                @if (Model.TrangThai == "Đã đặt")
+                                {
+                                    <option value="Đã đặt" selected>Đã đặt</option>
+                                }
+                                else
+                                {
+                                    <option value="Đã đặt">Đã đặt</option>
+                                }
+
+                                @if (Model.TrangThai == "Đã thanh toán")
+                                {
+                                    <option value="Đã thanh toán" selected>Đã thanh toán</option>
+                                }
+                                else
+                                {
+                                    <option value="Đã thanh toán">Đã thanh toán</option>
+                                }
+
+                                @if (Model.TrangThai == "Đã hủy")
+                                {
+                                    <option value="Đã hủy" selected>Đã hủy</option>
+                                }
+                                else
+                                {
+                                    <option value="Đã hủy">Đã hủy</option>
+                                }
+
+                                @if (Model.TrangThai == "Chờ thanh toán")
+                                {
+                                    <option value="Chờ thanh toán" selected>Chờ thanh toán</option>
+                                }
+                                else
+                                {
+                                    <option value="Chờ thanh toán">Chờ thanh toán</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.ThanhToans != null && Model.ThanhToans.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Lịch sử thanh toán</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Mã thanh toán</th>
+                                        <th>Phương thức</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var thanhToan in Model.ThanhToans)
+                                    {
+                                        <tr>
+                                            <td>@thanhToan.MaThanhToan</td>
+                                            <td>@thanhToan.PhuongThucThanhToan</td>
+                                            <td>@thanhToan.SoTien.ToString("N0") VNĐ</td>
+                                            <td>
+                                                <span class="badge rounded-pill
+                                                    @(thanhToan.TrangThai == "Thành công" ? "bg-success" :
+                                                    thanhToan.TrangThai == "Thất bại" ? "bg-danger" : "bg-warning")">
+                                                    @thanhToan.TrangThai
+                                                </span>
+                                            </td>
+                                            <td>@(thanhToan.NgayThanhToan.HasValue ? thanhToan.NgayThanhToan.Value.ToString("dd/MM/yyyy HH:mm:ss") : "N/A")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Thông tin ghế đã đặt</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.DatVeGhes != null && Model.DatVeGhes.Any())
+                    {
+                        <div class="row row-cols-2 row-cols-sm-3 g-2">
+                            @foreach (var datVeGhe in Model.DatVeGhes)
+                            {
+                                <div class="col">
+                                    <div class="card h-100 bg-light">
+                                        <div class="card-body text-center py-2">
+                                            <h5 class="card-title mb-0">@datVeGhe.Ghe.SoGhe</h5>
+                                            <p class="card-text small mb-0">Ghế số @datVeGhe.Ghe.SoGhe</p>
+                                            <p class="card-text small mb-0">
+                                                <span class="badge bg-secondary">
+                                                    @datVeGhe.Ghe.LoaiGhe
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Số lượng ghế:</span>
+                                <span class="fw-bold">@Model.DatVeGhes.Count()</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Loại ghế:</span>
+                                <span>
+                                    @{
+                                        var loaiGheGroups = Model.DatVeGhes
+                                            .GroupBy(dvg => dvg.Ghe.LoaiGhe)
+                                            .Select(g => $"{g.Count()} {g.Key}");
+                                    }
+                                    @string.Join(", ", loaiGheGroups)
+                                </span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center">Không có thông tin ghế</p>
+                    }
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Thông tin khách hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Họ tên:</h6>
+                        <p>@Model.NguoiDung.HoTen</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Email:</h6>
+                        <p>@Model.NguoiDung.Email</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Số điện thoại:</h6>
+                        <p>@(string.IsNullOrEmpty(Model.NguoiDung.SoDienThoai) ? "Chưa cập nhật" : Model.NguoiDung.SoDienThoai)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alert after 5 seconds
+        $(document).ready(function() {
+            setTimeout(function() {
+                $(".alert").alert('close');
+            }, 5000);
+        });
+    </script>
+}
