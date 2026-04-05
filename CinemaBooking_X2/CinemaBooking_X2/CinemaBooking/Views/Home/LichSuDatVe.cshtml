@@ -1,0 +1,541 @@
+@model IEnumerable<CinemaBooking.Models.DatVe>
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Lịch sử đặt vé";
+}
+
+<div class="booking-history-wrapper" style="padding-top: 120px; min-height: 95vh; background: radial-gradient(circle at 10% 20%, rgba(229, 9, 20, 0.05) 0%, transparent 40%);">
+    <div class="container pb-5">
+        <!-- Header -->
+        <div class="d-flex align-items-center justify-content-between mb-5 animate__animated animate__fadeIn">
+            <div class="d-flex align-items-center">
+                <a asp-action="Index" asp-controller="UserProfile" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="text-white fw-black mb-0">Lịch sử đặt vé</h2>
+                    <p class="text-white-50 mb-0">Quản lý và xem lại hành trình điện ảnh của bạn</p>
+                </div>
+            </div>
+            <a href="@Url.Action("TicketHelp", "Home")" class="btn btn-glass-sm rounded-pill d-none d-md-flex align-items-center">
+                <i class="fas fa-question-circle me-2"></i>Hướng dẫn in vé
+            </a>
+        </div>
+
+        <!-- Alert Section (Smart Filter) -->
+        <div class="glass-container p-3 mb-5 border-start border-netflix border-4 animate__animated animate__fadeInUp" style="background: rgba(229, 9, 20, 0.03);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="status-indicator-glow">
+                    <i class="fas fa-info-circle text-netflix fs-4"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <p class="text-white small mb-0"><strong>Chính sách:</strong> Vé chưa thanh toán có thể hủy trước 4 giờ. Vé đã thanh toán không hoàn tiền.</p>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-glass-success animate__animated animate__shakeX mb-4">
+                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="glass-container text-center py-5 animate__animated animate__fadeIn">
+                <div class="empty-state-icon mx-auto mb-4">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h3 class="text-white fw-bold mb-3">Chưa có hành trình nào</h3>
+                <p class="text-white-50 mb-4 mx-auto" style="max-width: 400px;">Bạn chưa thực hiện bất kỳ giao dịch đặt vé nào. Hãy chọn cho mình một bộ phim yêu thích ngay!</p>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-netflix px-5 py-3 rounded-pill fw-bold">
+                    KHÁM PHÁ PHIM NGAY
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var datVe in Model)
+                {
+                    <div class="col-12 animate__animated animate__fadeInUp">
+                        <div class="glass-container position-relative overflow-hidden ticket-card-premium">
+                            <div class="ticket-visual-wrapper d-flex flex-column flex-md-row">
+                                <!-- LEFT: The Main Stub -->
+                                <div class="ticket-main-stub p-4 flex-grow-1 position-relative">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div class="d-flex gap-4 align-items-start">
+                                            <!-- Poster in stub -->
+                                            <div class="ticket-poster-mini d-none d-lg-block">
+                                                <img src="@(string.IsNullOrEmpty(datVe.LichChieu.Phim.UrlPoster) ? "/images/no-image.jpg" : datVe.LichChieu.Phim.UrlPoster)" alt="Poster">
+                                            </div>
+                                            <div>
+                                                <h3 class="text-white fw-black mb-1 letter-spacing-1 h4">@datVe.LichChieu.Phim.TenPhim</h3>
+                                                <div class="d-flex flex-wrap align-items-center text-white-50 small gap-3 mt-2">
+                                                    <span class="badge-cinema"><i class="fas fa-map-marker-alt me-1 text-netflix"></i> @datVe.LichChieu.PhongChieu.RapPhim.TenRap</span>
+                                                    <span class="badge-room"><i class="fas fa-door-open me-1 text-netflix"></i> Phòng @datVe.LichChieu.PhongChieu.SoPhong</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        @{
+                                            string badgeClass = datVe.TrangThai == "Đã thanh toán" ? "status-success" : 
+                                                                datVe.TrangThai == "Chưa thanh toán" || datVe.TrangThai == "Chờ thanh toán" ? "status-warning" : 
+                                                                datVe.TrangThai.Contains("Đã hủy") ? "status-error" : "status-default";
+                                        }
+                                        <div class="status-badge @badgeClass">
+                                            @datVe.TrangThai
+                                        </div>
+                                    </div>
+
+                                    <!-- Details Row -->
+                                    <div class="row g-4 mb-4">
+                                        <div class="col-6 col-md-3">
+                                            <div class="info-label text-uppercase text-white-50">Ngày chiếu</div>
+                                            <div class="info-value text-white fw-bold">@datVe.LichChieu.NgayChieu.ToString("ddd, dd/MM/yyyy")</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="info-label text-uppercase text-white-50">Giờ chiếu</div>
+                                            <div class="info-value text-white fw-bold">@($"{datVe.LichChieu.GioChieu.Hours:D2}:{datVe.LichChieu.GioChieu.Minutes:D2}")</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="info-label text-uppercase text-white-50">Thanh toán</div>
+                                            <div class="info-value text-white fw-bold">
+                                                @{
+                                                    var payment = datVe.ThanhToans?.OrderByDescending(t => t.NgayThanhToan).FirstOrDefault();
+                                                    var paymentMethod = payment?.PhuongThucThanhToan ?? "Chưa chọn";
+                                                }
+                                                <span class="payment-method-badge">
+                                                    @if (paymentMethod.ToUpper() == "MOMO") { <i class="fas fa-wallet me-1 text-momo"></i> }
+                                                    else if (paymentMethod == "Tại rạp") { <i class="fas fa-money-bill-wave me-1 text-success"></i> }
+                                                    @paymentMethod
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="info-label text-uppercase text-white-50">Ghế ngồi</div>
+                                            <div class="info-value text-white fw-bold d-flex flex-wrap gap-2">
+                                                @if (datVe.TrangThai.Contains("Đã hủy") && !string.IsNullOrEmpty(datVe.GhiChu))
+                                                {
+                                                    var splitNote = datVe.GhiChu.Split(". ");
+                                                    var seatPart = splitNote[0].Replace("Ghế đã đặt: ", "").Replace("Ghế đã hủy: ", "");
+                                                    var refundPart = splitNote.Length > 1 ? splitNote[1] : "";
+                                                    
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            @foreach(var s in seatPart.Split(", ")) {
+                                                                <span class="seat-badge-invalid">@s</span>
+                                                            }
+                                                        </div>
+                                                        @if (!string.IsNullOrEmpty(refundPart))
+                                                        {
+                                                            <div class="mt-1">
+                                                                @if (refundPart.Contains("100%")) { <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50" style="font-size: 0.6rem;">@refundPart</span> }
+                                                                else if (refundPart.Contains("50%")) { <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50" style="font-size: 0.6rem;">@refundPart</span> }
+                                                                else { <span class="badge bg-secondary bg-opacity-25 text-white-50 border border-white-50 border-opacity-25" style="font-size: 0.6rem;">@refundPart</span> }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                                else if (datVe.DatVeGhes != null && datVe.DatVeGhes.Any())
+                                                {
+                                                    foreach(var g in datVe.DatVeGhes) {
+                                                        <span class="seat-badge">@g.Ghe.SoGhe</span>
+                                                    }
+                                                }
+                                                else { <span class="text-white-50 opacity-25">Trống</span> }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-end pt-3 border-top border-white-10">
+                                        <div class="text-white-50 xs-small">
+                                            <i class="far fa-clock me-1"></i> Đặt lúc: @(datVe.NgayDat.HasValue ? datVe.NgayDat.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")
+                                        </div>
+                                        <div class="ticket-id-dotmatrix">#@datVe.MaDatVe.ToString("D8")</div>
+                                    </div>
+
+                                    <!-- Perforation Effect -->
+                                    <div class="ticket-perforation d-none d-md-block"></div>
+                                </div>
+
+                                <!-- RIGHT: The Action Stub -->
+                                <div class="ticket-action-stub p-4 d-flex flex-column align-items-center justify-content-center border-start border-white-10 text-center" style="min-width: 200px; background: rgba(255,255,255,0.02);">
+                                    <div class="mb-2 info-label text-uppercase text-white-50">Tổng thanh toán</div>
+                                    <div class="mb-4 text-netflix fs-3 fw-black">@string.Format("{0:N0}đ", datVe.TongTien)</div>
+                                    
+                                    <div class="d-grid gap-2 w-100">
+                                        @if (!datVe.TrangThai.Contains("Đã hủy"))
+                                        {
+                                            <a href="@Url.Action("Print", "DatVe", new { maDatVe = datVe.MaDatVe })" class="btn btn-secondary-cinematic w-100">
+                                                <i class="fas fa-print me-2"></i>In vé
+                                            </a>
+
+                                            if (datVe.TrangThai == "Chưa thanh toán" || datVe.TrangThai == "Chờ thanh toán")
+                                            {
+                                                <a href="@Url.Action("Index", "ThanhToan", new { maDatVe = datVe.MaDatVe })" class="btn btn-netflix w-100">
+                                                    <i class="fas fa-credit-card me-2"></i>Thanh toán
+                                                </a>
+                                            }
+
+                                            <form asp-controller="DatVe" asp-action="HuyVe" method="post" class="cancel-form w-100 mt-2">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="maDatVe" value="@datVe.MaDatVe" />
+                                                <button type="submit" class="btn-cancel-ticket-black w-100 mt-2">
+                                                    <i class="fas fa-times me-1"></i>Hủy đặt vé
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-white-50 opacity-50 small">
+                                                <i class="fas fa-ban mb-2 d-block fs-3"></i>
+                                                Vé không khả dụng
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .booking-history-wrapper {
+            font-family: var(--font-main);
+        }
+
+        .fw-black { font-weight: 900; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+        .xs-small { font-size: 0.7rem; }
+        .border-white-10 { border-color: rgba(255,255,255,0.1) !important; }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        .ticket-card-premium {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .ticket-card-premium:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(229, 9, 20, 0.4);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5);
+        }
+
+        .ticket-main-stub {
+            z-index: 1;
+        }
+
+        .ticket-poster-mini {
+            width: 80px;
+            height: 120px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .ticket-poster-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ticket-perforation {
+            position: absolute;
+            right: -10px;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background-image: radial-gradient(circle, transparent 7px, rgba(255,255,255,0.05) 8px);
+            background-size: 20px 25px;
+            background-position: center;
+            z-index: 2;
+        }
+
+        /* Badge Styles */
+        .badge-cinema, .badge-room {
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .seat-badge {
+            background: rgba(229, 9, 20, 0.1);
+            color: #e50914;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid rgba(229, 9, 20, 0.2);
+        }
+
+        .seat-badge-invalid {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.4);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border: 1px dashed rgba(255,255,255,0.1);
+        }
+
+        .ticket-id-dotmatrix {
+            font-family: 'Courier New', Courier, monospace;
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.1);
+        }
+
+        .status-warning {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f1c40f;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
+        .status-error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .text-momo {
+            color: #ae1f6b;
+        }
+
+        /* Info Grid */
+        .info-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            color: rgba(255,255,255,0.4) !important;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            letter-spacing: -0.2px;
+        }
+
+        /* Buttons */
+        .btn-secondary-cinematic {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-cinematic:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .btn-netflix {
+            background: #e50914;
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-netflix:hover {
+            background: #f40612;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+            color: #fff;
+        }
+
+        .btn-cancel-ticket-black {
+            background: #e50914; /* Red solid */
+            color: #000;         /* Black text */
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-cancel-ticket-black:hover {
+            background: #ff0000;
+            color: #000;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+        }
+
+        .border-netflix {
+            border: 2px solid #e50914 !important;
+        }
+
+        /* Dropdown */
+        .dropdown-glass {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 12px;
+            padding: 8px;
+            margin-top: 5px !important;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(229, 9, 20, 0.1);
+            color: #e50914;
+        }
+
+        /* Empty State */
+        .empty-state-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(255,255,255,0.1);
+        }
+
+        /* Alerts */
+        .alert-glass-success {
+            background: rgba(40, 167, 69, 0.05);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            // Hiển thị thông báo từ TempData nếu có (Lỗi do 4h hoặc hệ thống)
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: '@Html.Raw(TempData["ErrorMessage"])',
+                    background: '#111117',
+                    color: '#fff'
+                });
+                </text>
+            }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: '@Html.Raw(TempData["SuccessMessage"])',
+                    background: '#111117',
+                    color: '#fff'
+                });
+                </text>
+            }
+
+            // Cancel Form confirmation with SweetAlert2
+            $(".cancel-form").on('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+                const statusBadge = $(this).closest('.ticket-visual-wrapper').find('.status-badge');
+                const isPaid = statusBadge.text().trim().includes('THÀNH CÔNG') || statusBadge.text().trim().includes('ĐÃ THANH TOÁN');
+                
+                Swal.fire({
+                    title: 'Xác nhận hủy vé?',
+                    text: isPaid 
+                        ? 'Lưu ý: Bạn sẽ được hoàn từ 50% - 100% giá trị vé vào điểm tích lũy tùy theo thời gian hủy. Bạn vẫn muốn tiếp tục?' 
+                        : 'Bạn chắc chắn muốn hủy đặt vé này chứ?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e50914',
+                    cancelButtonColor: '#444',
+                    confirmButtonText: 'Đồng ý, hủy vé!',
+                    cancelButtonText: 'Quay lại',
+                    background: '#111117',
+                    color: '#fff',
+                    customClass: {
+                        popup: 'glass-container border-netflix'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+
+            // Smooth entrance sequence
+            $(".animate__animated").each(function(i) {
+                $(this).css("animation-delay", (i * 0.1) + "s");
+            });
+        });
+    </script>
+}

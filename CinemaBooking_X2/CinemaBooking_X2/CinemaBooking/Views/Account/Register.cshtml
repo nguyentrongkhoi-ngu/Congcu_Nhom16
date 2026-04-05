@@ -1,0 +1,485 @@
+@{
+    Layout = null;
+}
+@using CinemaBooking.Models.ViewModels
+@model RegisterViewModel
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký – CineZore 2026</title>
+    <meta name="description" content="Tạo tài khoản CineZore để đặt vé xem phim và nhận ưu đãi thành viên." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/auth-obsidian.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        .obsidian-card { max-width: 520px !important; }
+    </style>
+</head>
+<body class="auth-page">
+    <!-- Particles -->
+    <div class="auth-particles">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Grid -->
+    <div class="spatial-grid"></div>
+
+    <div class="auth-viewport">
+        <div class="obsidian-card" id="registerCard">
+            <!-- Scan line texture -->
+            <div class="auth-scanline"></div>
+
+            <!-- Corner accents -->
+            <div class="corner-accent corner-tl"></div>
+            <div class="corner-accent corner-tr"></div>
+            <div class="corner-accent corner-bl"></div>
+            <div class="corner-accent corner-br"></div>
+
+            <!-- Brand -->
+            <div class="auth-brand">
+                <div class="auth-brand-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                CINE<span>ZORE</span>
+            </div>
+
+            <!-- Header -->
+            <div class="auth-header">
+                <h1>@(Model.BuocNhapOTP ? "Xác thực Email" : "Tạo tài khoản")</h1>
+                <div class="auth-trust-row">
+                    <span class="auth-trust-badge">
+                        <i class="fas fa-shield-halved ico-green"></i> Mã hóa 256-bit
+                    </span>
+                    <span class="auth-trust-badge">
+                        <i class="fas fa-user-plus ico-blue"></i> Miễn phí mãi mãi
+                    </span>
+                </div>
+            </div>
+
+            <!-- Step Progress -->
+            <div class="step-progress-container">
+                <div class="step-item @(!Model.BuocNhapOTP ? "active" : "done")">
+                    <div class="step-circle">
+                        @if (Model.BuocNhapOTP)
+                        {
+                            <i class="fas fa-check" style="font-size:0.6rem;"></i>
+                        }
+                        else
+                        {
+                            <span>1</span>
+                        }
+                    </div>
+                    <span class="step-label">Thông tin</span>
+                </div>
+
+                <div class="step-connector @(Model.BuocNhapOTP ? "done" : "")"></div>
+
+                <div class="step-item @(Model.BuocNhapOTP ? "active" : "")">
+                    <div class="step-circle">2</div>
+                    <span class="step-label">Xác thực</span>
+                </div>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Count > 0)
+            {
+                <div class="alert-precision-error">
+                    <i class="fas fa-circle-exclamation"></i>
+                    @ViewData.ModelState[""].Errors[0].ErrorMessage
+                </div>
+            }
+
+            @if (TempData["OtpMessage"] != null)
+            {
+                <div class="alert-precision-success">
+                    <i class="fas fa-circle-check"></i>
+                    @TempData["OtpMessage"]
+                </div>
+            }
+
+            <form asp-action="Register" method="post" id="registerForm">
+                <div asp-validation-summary="None"></div>
+
+                @if (!Model.BuocNhapOTP)
+                {
+                    <!-- ══════════ STEP 1: Thông tin ══════════ -->
+                    <div class="auth-step active" id="step1">
+
+                        <!-- Họ tên -->
+                        <div class="obsidian-input-group">
+                            <label for="hoTenInput" class="obsidian-label">
+                                <i class="fas fa-user" style="color:var(--crimson);font-size:0.58rem;"></i>
+                                Họ và tên
+                            </label>
+                            <div class="input-icon-wrap has-icon-prefix">
+                                <i class="fas fa-user input-prefix-icon"></i>
+                                <input asp-for="HoTen" class="obsidian-input" placeholder="Họ và tên đầy đủ" autocomplete="name" id="hoTenInput" />
+                            </div>
+                            <span asp-validation-for="HoTen" class="text-danger"></span>
+                        </div>
+
+                        <!-- Username + Phone -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="obsidian-input-group">
+                                    <label for="TenDangNhap" class="obsidian-label">
+                                        <i class="fas fa-at" style="color:var(--crimson);font-size:0.58rem;"></i>
+                                        Tên đăng nhập
+                                    </label>
+                                    <div class="input-icon-wrap has-icon-prefix">
+                                        <i class="fas fa-at input-prefix-icon"></i>
+                                        <input asp-for="TenDangNhap" class="obsidian-input" placeholder="Tên đăng nhập" autocomplete="username" />
+                                    </div>
+                                    <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="obsidian-input-group">
+                                    <label for="SoDienThoai" class="obsidian-label">
+                                        <i class="fas fa-phone" style="color:var(--crimson);font-size:0.58rem;"></i>
+                                        Số điện thoại
+                                    </label>
+                                    <div class="input-icon-wrap has-icon-prefix">
+                                        <i class="fas fa-phone input-prefix-icon"></i>
+                                        <input asp-for="SoDienThoai" class="obsidian-input" placeholder="Số điện thoại" autocomplete="tel" />
+                                    </div>
+                                    <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="obsidian-input-group">
+                            <label for="emailInput" class="obsidian-label">
+                                <i class="fas fa-envelope" style="color:var(--crimson);font-size:0.58rem;"></i>
+                                Địa chỉ Email
+                            </label>
+                            <div class="input-icon-wrap has-icon-prefix">
+                                <i class="fas fa-envelope input-prefix-icon"></i>
+                                <input asp-for="Email" class="obsidian-input" placeholder="Địa chỉ email" autocomplete="email" id="emailInput" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Password + Confirm -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="obsidian-input-group">
+                                    <label for="passwordInput" class="obsidian-label">
+                                        <i class="fas fa-lock" style="color:var(--crimson);font-size:0.58rem;"></i>
+                                        Mật khẩu
+                                    </label>
+                                    <div class="input-icon-wrap has-icon-prefix has-action">
+                                        <i class="fas fa-lock input-prefix-icon"></i>
+                                        <div class="input-with-action" style="width:100%;">
+                                            <input asp-for="MatKhau" type="password" class="obsidian-input"
+                                                   placeholder="Mật khẩu" id="passwordInput"
+                                                   autocomplete="new-password" style="padding-left:40px;" />
+                                            <button type="button" class="input-action-btn" onclick="togglePwd1()" title="Hiện/ẩn">
+                                                <i class="fas fa-eye" id="eyeIcon1"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="strength-meter">
+                                        <div class="strength-bar" id="strengthBar"></div>
+                                    </div>
+                                    <span asp-validation-for="MatKhau" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="obsidian-input-group">
+                                    <label for="confirmPwdInput" class="obsidian-label">
+                                        <i class="fas fa-lock-open" style="color:var(--crimson);font-size:0.58rem;"></i>
+                                        Xác nhận mật khẩu
+                                    </label>
+                                    <div class="input-icon-wrap has-icon-prefix has-action">
+                                        <i class="fas fa-lock-open input-prefix-icon"></i>
+                                        <div class="input-with-action" style="width:100%;">
+                                            <input asp-for="XacNhanMatKhau" type="password" class="obsidian-input"
+                                                   placeholder="Nhập lại" id="confirmPwdInput"
+                                                   autocomplete="new-password" style="padding-left:40px;" />
+                                            <button type="button" class="input-action-btn" onclick="togglePwd2()" title="Hiện/ẩn">
+                                                <i class="fas fa-eye" id="eyeIcon2"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Strength hint -->
+                        <p class="strength-hint" id="strengthHint"></p>
+
+                        <button type="submit" class="btn-precision" id="btnContinue">
+                            <i class="fas fa-arrow-right" style="margin-right:8px;"></i>Tiếp tục
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- ══════════ STEP 2: OTP ══════════ -->
+                    <div class="auth-step active" id="step2">
+                        <input type="hidden" asp-for="Email" />
+                        <input type="hidden" asp-for="BuocNhapOTP" />
+                        <input type="hidden" asp-for="DaGuiOTP" />
+                        <input type="hidden" asp-for="HoTen" />
+                        <!-- Hidden real OTP value submitted by form -->
+                        <input type="hidden" asp-for="MaXacThuc" id="otpHiddenInput" />
+
+                        <p style="font-size:0.82rem;line-height:1.9;color:rgba(255,255,255,0.55);margin-bottom:6px;text-align:center;">
+                            Mã xác thực 6 chữ số đã được gửi tới
+                        </p>
+                        <p style="font-size:0.9rem;font-weight:700;color:#fff;text-align:center;margin-bottom:28px;letter-spacing:0.5px;">
+                            <i class="fas fa-envelope" style="color:var(--crimson);margin-right:6px;font-size:0.8rem;"></i>@Model.Email
+                        </p>
+
+                        <!-- OTP 6-box grid -->
+                        <div class="otp-grid" id="otpGrid">
+                            <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" id="otp0" />
+                            <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="otp1" />
+                            <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="otp2" />
+                            <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="otp3" />
+                            <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="otp4" />
+                            <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="otp5" />
+                        </div>
+                        <span asp-validation-for="MaXacThuc" class="text-danger" style="text-align:center;display:block;margin-top:8px;"></span>
+
+                        <button type="submit" class="btn-precision" id="btnVerify">
+                            <i class="fas fa-circle-check" style="margin-right:8px;"></i>Xác nhận đăng ký
+                        </button>
+
+                        <!-- Countdown + Resend -->
+                        <div class="otp-meta">
+                            <div class="otp-countdown" id="countdownContainer">
+                                Gửi lại mã sau: <span class="timer-num" id="timer">60</span>s
+                            </div>
+                            <a href="@Url.Action("ResendOtp", new { email = Model.Email, hoTen = Model.HoTen })"
+                               id="resendLink"
+                               class="otp-resend-link">
+                                <i class="fas fa-rotate-right" style="margin-right:5px;"></i>Gửi lại mã
+                            </a>
+                        </div>
+                    </div>
+                }
+            </form>
+
+            <div class="auth-nav-links">
+                Đã có tài khoản?
+                <a href="@Url.Action("Login", "Account")">Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        /* ── Password toggles ── */
+        function togglePwd1() {
+            const i = document.getElementById('passwordInput');
+            const ic = document.getElementById('eyeIcon1');
+            i.type = i.type === 'password' ? 'text' : 'password';
+            ic.className = i.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+        function togglePwd2() {
+            const i = document.getElementById('confirmPwdInput');
+            const ic = document.getElementById('eyeIcon2');
+            i.type = i.type === 'password' ? 'text' : 'password';
+            ic.className = i.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+
+        /* ── Ripple ── */
+        function addRipple(btn, e) {
+            const rect = btn.getBoundingClientRect();
+            const r = document.createElement('span');
+            r.className = 'btn-ripple';
+            const size = Math.max(rect.width, rect.height);
+            r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+            btn.appendChild(r);
+            r.addEventListener('animationend', () => r.remove());
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.querySelector('#registerCard');
+
+            /* ═══ ENTRANCE (GSAP optional fallback) ═══ */
+            if (typeof gsap !== 'undefined') {
+                const tl = gsap.timeline({
+                    defaults: { ease: 'expo.out' },
+                    onComplete: () => {
+                        gsap.set([card, '.btn-precision', '.obsidian-input-group'], { clearProps: 'all' });
+                    }
+                });
+
+                tl.from(card, { opacity: 0, y: 30, scale: 0.99, duration: 1.0 })
+                  .from('.auth-brand', { opacity: 0, y: -10, duration: 0.8 }, '-=0.7')
+                  .from('.auth-header, .step-progress-container', { opacity: 0, y: 10, stagger: 0.1, duration: 0.8 }, '-=0.7')
+                  .from('.obsidian-input-group, .row, .btn-precision, .auth-nav-links, .otp-grid, .otp-meta', {
+                      opacity: 0, 
+                      y: 10, 
+                      stagger: 0.05, 
+                      duration: 0.7 
+                  }, '-=0.6');
+            } else {
+                card.style.opacity = '1';
+            }
+
+            /* ═══ RIPPLE ═══ */
+            document.querySelectorAll('.btn-precision').forEach(btn => {
+                btn.addEventListener('click', (e) => addRipple(btn, e));
+            });
+
+            /* ═══ OTP 6-BOX LOGIC ═══ */
+            const otpBoxes  = document.querySelectorAll('.otp-box');
+            const otpHidden = document.getElementById('otpHiddenInput');
+            const timerEl   = document.getElementById('timer');
+            const resendLink = document.getElementById('resendLink');
+            const countdownContainer = document.getElementById('countdownContainer');
+
+            if (otpBoxes.length === 6) {
+                // Auto-focus first box
+                otpBoxes[0].focus();
+
+                function syncHidden() {
+                    if (otpHidden) {
+                        otpHidden.value = Array.from(otpBoxes).map(b => b.value).join('');
+                    }
+                }
+
+                function markFilled(box) {
+                    if (box.value.length > 0) {
+                        box.classList.add('filled');
+                    } else {
+                        box.classList.remove('filled');
+                    }
+                }
+
+                otpBoxes.forEach((box, idx) => {
+                    box.addEventListener('input', (e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        box.value = val.slice(0, 1);
+                        markFilled(box);
+                        syncHidden();
+                        // Animate fill
+                        if (box.value) {
+                            gsap.from(box, { scale: 1.15, duration: 0.25, ease: 'back.out(2)' });
+                            if (idx < 5) otpBoxes[idx + 1].focus();
+                        }
+                        // All filled?
+                        const allFilled = Array.from(otpBoxes).every(b => b.value.length === 1);
+                        if (allFilled) otpBoxes.forEach(b => b.classList.add('is-valid'));
+                    });
+
+                    box.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace') {
+                            box.value = '';
+                            box.classList.remove('filled', 'is-valid');
+                            otpBoxes.forEach(b => b.classList.remove('is-valid'));
+                            syncHidden();
+                            if (idx > 0) otpBoxes[idx - 1].focus();
+                        }
+                        if (e.key === 'ArrowLeft'  && idx > 0) otpBoxes[idx - 1].focus();
+                        if (e.key === 'ArrowRight' && idx < 5) otpBoxes[idx + 1].focus();
+                    });
+
+                    box.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                        paste.split('').slice(0, 6).forEach((ch, i) => {
+                            if (otpBoxes[i]) {
+                                otpBoxes[i].value = ch;
+                                markFilled(otpBoxes[i]);
+                            }
+                        });
+                        syncHidden();
+                        otpBoxes[Math.min(paste.length, 5)].focus();
+                        const allFilled = Array.from(otpBoxes).every(b => b.value.length === 1);
+                        if (allFilled) {
+                            otpBoxes.forEach(b => b.classList.add('is-valid'));
+                            gsap.from('.otp-box', { scale: 1.1, stagger: 0.04, duration: 0.3, ease: 'back.out(2)' });
+                        }
+                    });
+                });
+            }
+
+            /* ═══ OTP COUNTDOWN ═══ */
+            if (timerEl) {
+                let timeLeft = 60;
+                const interval = setInterval(() => {
+                    timeLeft--;
+                    timerEl.textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(interval);
+                        countdownContainer.style.display = 'none';
+                        resendLink.style.display = 'inline-block';
+                        gsap.from(resendLink, { opacity: 0, y: 6, duration: 0.4, ease: 'expo.out' });
+                    }
+                }, 1000);
+            }
+
+            /* ═══ PASSWORD STRENGTH ═══ */
+            const pwdInput     = document.getElementById('passwordInput');
+            const confirmInput = document.getElementById('confirmPwdInput');
+            const strengthBar  = document.getElementById('strengthBar');
+            const hint         = document.getElementById('strengthHint');
+            const labels = ['', 'Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
+            const colors = ['', '#ff4444', '#ff8c00', '#ffc107', '#4ccc88', '#00e676'];
+
+            if (pwdInput) {
+                pwdInput.addEventListener('input', () => {
+                    const val = pwdInput.value;
+                    let score = 0;
+                    if (val.length > 5)  score++;
+                    if (val.length > 9)  score++;
+                    if (/[A-Z]/.test(val))       score++;
+                    if (/[0-9]/.test(val))       score++;
+                    if (/[^A-Za-z0-9]/.test(val)) score++;
+                    const idx = Math.min(score, 5);
+                    if (strengthBar) {
+                        gsap.to(strengthBar, { width: (score / 5 * 100) + '%', backgroundColor: colors[idx] || colors[1], duration: 0.35 });
+                    }
+                    if (hint) {
+                        hint.textContent = val.length > 0 ? labels[idx] : '';
+                        hint.style.color = colors[idx] || 'rgba(255,255,255,0.38)';
+                    }
+                });
+            }
+
+            /* ═══ CONFIRM MATCH ═══ */
+            if (confirmInput && pwdInput) {
+                confirmInput.addEventListener('input', () => {
+                    if (confirmInput.value.length > 0) {
+                        if (confirmInput.value === pwdInput.value) {
+                            confirmInput.classList.add('is-valid');
+                            confirmInput.classList.remove('is-error');
+                        } else {
+                            confirmInput.classList.remove('is-valid');
+                            confirmInput.classList.add('is-error');
+                        }
+                    } else {
+                        confirmInput.classList.remove('is-valid', 'is-error');
+                    }
+                });
+            }
+
+            /* ═══ EMAIL LIVE VALIDATION ═══ */
+            const emailInput = document.getElementById('emailInput');
+            if (emailInput) {
+                emailInput.addEventListener('input', () => {
+                    const isEmail = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(emailInput.value.trim());
+                    if (isEmail) { emailInput.classList.add('is-valid'); emailInput.classList.remove('is-error'); }
+                    else         { emailInput.classList.remove('is-valid'); }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

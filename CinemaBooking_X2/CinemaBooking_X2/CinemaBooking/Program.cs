@@ -28,6 +28,7 @@ builder.Services.Configure<IISServerOptions>(options =>
     options.MaxRequestBodySize = 104857600; // 100MB
 });
 
+
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100MB
@@ -117,8 +118,8 @@ builder.Services.AddHostedService<LichChieuCleanupService>();
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? throw new InvalidOperationException("Google ClientId not configured.");
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? throw new InvalidOperationException("Google ClientSecret not configured.");
+        options.ClientId = "YOUR_GOOGLE_CLIENT_ID";
+        options.ClientSecret = "YOUR_GOOGLE_CLIENT_SECRET";
         options.CallbackPath = "/signin-google";
     });
 
@@ -150,6 +151,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
