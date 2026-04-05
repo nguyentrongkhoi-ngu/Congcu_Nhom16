@@ -47,4 +47,4 @@ namespace CinemaBooking.Models
         [ForeignKey("MaDatVe")]
         public virtual DatVe DatVe { get; set; }
     }
-} 
+}

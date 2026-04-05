@@ -95,15 +95,15 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 {
                     var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "posters");
                     Directory.CreateDirectory(uploadsFolder);
-                    
+
                     var fileName = Guid.NewGuid().ToString() + Path.GetExtension(posterFile.FileName);
                     var filePath = Path.Combine(uploadsFolder, fileName);
-                    
+
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await posterFile.CopyToAsync(stream);
                     }
-                    
+
                     phim.UrlPoster = "/posters/" + fileName;
                 }
 
@@ -111,28 +111,28 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 {
                     var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "trailers");
                     Directory.CreateDirectory(uploadsFolder);
-                    
+
                     var fileName = Guid.NewGuid().ToString() + Path.GetExtension(trailerFile.FileName);
                     var filePath = Path.Combine(uploadsFolder, fileName);
-                    
+
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await trailerFile.CopyToAsync(stream);
                     }
-                    
+
                     phim.Trailer = "/trailers/" + fileName;
                 }
 
                 _context.Add(phim);
                 await _context.SaveChangesAsync();
-                
+
                 TempData["SuccessMessage"] = "Thêm phim mới thành công!";
             }
             else
             {
                 TempData["ErrorMessage"] = "Lỗi dữ liệu: " + string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -149,7 +149,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            
+
             return View(phim);
         }
 
@@ -235,10 +235,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     // Manually handle cascading deletes if not configured in DB
                     if (phim.LichChieus != null && phim.LichChieus.Any())
                         _context.LichChieus.RemoveRange(phim.LichChieus);
-                    
+
                     if (phim.DanhGias != null && phim.DanhGias.Any())
                         _context.DanhGias.RemoveRange(phim.DanhGias);
-                    
+
                     if (phim.NgonNguPhims != null && phim.NgonNguPhims.Any())
                         _context.NgonNguPhims.RemoveRange(phim.NgonNguPhims);
 
@@ -246,7 +246,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     await _context.SaveChangesAsync();
                     return Json(new { success = true, message = "Xóa phim và các dữ liệu liên quan thành công!" });
                 }
-                
+
                 return Json(new { success = false, message = "Không tìm thấy phim để xóa." });
             }
             catch (Exception ex)

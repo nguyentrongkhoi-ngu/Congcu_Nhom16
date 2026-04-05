@@ -88,10 +88,10 @@ namespace CinemaBooking.Controllers
                 existingDanhGia.DiemSo = viewModel.DiemSo;
                 existingDanhGia.BinhLuan = viewModel.BinhLuan;
                 existingDanhGia.NgayDanhGia = DateTime.Now;
-                
+
                 _context.Update(existingDanhGia);
                 await _context.SaveChangesAsync();
-                
+
                 TempData["SuccessMessage"] = "Cập nhật đánh giá thành công!";
             }
             else
@@ -105,10 +105,10 @@ namespace CinemaBooking.Controllers
                     BinhLuan = viewModel.BinhLuan,
                     NgayDanhGia = DateTime.Now
                 };
-                
+
                 _context.Add(danhGia);
                 await _context.SaveChangesAsync();
-                
+
                 TempData["SuccessMessage"] = "Đánh giá phim thành công!";
             }
 
@@ -160,7 +160,7 @@ namespace CinemaBooking.Controllers
         public async Task<IActionResult> XoaDanhGia(int id)
         {
             var danhGia = await _context.DanhGias.FindAsync(id);
-            
+
             if (danhGia == null)
             {
                 return NotFound();
@@ -181,13 +181,13 @@ namespace CinemaBooking.Controllers
             }
 
             var maPhim = danhGia.MaPhim;
-            
+
             _context.DanhGias.Remove(danhGia);
             await _context.SaveChangesAsync();
-            
+
             TempData["SuccessMessage"] = "Xóa đánh giá thành công!";
-            
+
             return RedirectToAction("DanhSachDanhGia", new { id = maPhim });
         }
     }
-} 
+}

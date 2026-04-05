@@ -46,4 +46,4 @@ namespace CinemaBooking.Models.ViewModels
         public string? UrlPoster { get; set; }
         public string? Trailer { get; set; }
     }
-} 
+}

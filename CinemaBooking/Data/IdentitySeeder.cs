@@ -12,13 +12,13 @@ namespace CinemaBooking.Data
         {
             // Seed roles
             await SeedRolesAsync(roleManager);
-            
+
             // Seed admin user
             await SeedAdminUserAsync(userManager);
 
             // Seed test user
             await SeedUserTestAsync(userManager, context);
-            
+
             // Migrate existing users from NguoiDung to Identity
             await MigrateExistingUsersAsync(userManager, context);
         }
@@ -140,7 +140,7 @@ namespace CinemaBooking.Data
 
                 // Create user with a temporary password (they'll need to reset it)
                 var result = await userManager.CreateAsync(applicationUser, "TempPassword123!");
-                
+
                 if (result.Succeeded)
                 {
                     // Assign role based on MaVaiTro

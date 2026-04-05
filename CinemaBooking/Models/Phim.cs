@@ -58,8 +58,8 @@ namespace CinemaBooking.Models
         public virtual ICollection<NgonNguPhim> NgonNguPhims { get; set; }
         public virtual ICollection<LichChieu> LichChieus { get; set; }
         public virtual ICollection<DanhGia> DanhGias { get; set; }
-        
+
         [NotMapped]
         public string HinhAnh => UrlPoster;
     }
-} 
+}

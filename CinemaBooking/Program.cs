@@ -190,7 +190,7 @@ app.MapControllerRoute(
 
 app.MapHub<CinemaBooking.Hubs.BookingHub>("/bookingHub");
 
-try 
+try
 {
     // Seed dữ liệu mẫu
     using (var scope = app.Services.CreateScope())
@@ -201,7 +201,7 @@ try
 
         // Initialize traditional data first
         await SeedData.Initialize(context);
-        
+
         // Initialize Identity data
         await IdentitySeeder.SeedAsync(userManager, roleManager, context);
     }
@@ -211,7 +211,7 @@ try
 catch (Exception ex)
 {
     Console.WriteLine($"FATAL ERROR ON STARTUP: {ex.Message}");
-    if (ex.InnerException != null) 
+    if (ex.InnerException != null)
     {
         Console.WriteLine($"INNER EXCEPTION: {ex.InnerException.Message}");
         if (ex.InnerException.InnerException != null)

@@ -16,7 +16,7 @@ namespace CinemaBooking.Models.Services
             _configuration = configuration;
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             _logPath = Path.Combine(baseDirectory, "Logs", "Payments");
-            
+
             // Đảm bảo thư mục log tồn tại
             if (!Directory.Exists(_logPath))
             {
@@ -30,11 +30,11 @@ namespace CinemaBooking.Models.Services
             {
                 string fileName = $"momo_req_{requestId}_{DateTime.Now:yyyyMMdd_HHmmss}.json";
                 string filePath = Path.Combine(_logPath, fileName);
-                string jsonData = JsonSerializer.Serialize(requestData, new JsonSerializerOptions 
-                { 
-                    WriteIndented = true 
+                string jsonData = JsonSerializer.Serialize(requestData, new JsonSerializerOptions
+                {
+                    WriteIndented = true
                 });
-                
+
                 File.WriteAllText(filePath, jsonData, Encoding.UTF8);
             }
             catch (Exception ex)
@@ -49,21 +49,21 @@ namespace CinemaBooking.Models.Services
             {
                 string fileName = $"momo_res_{requestId}_{DateTime.Now:yyyyMMdd_HHmmss}.json";
                 string filePath = Path.Combine(_logPath, fileName);
-                
+
                 // Attempt to format the JSON if possible
                 try
                 {
                     var jsonDocument = JsonDocument.Parse(responseData);
-                    responseData = JsonSerializer.Serialize(jsonDocument, new JsonSerializerOptions 
-                    { 
-                        WriteIndented = true 
+                    responseData = JsonSerializer.Serialize(jsonDocument, new JsonSerializerOptions
+                    {
+                        WriteIndented = true
                     });
                 }
                 catch
                 {
                     // If parsing fails, just log the raw response
                 }
-                
+
                 File.WriteAllText(filePath, responseData, Encoding.UTF8);
             }
             catch (Exception ex)
@@ -78,19 +78,19 @@ namespace CinemaBooking.Models.Services
             {
                 string fileName = $"error_{paymentMethod}_{requestId}_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
                 string filePath = Path.Combine(_logPath, fileName);
-                
+
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"=== Payment Error - {paymentMethod} ===");
                 sb.AppendLine($"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                 sb.AppendLine($"Request ID: {requestId}");
                 sb.AppendLine($"Error Message: {exception.Message}");
                 sb.AppendLine($"Stack Trace: {exception.StackTrace}");
-                
+
                 if (exception.InnerException != null)
                 {
                     sb.AppendLine($"Inner Exception: {exception.InnerException.Message}");
                 }
-                
+
                 File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
             }
             catch (Exception ex)
@@ -99,4 +99,4 @@ namespace CinemaBooking.Models.Services
             }
         }
     }
-} 
+}

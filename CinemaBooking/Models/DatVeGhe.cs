@@ -18,4 +18,4 @@ namespace CinemaBooking.Models
         [ForeignKey("MaGhe")]
         public virtual Ghe? Ghe { get; set; }
     }
-} 
+}

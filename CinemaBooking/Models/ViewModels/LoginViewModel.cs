@@ -16,4 +16,4 @@ namespace CinemaBooking.Models.ViewModels
         [Display(Name = "Ghi nhớ đăng nhập")]
         public bool RememberMe { get; set; }
     }
-} 
+}

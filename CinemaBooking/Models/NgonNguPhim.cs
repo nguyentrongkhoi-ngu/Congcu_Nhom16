@@ -25,7 +25,7 @@ namespace CinemaBooking.Models
 
         [ForeignKey("MaPhim")]
         public virtual Phim? Phim { get; set; }
-        
+
         public virtual ICollection<LichChieu> LichChieus { get; set; } = new List<LichChieu>();
     }
-} 
+}

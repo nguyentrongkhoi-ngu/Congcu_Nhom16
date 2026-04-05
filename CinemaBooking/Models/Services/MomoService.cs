@@ -18,8 +18,8 @@ namespace CinemaBooking.Models.Services
         private readonly PaymentLogger _logger;
 
         public MomoService(
-            IConfiguration configuration, 
-            IHttpContextAccessor httpContextAccessor, 
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor,
             HttpClient httpClient,
             PaymentLogger logger)
         {
@@ -108,7 +108,8 @@ namespace CinemaBooking.Models.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var options = new JsonSerializerOptions {
+                    var options = new JsonSerializerOptions
+                    {
                         PropertyNameCaseInsensitive = true
                     };
 
@@ -149,10 +150,10 @@ namespace CinemaBooking.Models.Services
         {
             string secretKey = _configuration["Momo:SecretKey"];
             StringBuilder rawData = new StringBuilder();
-            
+
             // Sắp xếp các tham số theo thứ tự alphabet
             var sortedParams = new SortedDictionary<string, string>(requestData);
-            
+
             foreach (var item in sortedParams)
             {
                 // Bỏ qua signature
@@ -161,14 +162,14 @@ namespace CinemaBooking.Models.Services
 
                 rawData.Append($"&{item.Key}={item.Value}");
             }
-            
+
             // Xóa dấu & ở đầu chuỗi
             if (rawData.Length > 0)
                 rawData.Remove(0, 1);
-            
+
             // Tính toán chữ ký
             string calculatedSignature = ComputeHmacSha256(rawData.ToString(), secretKey);
-            
+
             // So sánh chữ ký
             return calculatedSignature.Equals(receivedSignature, StringComparison.OrdinalIgnoreCase);
         }
@@ -233,4 +234,4 @@ namespace CinemaBooking.Models.Services
         public int ResultCode { get; set; }
         public string PayUrl { get; set; }
     }
-} 
+}

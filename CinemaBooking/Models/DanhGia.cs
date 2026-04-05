@@ -42,4 +42,4 @@ namespace CinemaBooking.Models
         [ForeignKey("MaPhim")]
         public virtual Phim Phim { get; set; }
     }
-} 
+}

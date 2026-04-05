@@ -45,7 +45,8 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 tenRap = cinema.TenRap,
                 diaChi = cinema.DiaChi,
                 thanhPho = cinema.ThanhPho,
-                phongs = cinema.PhongChieus.Select(p => new {
+                phongs = cinema.PhongChieus.Select(p => new
+                {
                     maPhong = p.MaPhong,
                     soPhong = p.SoPhong,
                     sucChua = p.SucChua,

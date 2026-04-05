@@ -49,4 +49,4 @@ namespace CinemaBooking.Models
 
         public virtual ICollection<DatVe> DatVes { get; set; } = new List<DatVe>();
     }
-} 
+}

@@ -60,4 +60,4 @@ namespace CinemaBooking.Models
         public virtual ICollection<DatVeCombo> DatVeCombos { get; set; }
         public virtual ICollection<ThanhToan> ThanhToans { get; set; }
     }
-} 
+}

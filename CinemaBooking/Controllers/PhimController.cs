@@ -99,7 +99,7 @@ namespace CinemaBooking.Controllers
                     .ThenInclude(l => l.PhongChieu)
                         .ThenInclude(p => p.RapPhim)
                 .FirstOrDefaultAsync(m => m.MaPhim == id);
-                
+
             if (phim == null)
             {
                 return NotFound();
@@ -108,9 +108,9 @@ namespace CinemaBooking.Controllers
             // Kiểm tra xem phim có lịch chiếu trong tương lai không
             var now = DateTime.Now;
             bool hasScreenings = phim.LichChieus != null && phim.LichChieus
-                .Any(l => l.NgayChieu.Date > now.Date || 
+                .Any(l => l.NgayChieu.Date > now.Date ||
                     (l.NgayChieu.Date == now.Date && l.GioChieu > now.TimeOfDay));
-            
+
             ViewBag.HasFutureScreenings = hasScreenings;
 
             // Lấy danh sách đánh giá của phim
@@ -157,12 +157,12 @@ namespace CinemaBooking.Controllers
                 {
                     ModelState.AddModelError("PosterFile", "Vui lòng chọn ảnh poster cho phim");
                 }
-                
+
                 if (model.TrailerFile == null || model.TrailerFile.Length == 0)
                 {
                     ModelState.AddModelError("TrailerFile", "Vui lòng chọn file trailer cho phim");
                 }
-                
+
                 if (!ModelState.IsValid)
                 {
                     // Log validation errors
@@ -174,25 +174,25 @@ namespace CinemaBooking.Controllers
                             Console.WriteLine($"Error in {key}: {error.ErrorMessage}");
                         }
                     }
-                    
+
                     return View(model);
                 }
-                
+
                 // Kiểm tra kích thước file
                 long maxFileSizeMB = 100; // Tăng giới hạn lên 100MB
-                
+
                 if (model.PosterFile != null && model.PosterFile.Length > maxFileSizeMB * 1024 * 1024)
                 {
                     ModelState.AddModelError("PosterFile", $"Kích thước file quá lớn. Tối đa {maxFileSizeMB}MB.");
                     return View(model);
                 }
-                
+
                 if (model.TrailerFile != null && model.TrailerFile.Length > maxFileSizeMB * 1024 * 1024)
                 {
                     ModelState.AddModelError("TrailerFile", $"Kích thước file quá lớn. Tối đa {maxFileSizeMB}MB.");
                     return View(model);
                 }
-                
+
                 // Xử lý upload poster
                 string posterUrl = null;
                 if (model.PosterFile != null)
@@ -201,7 +201,7 @@ namespace CinemaBooking.Controllers
                     posterUrl = await UploadFile(model.PosterFile, "posters");
                     Console.WriteLine($"Poster URL: {posterUrl}");
                 }
-                
+
                 // Xử lý upload trailer
                 string trailerUrl = null;
                 if (model.TrailerFile != null)
@@ -228,7 +228,7 @@ namespace CinemaBooking.Controllers
                 _context.Add(phim);
                 await _context.SaveChangesAsync();
                 Console.WriteLine("Movie saved successfully");
-                
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -239,7 +239,7 @@ namespace CinemaBooking.Controllers
                     Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 }
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                
+
                 ModelState.AddModelError(string.Empty, $"Lỗi khi lưu phim: {ex.Message}");
                 return View(model);
             }
@@ -369,7 +369,7 @@ namespace CinemaBooking.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var phim = await _context.Phims.FindAsync(id);
-            
+
             if (phim == null)
             {
                 return NotFound();
@@ -393,7 +393,7 @@ namespace CinemaBooking.Controllers
                 {
                     return Json(new { success = false, message = "No file selected" });
                 }
-                
+
                 var result = new Dictionary<string, object>
                 {
                     { "success", true },
@@ -401,13 +401,14 @@ namespace CinemaBooking.Controllers
                     { "fileSize", file.Length },
                     { "contentType", file.ContentType }
                 };
-                
+
                 return Json(result);
             }
             catch (Exception ex)
             {
-                return Json(new { 
-                    success = false, 
+                return Json(new
+                {
+                    success = false,
                     message = ex.Message,
                     innerException = ex.InnerException?.Message,
                     stackTrace = ex.StackTrace
@@ -427,18 +428,18 @@ namespace CinemaBooking.Controllers
             {
                 // Tạo tên file duy nhất
                 string uniqueFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid().ToString().Substring(0, 8)}{Path.GetExtension(file.FileName)}";
-                
+
                 // Đường dẫn lưu file
                 string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, folderName);
-                
+
                 // Tạo thư mục nếu chưa tồn tại
                 if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
                 }
-                
+
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                
+
                 // Sử dụng buffer nhỏ hơn và ghi file dần dần khi là video lớn
                 if (file.Length > 10 * 1024 * 1024) // Nếu lớn hơn 10MB
                 {
@@ -446,7 +447,7 @@ namespace CinemaBooking.Controllers
                     {
                         const int bufferSize = 1024 * 1024; // 1MB buffer
                         byte[] buffer = new byte[bufferSize];
-                        
+
                         using (var fileStream = file.OpenReadStream())
                         {
                             int bytesRead;
@@ -466,7 +467,7 @@ namespace CinemaBooking.Controllers
                         await file.CopyToAsync(fileStream);
                     }
                 }
-                
+
                 // Trả về đường dẫn tương đối
                 return $"/{folderName}/{uniqueFileName}";
             }
@@ -489,7 +490,7 @@ namespace CinemaBooking.Controllers
             {
                 // Đường dẫn tuyệt đối tới file
                 string filePath = Path.Combine(_webHostEnvironment.WebRootPath, fileUrl.TrimStart('/'));
-                
+
                 if (System.IO.File.Exists(filePath))
                 {
                     System.IO.File.Delete(filePath);
@@ -507,4 +508,4 @@ namespace CinemaBooking.Controllers
             return _context.Phims.Any(e => e.MaPhim == id);
         }
     }
-} 
+}

@@ -32,15 +32,15 @@ namespace CinemaBooking.Models.ViewModels
         [Display(Name = "Số điện thoại")]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
         public string SoDienThoai { get; set; }
-        
+
         // Trường dành cho OTP - chỉ bắt buộc ở bước 2
         [Display(Name = "Mã xác thực")]
         public string MaXacThuc { get; set; }
-        
+
         // Cờ để đánh dấu trạng thái xác thực
         public bool DaGuiOTP { get; set; }
-        
+
         // Cờ để đánh dấu bước xác thực
         public bool BuocNhapOTP { get; set; }
     }
-} 
+}

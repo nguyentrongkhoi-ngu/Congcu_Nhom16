@@ -10,13 +10,13 @@ namespace CinemaBooking.Hubs
     {
         // Simple in-memory store for "Currently Selecting" seats
         // Key: ScreeningId (MaLichChieu), Value: Dictionary<SeatId, ConnectionId>
-        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> SelectingSeats = 
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> SelectingSeats =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, string>>();
 
         public async Task JoinScreening(string screeningId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, screeningId);
-            
+
             // Send current selecting status to the newcomer
             if (SelectingSeats.TryGetValue(screeningId, out var seats))
             {
@@ -28,7 +28,7 @@ namespace CinemaBooking.Hubs
         public async Task SelectSeat(string screeningId, string seatId)
         {
             var screeningSelection = SelectingSeats.GetOrAdd(screeningId, _ => new ConcurrentDictionary<string, string>());
-            
+
             if (screeningSelection.TryAdd(seatId, Context.ConnectionId))
             {
                 await Clients.GroupExcept(screeningId, Context.ConnectionId).SendAsync("SeatSelectedByOther", seatId);

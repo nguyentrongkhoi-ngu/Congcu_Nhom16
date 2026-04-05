@@ -32,8 +32,8 @@ namespace CinemaBooking.Models
 
         public virtual ICollection<LichChieu> LichChieus { get; set; }
         public virtual ICollection<Ghe> Ghes { get; set; }
-        
+
         [NotMapped]
         public string TenPhong => $"Phòng {SoPhong}";
     }
-} 
+}

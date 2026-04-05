@@ -48,7 +48,7 @@ namespace CinemaBooking.Controllers
             // Áp dụng các bộ lọc
             if (!string.IsNullOrEmpty(viewModel.SearchTerm))
             {
-                query = query.Where(l => l.Phim.TenPhim.Contains(viewModel.SearchTerm) || 
+                query = query.Where(l => l.Phim.TenPhim.Contains(viewModel.SearchTerm) ||
                                         l.PhongChieu.RapPhim.TenRap.Contains(viewModel.SearchTerm));
             }
 

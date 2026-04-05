@@ -27,7 +27,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
         {
             // Lấy danh sách rạp phim cho dropdown
             ViewBag.RapPhims = await _context.RapPhims.ToListAsync();
-            
+
             // Lấy danh sách phòng chiếu (nếu có chọn rạp)
             if (rapId.HasValue)
             {
@@ -35,10 +35,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     .Where(p => p.MaRap == rapId.Value)
                     .ToListAsync();
             }
-            
+
             // Danh sách các trạng thái đặt vé
             ViewBag.TrangThais = new List<string> { "Đã đặt", "Đã thanh toán", "Đã hủy", "Chờ thanh toán" };
-            
+
             // Lấy query danh sách đặt vé
             var datVeQuery = _context.DatVes
                 .Include(d => d.NguoiDung)
@@ -57,44 +57,44 @@ namespace CinemaBooking.Areas.Admin.Controllers
             {
                 datVeQuery = datVeQuery.Where(d => d.LichChieu.PhongChieu.MaRap == rapId.Value);
             }
-            
+
             // Lọc theo phòng chiếu (nếu có)
             if (phongId.HasValue)
             {
                 datVeQuery = datVeQuery.Where(d => d.LichChieu.MaPhong == phongId.Value);
             }
-            
+
             // Lọc theo trạng thái (nếu có)
             if (!string.IsNullOrEmpty(trangThai))
             {
                 datVeQuery = datVeQuery.Where(d => d.TrangThai == trangThai);
             }
-            
+
             // Lọc theo ngày đặt (nếu có)
             if (tuNgay.HasValue)
             {
                 datVeQuery = datVeQuery.Where(d => d.NgayDat >= tuNgay.Value.Date);
             }
-            
+
             if (denNgay.HasValue)
             {
                 datVeQuery = datVeQuery.Where(d => d.NgayDat <= denNgay.Value.Date.AddDays(1).AddSeconds(-1));
             }
-            
+
             // Lọc theo tìm kiếm (tên, email, số điện thoại hoặc mã vé)
             if (!string.IsNullOrEmpty(search))
             {
                 string s = search.ToLower();
-                datVeQuery = datVeQuery.Where(d => 
-                    d.MaDatVe.ToString().Contains(s) || 
-                    d.NguoiDung.HoTen.ToLower().Contains(s) || 
-                    d.NguoiDung.Email.ToLower().Contains(s) || 
+                datVeQuery = datVeQuery.Where(d =>
+                    d.MaDatVe.ToString().Contains(s) ||
+                    d.NguoiDung.HoTen.ToLower().Contains(s) ||
+                    d.NguoiDung.Email.ToLower().Contains(s) ||
                     d.NguoiDung.SoDienThoai.Contains(s));
             }
 
             // Sắp xếp theo ngày đặt mới nhất
             datVeQuery = datVeQuery.OrderByDescending(d => d.NgayDat);
-            
+
             // Lưu giá trị lọc vào ViewBag để hiển thị lại trên form
             ViewBag.RapId = rapId;
             ViewBag.PhongId = phongId;
@@ -126,7 +126,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     .ThenInclude(dvg => dvg.Ghe)
                 .Include(d => d.ThanhToans)
                 .FirstOrDefaultAsync(m => m.MaDatVe == id);
-                
+
             if (datVe == null)
             {
                 return NotFound();
@@ -143,7 +143,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
             var datVe = await _context.DatVes
                 .Include(d => d.DatVeGhes)
                 .FirstOrDefaultAsync(d => d.MaDatVe == id);
-                
+
             if (datVe == null)
             {
                 return NotFound();
@@ -151,7 +151,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
 
             // Lưu trạng thái cũ trước khi cập nhật
             string trangThaiCu = datVe.TrangThai;
-            
+
             // Cập nhật trạng thái mới
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
@@ -175,7 +175,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                             {
                                 DateTime lichChieuDT = datVeFull.LichChieu.NgayChieu.Date.Add(datVeFull.LichChieu.GioChieu);
                                 TimeSpan timeToScreening = lichChieuDT - DateTime.Now;
-                                
+
                                 decimal refundPercentage = 0;
                                 string refundNote = "Không hoàn tiền";
 
@@ -210,16 +210,17 @@ namespace CinemaBooking.Areas.Admin.Controllers
                                     }
 
                                     _context.Update(datVeFull.NguoiDung);
-                                    
+
                                     // Log chi tiết
-                                    _context.LichSuGiaoDiches.Add(new LichSuGiaoDich {
+                                    _context.LichSuGiaoDiches.Add(new LichSuGiaoDich
+                                    {
                                         MaNguoiDung = datVeFull.MaNguoiDung,
                                         LoaiGiaoDich = "Admin hoàn tiền",
                                         NoiDung = $"Admin xử lý hoàn vé #{id} ({method}). {refundNote}.",
                                         NgayGiaoDich = DateTime.Now,
                                         TrangThai = "Thành công"
                                     });
-                                    
+
                                     TempData["SuccessMessage"] = $"Huỷ vé thành công! {refundNote}";
                                 }
                             }
@@ -230,8 +231,9 @@ namespace CinemaBooking.Areas.Admin.Controllers
                         {
                             string thongTinGhe = string.Join(", ", datVe.DatVeGhes.Select(dvg => dvg.Ghe?.SoGhe));
                             _context.DatVeGhes.RemoveRange(datVe.DatVeGhes);
-                            
-                            _context.LichSuGiaoDiches.Add(new LichSuGiaoDich {
+
+                            _context.LichSuGiaoDiches.Add(new LichSuGiaoDich
+                            {
                                 MaNguoiDung = datVe.MaNguoiDung,
                                 LoaiGiaoDich = "Hủy vé",
                                 TrangThai = "Thành công",
@@ -245,7 +247,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                         await UpdateUserPoints(id);
                         TempData["SuccessMessage"] = "Xác nhận thanh toán và cộng điểm thành công!";
                     }
-                    
+
                     if (TempData["SuccessMessage"] == null)
                         TempData["SuccessMessage"] = "Cập nhật trạng thái vé thành công!";
 
@@ -258,7 +260,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     TempData["ErrorMessage"] = "Lỗi khi cập nhật trạng thái: " + ex.Message;
                 }
             }
-            
+
             return RedirectToAction(nameof(Details), new { id = id });
         }
 
@@ -268,12 +270,13 @@ namespace CinemaBooking.Areas.Admin.Controllers
         {
             var phongChieus = await _context.PhongChieus
                 .Where(p => p.MaRap == rapId)
-                .Select(p => new { 
-                    MaPhong = p.MaPhong, 
-                    TenPhong = $"Phòng {p.SoPhong}" 
+                .Select(p => new
+                {
+                    MaPhong = p.MaPhong,
+                    TenPhong = $"Phòng {p.SoPhong}"
                 })
                 .ToListAsync();
-                
+
             return Json(phongChieus);
         }
 
@@ -291,16 +294,16 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     // Kiểm tra xem đã tích điểm cho vé này chưa (tránh cộng trùng)
                     var exists = await _context.LichSuGiaoDiches
                         .AnyAsync(l => l.MaNguoiDung == datVe.MaNguoiDung && l.LoaiGiaoDich == "Tích điểm" && l.NoiDung.Contains($"vé #{maDatVe}"));
-                    
+
                     if (!exists)
                     {
                         // 1,000 VND = 1 điểm
                         int pointsEarned = (int)(datVe.TongTien / 1000);
-                        
+
                         if (pointsEarned > 0)
                         {
                             datVe.NguoiDung.DiemTichLuy += pointsEarned;
-                            
+
                             // Ghi log tích điểm
                             var lichSuDiem = new LichSuGiaoDich
                             {
@@ -310,7 +313,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                                 NoiDung = $"Tích +{pointsEarned} điểm từ vé #{maDatVe} (Admin xác nhận)",
                                 NgayGiaoDich = DateTime.Now
                             };
-                            
+
                             _context.LichSuGiaoDiches.Add(lichSuDiem);
                             await _context.SaveChangesAsync();
                         }

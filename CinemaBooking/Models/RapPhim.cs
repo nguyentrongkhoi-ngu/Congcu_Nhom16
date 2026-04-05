@@ -27,4 +27,4 @@ namespace CinemaBooking.Models
 
         public virtual ICollection<PhongChieu> PhongChieus { get; set; }
     }
-} 
+}

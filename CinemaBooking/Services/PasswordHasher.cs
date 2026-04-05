@@ -23,4 +23,4 @@ namespace CinemaBooking.Services
             return hashedInput == hashedPassword;
         }
     }
-} 
+}

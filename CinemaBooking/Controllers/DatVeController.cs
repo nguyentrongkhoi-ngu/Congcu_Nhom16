@@ -213,7 +213,7 @@ namespace CinemaBooking.Controllers
 
             ViewBag.SelectedSeats = selectedSeats;
             ViewBag.Combos = combos;
-            
+
             // Tính tiền ghế sơ bộ để hiển thị real-time subtotal
             var selectedSeatsList = selectedSeats.Split(',');
             decimal seatTotal = 0;
@@ -222,13 +222,13 @@ namespace CinemaBooking.Controllers
                 var row = soGhe[0];
                 var col = int.Parse(soGhe.Substring(1));
                 decimal giaGhe = lichChieu.GiaVe;
-                
+
                 // VIP/Sweetbox logic (matching ChonGhe)
                 // Note: Simplified logic here, should use same as ChonGhe
                 int soHang = (int)Math.Ceiling((double)lichChieu.PhongChieu.SucChua / 10); // Simplified
                 if (row >= 'J') giaGhe = lichChieu.GiaVe * 1.2m;
                 if (row == 'P' && col <= 4) giaGhe = lichChieu.GiaVe * 1.5m;
-                
+
                 seatTotal += giaGhe;
             }
 
@@ -285,16 +285,17 @@ namespace CinemaBooking.Controllers
             // 2. Kiểm tra giá trị đơn hàng tối thiểu
             if (tongTien < khuyenMai.GiaTriToiThieu)
             {
-                return Json(new { 
-                    isValid = false, 
-                    message = $"Đơn hàng tối thiểu để áp dụng mã này là {khuyenMai.GiaTriToiThieu:N0}đ." 
+                return Json(new
+                {
+                    isValid = false,
+                    message = $"Đơn hàng tối thiểu để áp dụng mã này là {khuyenMai.GiaTriToiThieu:N0}đ."
                 });
             }
 
             // 3. Kiểm tra xem user đã sử dụng mã này chưa (Mỗi user chỉ dùng 1 lần)
             var isPromoUsedByCustomer = await _context.DatVes
-                .AnyAsync(d => d.MaNguoiDung == currentUserId.Value && 
-                               d.MaKhuyenMai == khuyenMai.MaKhuyenMai && 
+                .AnyAsync(d => d.MaNguoiDung == currentUserId.Value &&
+                               d.MaKhuyenMai == khuyenMai.MaKhuyenMai &&
                                d.TrangThai != "Đã hủy");
 
             if (isPromoUsedByCustomer)
@@ -302,7 +303,8 @@ namespace CinemaBooking.Controllers
                 return Json(new { isValid = false, message = "Bạn đã sử dụng mã giảm giá này cho một đơn hàng khác rồi." });
             }
 
-            return Json(new {
+            return Json(new
+            {
                 isValid = true,
                 phanTramGiam = khuyenMai.PhanTramGiam,
                 maKhuyenMai = khuyenMai.MaKhuyenMai,
@@ -381,9 +383,11 @@ namespace CinemaBooking.Controllers
             var comboSelections = new List<ComboSelection>();
             if (!string.IsNullOrEmpty(selectedCombos))
             {
-                try {
+                try
+                {
                     comboSelections = JsonSerializer.Deserialize<List<ComboSelection>>(selectedCombos);
-                } catch { /* Handle error or ignore */ }
+                }
+                catch { /* Handle error or ignore */ }
             }
 
             if (comboSelections != null)
@@ -429,7 +433,7 @@ namespace CinemaBooking.Controllers
                     // Re-validate strictly in Backend
                     var now = DateTime.Now;
                     var isPromoAlreadyRedeemed = await _context.DatVes.AnyAsync(d => d.MaNguoiDung == currentUserId && d.MaKhuyenMai == khuyenMai.MaKhuyenMai && d.TrangThai != "Đã hủy");
-                    
+
                     if (now >= khuyenMai.NgayBatDau && now <= khuyenMai.NgayKetThuc && tongTien >= khuyenMai.GiaTriToiThieu && !isPromoAlreadyRedeemed)
                     {
                         tongTien = tongTien * (1 - (decimal)khuyenMai.PhanTramGiam / 100);
@@ -836,7 +840,7 @@ namespace CinemaBooking.Controllers
                                 // Tạm thời vẫn hoàn vào điểm nếu chưa có API thật, hoặc ghi log yêu cầu hoàn thủ công
                                 int pointsRefund = (int)((datVe.TongTien * refundPercentage) / 1000);
                                 user.DiemTichLuy += pointsRefund;
-                                refundNote += " (Qua MoMo -> Quy đổi điểm)"; 
+                                refundNote += " (Qua MoMo -> Quy đổi điểm)";
                             }
                             else if (paymentMethod.ToUpper() == "VNPAY")
                             {
@@ -850,7 +854,7 @@ namespace CinemaBooking.Controllers
                                 // Không tự động cộng điểm, ghi chú để Admin biết
                                 refundNote += " (Cần hoàn tiền mặt tại quầy)";
                             }
-                            else 
+                            else
                             {
                                 // Mặc định hoàn vào điểm (Ví dụ thanh toán bằng Điểm/Voucher)
                                 int pointsRefund = (int)((datVe.TongTien * refundPercentage) / 1000);
@@ -860,7 +864,8 @@ namespace CinemaBooking.Controllers
                             _context.Update(user);
 
                             // Ghi log hoàn tiền kỹ thuật
-                            _context.LichSuGiaoDiches.Add(new LichSuGiaoDich {
+                            _context.LichSuGiaoDiches.Add(new LichSuGiaoDich
+                            {
                                 MaNguoiDung = currentUserId,
                                 LoaiGiaoDich = "Hoàn tiền/điểm",
                                 NoiDung = $"Hủy vé #{maDatVe} ({paymentMethod}). {refundNote}. Khấu trừ {pointsEarned}đ thưởng.",
@@ -920,7 +925,8 @@ namespace CinemaBooking.Controllers
 
                 if (lichChieu == null)
                 {
-                    return Json(new {
+                    return Json(new
+                    {
                         success = false,
                         message = "Không tìm thấy lịch chiếu"
                     });
@@ -960,7 +966,8 @@ namespace CinemaBooking.Controllers
                     .Select(i => (char)('A' + i))
                     .ToArray();
 
-                return Json(new {
+                return Json(new
+                {
                     success = true,
                     bookedSeats = gheDaDat,
                     hangGhe = hangGhe,
@@ -969,7 +976,8 @@ namespace CinemaBooking.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new {
+                return Json(new
+                {
                     success = false,
                     message = "Lỗi khi lấy danh sách ghế: " + ex.Message
                 });

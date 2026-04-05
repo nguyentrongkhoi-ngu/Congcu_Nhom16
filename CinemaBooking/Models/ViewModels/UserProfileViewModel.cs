@@ -46,4 +46,4 @@ namespace CinemaBooking.Models.ViewModels
         [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp với mật khẩu mới")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
-} 
+}

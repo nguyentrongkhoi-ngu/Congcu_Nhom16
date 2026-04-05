@@ -39,7 +39,7 @@ namespace CinemaBooking.Controllers
             var user = await _context.NguoiDungs
                 .Include(u => u.DatVes)
                 .FirstOrDefaultAsync(u => u.MaNguoiDung == userIdInt.Value);
-            
+
             if (user == null)
             {
                 return NotFound();
@@ -50,7 +50,7 @@ namespace CinemaBooking.Controllers
             ViewBag.TotalSpent = await _context.DatVes
                 .Where(d => d.MaNguoiDung == user.MaNguoiDung && d.TrangThai == "Đã thanh toán")
                 .SumAsync(d => d.TongTien);
-            
+
             // Xếp hạng thành viên (Logic 2026)
             string rank = "Đồng";
             decimal discountPercent = 0;
@@ -58,7 +58,7 @@ namespace CinemaBooking.Controllers
             if (totalSpent >= 10000000) { rank = "Kim Cương"; discountPercent = 15; }
             else if (totalSpent >= 5000000) { rank = "Vàng"; discountPercent = 10; }
             else if (totalSpent >= 1000000) { rank = "Bạc"; discountPercent = 5; }
-            
+
             ViewBag.MemberRank = rank;
             ViewBag.DiscountPercent = discountPercent;
 
@@ -145,7 +145,7 @@ namespace CinemaBooking.Controllers
             if (model.AvatarFile != null)
             {
                 string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "avatars");
-                if (!Directory.Exists(uploadsFolder)) 
+                if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
                 }
@@ -162,12 +162,12 @@ namespace CinemaBooking.Controllers
 
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.AvatarFile.FileName);
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                
+
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await model.AvatarFile.CopyToAsync(fileStream);
                 }
-                
+
                 user.AvatarUrl = "/uploads/avatars/" + uniqueFileName;
             }
             else

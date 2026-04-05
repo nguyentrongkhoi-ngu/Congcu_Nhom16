@@ -48,4 +48,4 @@ namespace CinemaBooking.Models
         [ForeignKey("MaThanhToan")]
         public virtual ThanhToan? ThanhToan { get; set; }
     }
-} 
+}

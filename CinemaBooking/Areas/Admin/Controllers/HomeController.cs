@@ -63,11 +63,11 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 var dailyRev = await _context.ThanhToans
                     .Where(t => t.TrangThai == "Thành công" && t.NgayThanhToan >= date && t.NgayThanhToan < nextDate)
                     .SumAsync(t => t.SoTien);
-                
-                revenueHistory.Add(new DailyRevenueData 
-                { 
-                    DateLabel = date.ToString("dd/MM"), 
-                    Revenue = dailyRev 
+
+                revenueHistory.Add(new DailyRevenueData
+                {
+                    DateLabel = date.ToString("dd/MM"),
+                    Revenue = dailyRev
                 });
             }
 

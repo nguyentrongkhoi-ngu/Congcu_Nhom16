@@ -58,11 +58,12 @@ namespace CinemaBooking.Areas.Admin.Controllers
             if (user == null) return NotFound();
 
             var roles = await _userManager.GetRolesAsync(user);
-            return Json(new { 
-                id = user.Id, 
-                userName = user.UserName, 
-                email = user.Email, 
-                hoTen = user.HoTen, 
+            return Json(new
+            {
+                id = user.Id,
+                userName = user.UserName,
+                email = user.Email,
+                hoTen = user.HoTen,
                 soDienThoai = user.SoDienThoai,
                 roles = roles
             });
@@ -123,7 +124,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
             {
                 // Update Roles
                 var currentRoles = await _userManager.GetRolesAsync(user);
-                
+
                 // Only update roles if different
                 if (!currentRoles.Contains(Role))
                 {
@@ -133,7 +134,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                         await _userManager.AddToRoleAsync(user, Role);
                     }
                 }
-                
+
                 TempData["SuccessMessage"] = "Cập nhật thông tin người dùng thành công!";
             }
             else

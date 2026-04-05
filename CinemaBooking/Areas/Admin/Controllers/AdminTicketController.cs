@@ -37,7 +37,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 .OrderByDescending(l => l.NgayGiaoDich)
                 .Take(50)
                 .ToListAsync();
-                
+
             return View(history);
         }
 
@@ -71,9 +71,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
             if (datVe.TrangThai != "Đã thanh toán")
             {
                 LogVerification(ticketId, "Kiểm tra thất bại", $"Vé chưa được thanh toán. Trạng thái: {datVe.TrangThai}");
-                return Json(new { 
-                    success = false, 
-                    message = $"Vé chưa được thanh toán. Trạng thái hiện tại: {datVe.TrangThai}" 
+                return Json(new
+                {
+                    success = false,
+                    message = $"Vé chưa được thanh toán. Trạng thái hiện tại: {datVe.TrangThai}"
                 });
             }
 
@@ -85,28 +86,30 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 if (!seatValid)
                 {
                     LogVerification(ticketId, "Kiểm tra thất bại", $"Ghế {seatNumber} không thuộc vé này");
-                    return Json(new { 
-                        success = false, 
-                        message = $"Ghế {seatNumber} không thuộc vé này" 
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Ghế {seatNumber} không thuộc vé này"
                     });
                 }
             }
 
             // Kiểm tra suất chiếu đã qua chưa
             var now = DateTime.Now;
-            if (datVe.LichChieu.NgayChieu < now.Date || 
+            if (datVe.LichChieu.NgayChieu < now.Date ||
                 (datVe.LichChieu.NgayChieu == now.Date && datVe.LichChieu.GioChieu < now.TimeOfDay))
             {
                 LogVerification(ticketId, "Kiểm tra thất bại", "Vé đã hết hạn. Suất chiếu đã kết thúc.");
-                return Json(new { 
-                    success = false, 
+                return Json(new
+                {
+                    success = false,
                     message = "Vé đã hết hạn. Suất chiếu đã kết thúc."
                 });
             }
 
             // Kiểm tra vé đã được sử dụng chưa
             var usedCheck = await _context.LichSuGiaoDiches
-                .Where(l => l.NoiDung.Contains($"Vé #{ticketId} đã được xác nhận") && 
+                .Where(l => l.NoiDung.Contains($"Vé #{ticketId} đã được xác nhận") &&
                        l.TrangThai == "Thành công" &&
                        l.LoaiGiaoDich == "Kiểm tra vé")
                 .FirstOrDefaultAsync();
@@ -115,10 +118,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
             var showDateTime = datVe.LichChieu.NgayChieu.Add(datVe.LichChieu.GioChieu);
             var isEarly = showDateTime > now.AddHours(1);
             var isUsed = usedCheck != null;
-            
+
             string resultMessage;
             string statusString;
-            
+
             if (isEarly)
             {
                 resultMessage = "Vé hợp lệ, nhưng vẫn còn sớm (trước giờ chiếu hơn 1 giờ)";
@@ -134,18 +137,19 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 resultMessage = "Vé hợp lệ";
                 statusString = "Thành công";
             }
-            
+
             // Lưu thông tin kiểm tra
             string seatInfo = !string.IsNullOrEmpty(seatNumber) ? $" (Ghế: {seatNumber})" : "";
             LogVerification(
-                ticketId, 
-                statusString, 
+                ticketId,
+                statusString,
                 $"Vé #{ticketId} đã được xác nhận{seatInfo} cho phim '{datVe.LichChieu?.Phim?.TenPhim}'"
             );
 
             // Vé hợp lệ
-            return Json(new { 
-                success = true, 
+            return Json(new
+            {
+                success = true,
                 isEarly = isEarly,
                 isUsed = isUsed,
                 message = resultMessage,
@@ -163,7 +167,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 }
             });
         }
-        
+
         // Lưu lịch sử kiểm tra vé
         private async void LogVerification(int ticketId, string status, string message)
         {
@@ -171,7 +175,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
             {
                 var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 int.TryParse(userIdClaim, out int userId);
-                
+
                 var logEntry = new LichSuGiaoDich
                 {
                     MaNguoiDung = userId > 0 ? userId : null,
@@ -180,7 +184,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     NgayGiaoDich = DateTime.Now,
                     TrangThai = status
                 };
-                
+
                 _context.LichSuGiaoDiches.Add(logEntry);
                 await _context.SaveChangesAsync();
             }
@@ -190,4 +194,4 @@ namespace CinemaBooking.Areas.Admin.Controllers
             }
         }
     }
-} 
+}

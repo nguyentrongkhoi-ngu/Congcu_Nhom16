@@ -74,19 +74,19 @@ namespace CinemaBooking.Data
             {
                 var khuyenMais = new KhuyenMai[]
                 {
-                    new KhuyenMai 
-                    { 
-                        MaCode = "WELCOME10", 
-                        PhanTramGiam = 10, 
-                        NgayBatDau = DateTime.Now.AddDays(-30), 
+                    new KhuyenMai
+                    {
+                        MaCode = "WELCOME10",
+                        PhanTramGiam = 10,
+                        NgayBatDau = DateTime.Now.AddDays(-30),
                         NgayKetThuc = DateTime.Now.AddDays(30),
                         MoTa = "Giảm 10% cho khách hàng mới"
                     },
-                    new KhuyenMai 
-                    { 
-                        MaCode = "SUMMER20", 
-                        PhanTramGiam = 20, 
-                        NgayBatDau = DateTime.Now.AddDays(-15), 
+                    new KhuyenMai
+                    {
+                        MaCode = "SUMMER20",
+                        PhanTramGiam = 20,
+                        NgayBatDau = DateTime.Now.AddDays(-15),
                         NgayKetThuc = DateTime.Now.AddDays(45),
                         MoTa = "Giảm 20% mùa hè"
                     }
@@ -102,9 +102,9 @@ namespace CinemaBooking.Data
             // Finally, Ensure all movies have some showtimes
             Console.WriteLine("Seeding showtimes...");
             await SeedShowtimes(context);
-            
+
             // Seed Combos
-            try 
+            try
             {
                 Console.WriteLine("Seeding combos...");
                 await SeedCombos(context);
@@ -114,7 +114,7 @@ namespace CinemaBooking.Data
                 Console.WriteLine($"Error seeding combos: {ex.Message}");
                 if (ex.InnerException != null) Console.WriteLine($"Inner: {ex.InnerException.Message}");
             }
-            
+
             Console.WriteLine("SeedData completed successfully.");
         }
 
@@ -147,12 +147,12 @@ namespace CinemaBooking.Data
 
             var movieData = new List<Phim>
             {
-                new Phim 
-                { 
-                    TenPhim = "Avengers: Endgame", 
-                    MoTa = "Cuộc chiến cuối cùng của các siêu anh hùng để cứu lấy vũ trụ khỏi sự hủy diệt của Thanos.", 
-                    ThoiLuong = 181, 
-                    TheLoai = "Hành động, Khoa học viễn tưởng", 
+                new Phim
+                {
+                    TenPhim = "Avengers: Endgame",
+                    MoTa = "Cuộc chiến cuối cùng của các siêu anh hùng để cứu lấy vũ trụ khỏi sự hủy diệt của Thanos.",
+                    ThoiLuong = 181,
+                    TheLoai = "Hành động, Khoa học viễn tưởng",
                     NgayPhatHanh = new DateTime(2019, 4, 26),
                     UrlPoster = "https://image.tmdb.org/t/p/original/or06vSfv0uY7o98ToolkitW0v3K7.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/7RyB7z6IqH9Yp8W9oA_8sXkQ_pY.jpg",
@@ -160,12 +160,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, 3D, IMAX",
                     Trailer = "https://www.youtube.com/watch?v=TcMBFSGVi1c"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Những Mảnh Ghép Cảm Xúc 2", 
-                    MoTa = "Inside Out 2 tiếp tục cuộc hành trình khám phá thế giới nội tâm của Riley khi cô bước sang tuổi thiếu niên với những cảm xúc mới đầy phức tạp.", 
-                    ThoiLuong = 96, 
-                    TheLoai = "Hoạt hình, Hài hước, Gia đình", 
+                new Phim
+                {
+                    TenPhim = "Những Mảnh Ghép Cảm Xúc 2",
+                    MoTa = "Inside Out 2 tiếp tục cuộc hành trình khám phá thế giới nội tâm của Riley khi cô bước sang tuổi thiếu niên với những cảm xúc mới đầy phức tạp.",
+                    ThoiLuong = 96,
+                    TheLoai = "Hoạt hình, Hài hước, Gia đình",
                     NgayPhatHanh = new DateTime(2024, 6, 14),
                     UrlPoster = "https://image.tmdb.org/t/p/original/vpn9sy7kR40O1ZJ3A6Gv09yH6Vj.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/stKGOmbuoeEEoGPqy9Y96jKiTuB.jpg",
@@ -173,12 +173,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, 3D",
                     Trailer = "https://www.youtube.com/watch?v=L4DrolmDxmw"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Deadpool & Wolverine", 
-                    MoTa = "Deadpool hợp tác với Wolverine trong một nhiệm vụ điên rồ của TVA để cứu lấy dòng thời gian của mình.", 
-                    ThoiLuong = 127, 
-                    TheLoai = "Hành động, Hài hước, Sci-Fi", 
+                new Phim
+                {
+                    TenPhim = "Deadpool & Wolverine",
+                    MoTa = "Deadpool hợp tác với Wolverine trong một nhiệm vụ điên rồ của TVA để cứu lấy dòng thời gian của mình.",
+                    ThoiLuong = 127,
+                    TheLoai = "Hành động, Hài hước, Sci-Fi",
                     NgayPhatHanh = new DateTime(2024, 7, 26),
                     UrlPoster = "https://image.tmdb.org/t/p/original/8cd96f2pUAp9GmBy5C2OSWSJhNm.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/yD0rN0Y6yI1c9nIqy7mO5ZzPzK3.jpg",
@@ -186,12 +186,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, 3D, IMAX",
                     Trailer = "https://www.youtube.com/watch?v=73_1biulkYk"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Lốc Xoáy Tử Thần", 
-                    MoTa = "Phần phim tiếp theo của tác phẩm kinh điển năm 1996, đưa người xem vào trung tâm những cơn bão lốc xoáy kinh hoàng với công nghệ săn bão hiện đại.", 
-                    ThoiLuong = 122, 
-                    TheLoai = "Hành động, Phiêu lưu, Kịch tính", 
+                new Phim
+                {
+                    TenPhim = "Lốc Xoáy Tử Thần",
+                    MoTa = "Phần phim tiếp theo của tác phẩm kinh điển năm 1996, đưa người xem vào trung tâm những cơn bão lốc xoáy kinh hoàng với công nghệ săn bão hiện đại.",
+                    ThoiLuong = 122,
+                    TheLoai = "Hành động, Phiêu lưu, Kịch tính",
                     NgayPhatHanh = new DateTime(2024, 7, 19),
                     UrlPoster = "https://image.tmdb.org/t/p/original/pjnD0S79CVC0XDY7vtSjIqvX1u2.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/pjna8WbB1X0pYV7YpZzYV9oU.jpg",
@@ -199,12 +199,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, IMAX",
                     Trailer = "https://www.youtube.com/watch?v=vVj2itVjfd8"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Robot Hoang Dã", 
-                    MoTa = "Một chú robot thông minh lạc trên hoang đảo và phải học cách làm bạn với các sinh vật tự nhiên để sinh tồn.", 
-                    ThoiLuong = 102, 
-                    TheLoai = "Hoạt hình, Phiêu lưu, Khoa học viễn tưởng", 
+                new Phim
+                {
+                    TenPhim = "Robot Hoang Dã",
+                    MoTa = "Một chú robot thông minh lạc trên hoang đảo và phải học cách làm bạn với các sinh vật tự nhiên để sinh tồn.",
+                    ThoiLuong = 102,
+                    TheLoai = "Hoạt hình, Phiêu lưu, Khoa học viễn tưởng",
                     NgayPhatHanh = new DateTime(2024, 9, 27),
                     UrlPoster = "https://image.tmdb.org/t/p/original/hr7I1tLIs090dK47K0P70wInS0G.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/9lE7mShpS7jYz49yY7y7K9Z1oG.jpg",
@@ -212,12 +212,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, 3D",
                     Trailer = "https://www.youtube.com/watch?v=67vbA5ZJdUs"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Anora", 
-                    MoTa = "Câu chuyện về một cô gái múa thoát y ở Brooklyn có cơ hội đổi đời khi gặp gỡ và kết hôn với con trai một nhà tài phiệt Nga.", 
-                    ThoiLuong = 139, 
-                    TheLoai = "Hài hước, Kịch tính, Romance", 
+                new Phim
+                {
+                    TenPhim = "Anora",
+                    MoTa = "Câu chuyện về một cô gái múa thoát y ở Brooklyn có cơ hội đổi đời khi gặp gỡ và kết hôn với con trai một nhà tài phiệt Nga.",
+                    ThoiLuong = 139,
+                    TheLoai = "Hài hước, Kịch tính, Romance",
                     NgayPhatHanh = new DateTime(2024, 10, 18),
                     UrlPoster = "https://image.tmdb.org/t/p/original/6KpaYlyQoXlP2WbH2f2Tsc69kM.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/6KpaYlyQoXlP2WbH2f2Tsc69kM.jpg",
@@ -225,12 +225,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D",
                     Trailer = "https://www.youtube.com/watch?v=I6B0_m83RVM"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Sinners", 
-                    MoTa = "Trong nỗ lực bỏ qua cuộc sống khó khăn, hai anh em sinh đôi trở về thị trấn quê hương để bắt đầu lại, nhưng họ phát hiện ra một ác quỷ còn đáng sợ hơn.", 
-                    ThoiLuong = 115, 
-                    TheLoai = "Kinh dị, Thriller, Kịch tính", 
+                new Phim
+                {
+                    TenPhim = "Sinners",
+                    MoTa = "Trong nỗ lực bỏ qua cuộc sống khó khăn, hai anh em sinh đôi trở về thị trấn quê hương để bắt đầu lại, nhưng họ phát hiện ra một ác quỷ còn đáng sợ hơn.",
+                    ThoiLuong = 115,
+                    TheLoai = "Kinh dị, Thriller, Kịch tính",
                     NgayPhatHanh = new DateTime(2025, 3, 7),
                     UrlPoster = "https://image.tmdb.org/t/p/original/wD1p356Xv3b8hE2m5hSleUpK3vj.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/wD1p356Xv3b8hE2m5hSleUpK3vj.jpg",
@@ -238,12 +238,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D",
                     Trailer = "https://www.youtube.com/watch?v=mD2f_h1fE0M"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Frankenstein", 
-                    MoTa = "Đạo diễn Guillermo del Toro tái hiện câu chuyện kinh điển về nhà khoa học Victor Frankenstein và tạo vật quái dị của ông.", 
-                    ThoiLuong = 152, 
-                    TheLoai = "Kinh dị, Sci-Fi, Kịch tính", 
+                new Phim
+                {
+                    TenPhim = "Frankenstein",
+                    MoTa = "Đạo diễn Guillermo del Toro tái hiện câu chuyện kinh điển về nhà khoa học Victor Frankenstein và tạo vật quái dị của ông.",
+                    ThoiLuong = 152,
+                    TheLoai = "Kinh dị, Sci-Fi, Kịch tính",
                     NgayPhatHanh = new DateTime(2025, 10, 31),
                     UrlPoster = "https://image.tmdb.org/t/p/original/yD0rN0Y6yI1c9nIqy7mO5ZzPzK3.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/yD0rN0Y6yI1c9nIqy7mO5ZzPzK3.jpg",
@@ -251,12 +251,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, IMAX",
                     Trailer = "https://www.youtube.com/watch?v=rX6T9Z3rR_Y"
                 },
-                new Phim 
-                { 
-                    TenPhim = "One of Them Days", 
-                    MoTa = "Hai người bạn thân sống chung nhà phải đối mặt với một ngày tồi tệ nhất đời khi mọi thứ đều đi chệch quỹ đạo.", 
-                    ThoiLuong = 105, 
-                    TheLoai = "Hài hước", 
+                new Phim
+                {
+                    TenPhim = "One of Them Days",
+                    MoTa = "Hai người bạn thân sống chung nhà phải đối mặt với một ngày tồi tệ nhất đời khi mọi thứ đều đi chệch quỹ đạo.",
+                    ThoiLuong = 105,
+                    TheLoai = "Hài hước",
                     NgayPhatHanh = new DateTime(2025, 1, 24),
                     UrlPoster = "https://image.tmdb.org/t/p/original/zN0fG0A9j3w3f7vX6rPzK5I9Gv.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/zN0fG0A9j3w3f7vX6rPzK5I9Gv.jpg",
@@ -264,12 +264,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D",
                     Trailer = "https://www.youtube.com/watch?v=OneOfThemDaysTrailer"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Happy Gilmore 2", 
-                    MoTa = "Sự trở lại đầy hài hước của tay chơi golf huyền thoại Adam Sandler trong phần tiếp theo của tác phẩm ăn khách năm 1996.", 
-                    ThoiLuong = 110, 
-                    TheLoai = "Hài hước, Thể thao", 
+                new Phim
+                {
+                    TenPhim = "Happy Gilmore 2",
+                    MoTa = "Sự trở lại đầy hài hước của tay chơi golf huyền thoại Adam Sandler trong phần tiếp theo của tác phẩm ăn khách năm 1996.",
+                    ThoiLuong = 110,
+                    TheLoai = "Hài hước, Thể thao",
                     NgayPhatHanh = new DateTime(2025, 8, 15),
                     UrlPoster = "https://image.tmdb.org/t/p/original/happy_gilmore_two_poster.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/happy_gilmore_two_backdrop.jpg",
@@ -277,12 +277,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D",
                     Trailer = "https://www.youtube.com/watch?v=HappyGilmore2"
                 },
-                new Phim 
-                { 
-                    TenPhim = "My Oxford Year", 
-                    MoTa = "Một sinh viên trẻ người Mỹ được học bổng tại Đại học Oxford và đem lòng yêu một giảng viên tại đây, nhưng một bí mật đe dọa tương lai của họ.", 
-                    ThoiLuong = 113, 
-                    TheLoai = "Romance, Drama", 
+                new Phim
+                {
+                    TenPhim = "My Oxford Year",
+                    MoTa = "Một sinh viên trẻ người Mỹ được học bổng tại Đại học Oxford và đem lòng yêu một giảng viên tại đây, nhưng một bí mật đe dọa tương lai của họ.",
+                    ThoiLuong = 113,
+                    TheLoai = "Romance, Drama",
                     NgayPhatHanh = new DateTime(2025, 2, 14),
                     UrlPoster = "https://image.tmdb.org/t/p/original/my_oxford_year_poster.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/my_oxford_year_backdrop.jpg",
@@ -290,12 +290,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D",
                     Trailer = "https://www.youtube.com/watch?v=MyOxfordYear"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Spider-Man: No Way Home", 
-                    MoTa = "Peter Parker phải đối mặt với những kẻ thù từ các vũ trụ khác", 
-                    ThoiLuong = 148, 
-                    TheLoai = "Hành động, Phiêu lưu", 
+                new Phim
+                {
+                    TenPhim = "Spider-Man: No Way Home",
+                    MoTa = "Peter Parker phải đối mặt với những kẻ thù từ các vũ trụ khác",
+                    ThoiLuong = 148,
+                    TheLoai = "Hành động, Phiêu lưu",
                     NgayPhatHanh = new DateTime(2021, 12, 17),
                     UrlPoster = "https://image.tmdb.org/t/p/original/1g0dhvRzfwvqp1Z6BLpvmUfAdpI.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/1Rr9S9Px969tWyZzVH9A919p19p.jpg",
@@ -303,12 +303,12 @@ namespace CinemaBooking.Data
                     DinhDang = "2D, 3D, IMAX",
                     Trailer = "https://www.youtube.com/watch?v=JfVOs4VSpmA"
                 },
-                new Phim 
-                { 
-                    TenPhim = "Top Gun: Maverick", 
-                    MoTa = "Maverick trở lại với nhiệm vụ mới", 
-                    ThoiLuong = 130, 
-                    TheLoai = "Hành động, Drama", 
+                new Phim
+                {
+                    TenPhim = "Top Gun: Maverick",
+                    MoTa = "Maverick trở lại với nhiệm vụ mới",
+                    ThoiLuong = 130,
+                    TheLoai = "Hành động, Drama",
                     NgayPhatHanh = new DateTime(2022, 5, 27),
                     UrlPoster = "https://image.tmdb.org/t/p/original/628SwSjtR7ovR6RM9uFEEAbpqo.jpg",
                     UrlBackdrop = "https://image.tmdb.org/t/p/original/t9Xsb86v7Jq9uWyZzVH9A919p19p.jpg",
@@ -326,7 +326,8 @@ namespace CinemaBooking.Data
                     context.Phims.Add(phim);
                     await context.SaveChangesAsync();
                 }
-                else {
+                else
+                {
                     Console.WriteLine($"Movie already exists: {phim.TenPhim}");
                 }
             }
@@ -346,12 +347,12 @@ namespace CinemaBooking.Data
         private static async Task SeedSeats(ApplicationDbContext context)
         {
             var phongChieus = await context.PhongChieus.ToListAsync();
-            
+
             foreach (var phong in phongChieus)
             {
                 if (context.Ghes.Any(g => g.MaPhong == phong.MaPhong)) continue;
 
-                int soHang = phong.SucChua / 10; 
+                int soHang = phong.SucChua / 10;
                 for (int hang = 0; hang < soHang; hang++)
                 {
                     char tenHang = (char)('A' + hang);
@@ -384,18 +385,18 @@ namespace CinemaBooking.Data
 
             foreach (var phim in phims)
             {
-                foreach (var phong in phongChieus.Take(2)) 
+                foreach (var phong in phongChieus.Take(2))
                 {
                     if (!context.LichChieus.Any(l => l.MaPhim == phim.MaPhim && l.MaPhong == phong.MaPhong && l.NgayChieu == DateTime.Today))
                     {
                         for (int day = 0; day < 3; day++)
                         {
                             var ngayChieu = DateTime.Today.AddDays(day);
-                            var gioChieus = new TimeSpan[] 
-                            { 
-                                new TimeSpan(10, 0, 0), 
-                                new TimeSpan(14, 0, 0), 
-                                new TimeSpan(19, 0, 0) 
+                            var gioChieus = new TimeSpan[]
+                            {
+                                new TimeSpan(10, 0, 0),
+                                new TimeSpan(14, 0, 0),
+                                new TimeSpan(19, 0, 0)
                             };
 
                             foreach (var gioChieu in gioChieus)

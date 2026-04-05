@@ -85,7 +85,7 @@ namespace CinemaBooking.Controllers
                     if (result.Succeeded)
                     {
                         Console.WriteLine("Identity login successful");
-                        
+
                         // Sync legacy ID to claims if needed
                         var claims = await _userManager.GetClaimsAsync(identityUser);
                         if (!claims.Any(c => c.Type == "MaNguoiDung"))
@@ -96,7 +96,7 @@ namespace CinemaBooking.Controllers
                                 await _userManager.AddClaimAsync(identityUser, new System.Security.Claims.Claim("MaNguoiDung", legacyUserRecord.MaNguoiDung.ToString()));
                             }
                         }
-                        
+
                         return Redirect(await GetRedirectUrl(identityUser));
                     }
                 }

@@ -47,10 +47,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 {
                     string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "combos");
                     if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-                    
+
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(combo.ImageFile.FileName);
                     string filePath = Path.Combine(uploadsFolder, fileName);
-                    
+
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await combo.ImageFile.CopyToAsync(stream);
@@ -92,10 +92,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     {
                         string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "uploads", "combos");
                         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-                        
+
                         string fileName = Guid.NewGuid().ToString() + Path.GetExtension(combo.ImageFile.FileName);
                         string filePath = Path.Combine(uploadsFolder, fileName);
-                        
+
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
                             await combo.ImageFile.CopyToAsync(stream);

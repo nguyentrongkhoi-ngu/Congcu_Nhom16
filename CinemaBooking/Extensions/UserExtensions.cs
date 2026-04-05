@@ -33,7 +33,7 @@ namespace CinemaBooking.Extensions
                 // Find the corresponding legacy user by email
                 var nguoiDung = await context.NguoiDungs
                     .FirstOrDefaultAsync(n => n.Email == email);
-                
+
                 if (nguoiDung != null)
                 {
                     return nguoiDung.MaNguoiDung;
@@ -45,7 +45,7 @@ namespace CinemaBooking.Extensions
             {
                 var nguoiDung = await context.NguoiDungs
                     .FirstOrDefaultAsync(n => n.TenDangNhap == user.Identity.Name || n.Email == user.Identity.Name);
-                
+
                 if (nguoiDung != null)
                 {
                     return nguoiDung.MaNguoiDung;

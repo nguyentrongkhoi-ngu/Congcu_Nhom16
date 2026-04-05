@@ -36,31 +36,31 @@ namespace CinemaBooking.Models.ViewModels
 
         [Display(Name = "Ngôn ngữ")]
         public int? MaNgonNgu { get; set; }
-        
+
         // Properties cho dropdown list - không yêu cầu validation
         [ValidateNever]
         public SelectList? PhimList { get; set; }
-        
+
         [ValidateNever]
         public SelectList? PhongList { get; set; }
-        
+
         [ValidateNever]
         public SelectList? NgonNguList { get; set; }
-        
+
         // Thông tin bổ sung để hiển thị - không yêu cầu validation
         [ValidateNever]
         public string? TenPhim { get; set; }
-        
+
         [ValidateNever]
         public string? TenPhong { get; set; }
-        
+
         [ValidateNever]
         public string? TenRap { get; set; }
-        
+
         [ValidateNever]
         public string? NgonNgu { get; set; }
     }
-    
+
     public class LichChieuListViewModel
     {
         public List<LichChieu> LichChieus { get; set; } = new List<LichChieu>();
@@ -69,11 +69,11 @@ namespace CinemaBooking.Models.ViewModels
         public DateTime? NgayKetThuc { get; set; }
         public int? MaPhim { get; set; }
         public int? MaRap { get; set; }
-        
+
         [ValidateNever]
         public SelectList? PhimList { get; set; }
-        
+
         [ValidateNever]
         public SelectList? RapList { get; set; }
     }
-} 
+}

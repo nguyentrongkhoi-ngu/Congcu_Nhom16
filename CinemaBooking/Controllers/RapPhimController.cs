@@ -37,13 +37,13 @@ namespace CinemaBooking.Controllers
             }
 
             var cinemas = await query.ToListAsync();
-            
+
             // Get unique cities for filter dropdown
             ViewBag.Cities = await _context.RapPhims
                 .Select(r => r.ThanhPho)
                 .Distinct()
                 .ToListAsync();
-                
+
             ViewBag.CurrentCity = citySearch;
             ViewBag.CurrentName = nameSearch;
 

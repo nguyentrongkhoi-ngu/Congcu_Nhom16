@@ -11,12 +11,12 @@ namespace CinemaBooking.Services
     public class EmailService
     {
         private readonly IConfiguration _configuration;
-        
+
         public EmailService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
-        
+
         public async Task<bool> SendEmailAsync(string toEmail, string subject, string body)
         {
             var emailSettings = _configuration.GetSection("EmailSettings");
@@ -43,7 +43,7 @@ namespace CinemaBooking.Services
 
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
-                    
+
                     Console.WriteLine($"[EmailService] Email sent successfully to {toEmail}");
                     return true;
                 }
@@ -58,7 +58,7 @@ namespace CinemaBooking.Services
                 return false;
             }
         }
-        
+
         public async Task<bool> SendOtpEmailAsync(string toEmail, string otp, string fullName = null)
         {
             var name = string.IsNullOrEmpty(fullName) ? "Quý khách" : fullName;
@@ -105,10 +105,10 @@ namespace CinemaBooking.Services
                 </div>
             </body>
             </html>";
-            
+
             return await SendEmailAsync(toEmail, subject, body);
         }
-        
+
         public async Task<bool> SendForgotPasswordOtpAsync(string toEmail, string otp, string fullName = null)
         {
             var name = string.IsNullOrEmpty(fullName) ? "Quý khách" : fullName;
@@ -150,7 +150,7 @@ namespace CinemaBooking.Services
                 </div>
             </body>
             </html>";
-            
+
             return await SendEmailAsync(toEmail, subject, body);
         }
     }

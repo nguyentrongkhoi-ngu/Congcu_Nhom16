@@ -46,7 +46,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
             // Áp dụng các bộ lọc
             if (!string.IsNullOrEmpty(viewModel.SearchTerm))
             {
-                query = query.Where(l => l.Phim.TenPhim.Contains(viewModel.SearchTerm) || 
+                query = query.Where(l => l.Phim.TenPhim.Contains(viewModel.SearchTerm) ||
                                         l.PhongChieu.RapPhim.TenRap.Contains(viewModel.SearchTerm));
             }
 
@@ -105,11 +105,11 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 GioChieu = new TimeSpan(9, 0, 0),
                 GiaVe = 100000
             };
-            
+
             await LoadRelatedData(viewModel);
             return View(viewModel);
         }
-        
+
         // POST: Admin/LichChieu/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -124,7 +124,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     await LoadRelatedData(viewModel);
                     return View(viewModel);
                 }
-                
+
                 var lichChieu = new LichChieu
                 {
                     MaPhim = viewModel.MaPhim,
@@ -134,10 +134,10 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     GiaVe = viewModel.GiaVe,
                     MaNgonNgu = viewModel.MaNgonNgu
                 };
-                
+
                 _context.LichChieus.Add(lichChieu);
                 await _context.SaveChangesAsync();
-                
+
                 TempData["SuccessMessage"] = "Tạo lịch chiếu mới thành công";
                 return RedirectToAction(nameof(Index));
             }
@@ -212,7 +212,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                     else throw;
                 }
             }
-            
+
             await LoadRelatedData(viewModel);
             return View(viewModel);
         }
@@ -227,7 +227,7 @@ namespace CinemaBooking.Areas.Admin.Controllers
                 .Include(l => l.PhongChieu)
                     .ThenInclude(p => p.RapPhim)
                 .FirstOrDefaultAsync(m => m.MaLichChieu == id);
-                
+
             if (lichChieu == null) return NotFound();
 
             return View(lichChieu);
@@ -257,23 +257,25 @@ namespace CinemaBooking.Areas.Admin.Controllers
         private async Task LoadRelatedData(LichChieuViewModel viewModel)
         {
             viewModel.PhimList = new SelectList(await _context.Phims.OrderBy(p => p.TenPhim).ToListAsync(), "MaPhim", "TenPhim");
-            
+
             var phongChieus = await _context.PhongChieus
                 .Include(p => p.RapPhim)
                 .OrderBy(p => p.RapPhim.TenRap)
                 .ThenBy(p => p.SoPhong)
-                .Select(p => new {
+                .Select(p => new
+                {
                     p.MaPhong,
                     TenPhong = $"Phòng {p.SoPhong} - {p.RapPhim.TenRap}"
                 })
                 .ToListAsync();
             viewModel.PhongList = new SelectList(phongChieus, "MaPhong", "TenPhong");
-            
+
             var ngonNguList = await _context.NgonNguPhims
                 .OrderBy(n => n.NgonNgu)
-                .Select(n => new { 
-                    n.MaNgonNgu, 
-                    TenNgonNgu = $"{n.NgonNgu} ({n.PhuDe})" 
+                .Select(n => new
+                {
+                    n.MaNgonNgu,
+                    TenNgonNgu = $"{n.NgonNgu} ({n.PhuDe})"
                 })
                 .ToListAsync();
             viewModel.NgonNguList = new SelectList(ngonNguList, "MaNgonNgu", "TenNgonNgu");

@@ -29,4 +29,4 @@ namespace CinemaBooking.Models
 
         public virtual ICollection<DatVeGhe> DatVeGhes { get; set; } = new List<DatVeGhe>();
     }
-} 
+}

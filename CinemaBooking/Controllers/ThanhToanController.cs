@@ -123,7 +123,7 @@ namespace CinemaBooking.Controllers
 
             // Cập nhật trạng thái đặt vé
             datVe.TrangThai = "Chờ thanh toán";
-            
+
             // Lưu thông tin thanh toán
             var thanhToan = new ThanhToan
             {
@@ -134,10 +134,10 @@ namespace CinemaBooking.Controllers
                 NgayThanhToan = DateTime.Now,
                 SoTien = datVe.TongTien
             };
-            
+
             _context.ThanhToans.Add(thanhToan);
             await _context.SaveChangesAsync();
-            
+
             TempData["SuccessMessage"] = "Đặt vé thành công! Vui lòng thanh toán tại rạp trước giờ chiếu 30 phút.";
             return RedirectToAction("ThanhToanThanhCong", new { maDatVe = maDatVe });
         }
@@ -174,12 +174,12 @@ namespace CinemaBooking.Controllers
                 return Forbid();
             }
 
-            try 
+            try
             {
                 // Tạo URL thanh toán qua service MoMo
                 string paymentUrl = await _momoService.CreatePaymentUrl(
-                    maDatVe, 
-                    datVe.LichChieu.Phim.TenPhim, 
+                    maDatVe,
+                    datVe.LichChieu.Phim.TenPhim,
                     datVe.TongTien);
 
                 // Lưu thông tin thanh toán vào hệ thống
@@ -192,7 +192,7 @@ namespace CinemaBooking.Controllers
                     NgayThanhToan = DateTime.Now,
                     SoTien = datVe.TongTien
                 };
-                
+
                 _context.ThanhToans.Add(thanhToan);
                 await _context.SaveChangesAsync();
 
@@ -206,7 +206,7 @@ namespace CinemaBooking.Controllers
                     NgayGiaoDich = DateTime.Now,
                     LoaiGiaoDich = "Thanh toán"
                 };
-                
+
                 _context.LichSuGiaoDiches.Add(lichSuGiaoDich);
                 await _context.SaveChangesAsync();
 
@@ -276,7 +276,7 @@ namespace CinemaBooking.Controllers
                 {
                     Directory.CreateDirectory(logPath);
                 }
-                
+
                 var logData = new StringBuilder();
                 logData.AppendLine($"=== MoMo Return Data - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
                 logData.AppendLine($"resultCode: {resultCode}");
@@ -285,9 +285,9 @@ namespace CinemaBooking.Controllers
                 logData.AppendLine($"transId: {transId}");
                 logData.AppendLine($"orderInfo: {orderInfo}");
                 logData.AppendLine($"extraData: {extraData}");
-                
+
                 System.IO.File.WriteAllText(
-                    Path.Combine(logPath, $"momo_return_{DateTime.Now:yyyyMMdd_HHmmss}.log"), 
+                    Path.Combine(logPath, $"momo_return_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
                     logData.ToString());
 
                 // Tạo dictionary để xác thực chữ ký
@@ -312,22 +312,22 @@ namespace CinemaBooking.Controllers
 
                 // Xác thực chữ ký từ MoMo 
                 bool isValidSignature = _momoService.ValidateSignature(requestData, signature);
-                
+
                 // Ghi log kết quả xác thực
                 logData.Clear();
                 logData.AppendLine($"=== MoMo Signature Validation - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
                 logData.AppendLine($"isValidSignature: {isValidSignature}");
                 logData.AppendLine($"maDatVe: {maDatVe}");
-                
+
                 System.IO.File.WriteAllText(
-                    Path.Combine(logPath, $"momo_validation_{DateTime.Now:yyyyMMdd_HHmmss}.log"), 
+                    Path.Combine(logPath, $"momo_validation_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
                     logData.ToString());
 
                 // Trong môi trường thực tế, phải luôn xác thực chữ ký
                 // Trong môi trường sandbox, đôi khi chữ ký có thể không hợp lệ
                 // Bạn có thể bật/tắt điều kiện này tùy theo môi trường
                 bool requireValidSignature = false; // Đặt thành true khi triển khai thực tế
-                
+
                 if (requireValidSignature && !isValidSignature)
                 {
                     TempData["ErrorMessage"] = "Xác thực chữ ký MoMo thất bại";
@@ -356,30 +356,30 @@ namespace CinemaBooking.Controllers
                 {
                     isSuccessful = true;
                 }
-                
+
                 // Ghi log thêm thông tin để debug
                 logData.Clear();
                 logData.AppendLine($"=== MoMo Payment Result - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
                 logData.AppendLine($"resultCode: {resultCode}");
                 logData.AppendLine($"message: {message}");
                 logData.AppendLine($"isSuccessful: {isSuccessful}");
-                
+
                 System.IO.File.WriteAllText(
-                    Path.Combine(logPath, $"momo_payment_result_{DateTime.Now:yyyyMMdd_HHmmss}.log"), 
+                    Path.Combine(logPath, $"momo_payment_result_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
                     logData.ToString());
 
                 if (isSuccessful)
                 {
                     // Cập nhật trạng thái đặt vé thành "Đã thanh toán"
                     datVe.TrangThai = "Đã thanh toán";
-                    
+
                     // Cập nhật thông tin thanh toán
                     if (thanhToan != null)
                     {
                         thanhToan.TrangThai = "Thành công";
                         thanhToan.MaGiaoDichNganHang = transId;
                         await _context.SaveChangesAsync();
-                        
+
                         // Ghi log giao dịch IPN thành công
                         var lichSuGiaoDich = new LichSuGiaoDich
                         {
@@ -390,10 +390,10 @@ namespace CinemaBooking.Controllers
                             NgayGiaoDich = DateTime.Now,
                             LoaiGiaoDich = "Thanh toán"
                         };
-                        
+
                         _context.LichSuGiaoDiches.Add(lichSuGiaoDich);
                         await _context.SaveChangesAsync();
-                        
+
                         // Ghi log thành công
                         System.IO.File.WriteAllText(
                             Path.Combine(logPath, $"momo_ipn_success_{maDatVe}_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
@@ -402,7 +402,7 @@ namespace CinemaBooking.Controllers
                         // Cập nhật điểm tích lũy
                         await UpdateUserPoints(maDatVe);
                     }
-                    
+
                     TempData["SuccessMessage"] = "Thanh toán qua MoMo thành công!";
                     return RedirectToAction("ThanhToanThanhCong", new { maDatVe = maDatVe });
                 }
@@ -415,11 +415,11 @@ namespace CinemaBooking.Controllers
                         thanhToan.MaGiaoDichNganHang = transId;
                         await _context.SaveChangesAsync();
                     }
-                    
+
                     // Điều chỉnh thông báo lỗi
-                    string errorMessage = string.IsNullOrEmpty(message) ? 
+                    string errorMessage = string.IsNullOrEmpty(message) ?
                         $"Mã lỗi: {resultCode}" : message;
-                    
+
                     // Lưu lịch sử giao dịch
                     var lichSuGiaoDich = new LichSuGiaoDich
                     {
@@ -430,10 +430,10 @@ namespace CinemaBooking.Controllers
                         NgayGiaoDich = DateTime.Now,
                         LoaiGiaoDich = "Thanh toán"
                     };
-                    
+
                     _context.LichSuGiaoDiches.Add(lichSuGiaoDich);
                     await _context.SaveChangesAsync();
-                    
+
                     TempData["ErrorMessage"] = $"Thanh toán MoMo không thành công: {errorMessage}";
                     return RedirectToAction("Index", new { maDatVe = maDatVe });
                 }
@@ -446,11 +446,11 @@ namespace CinemaBooking.Controllers
                 {
                     Directory.CreateDirectory(logPath);
                 }
-                
+
                 System.IO.File.WriteAllText(
-                    Path.Combine(logPath, $"momo_error_{DateTime.Now:yyyyMMdd_HHmmss}.log"), 
+                    Path.Combine(logPath, $"momo_error_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
                     ex.ToString());
-                
+
                 TempData["ErrorMessage"] = "Lỗi xử lý kết quả từ MoMo: " + ex.Message;
                 return RedirectToAction("Index", "Home");
             }
@@ -467,18 +467,18 @@ namespace CinemaBooking.Controllers
                 {
                     var body = await reader.ReadToEndAsync();
                     var data = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(body);
-                    
+
                     // Ghi log để debug
                     var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "Payments");
                     if (!Directory.Exists(logPath))
                     {
                         Directory.CreateDirectory(logPath);
                     }
-                    
+
                     System.IO.File.WriteAllText(
-                        Path.Combine(logPath, $"momo_ipn_{DateTime.Now:yyyyMMdd_HHmmss}.json"), 
+                        Path.Combine(logPath, $"momo_ipn_{DateTime.Now:yyyyMMdd_HHmmss}.json"),
                         body);
-                    
+
                     if (data != null && data.ContainsKey("orderId"))
                     {
                         string resultCode = data.ContainsKey("resultCode") ? data["resultCode"].ToString() : "";
@@ -486,7 +486,7 @@ namespace CinemaBooking.Controllers
                         string message = data.ContainsKey("message") ? data["message"].ToString() : "";
                         string transId = data.ContainsKey("transId") ? data["transId"].ToString() : "";
                         string signature = data.ContainsKey("signature") ? data["signature"].ToString() : "";
-                        
+
                         // Xác thực chữ ký MoMo cho IPN
                         var requestData = new Dictionary<string, string>();
                         foreach (var item in data)
@@ -496,31 +496,31 @@ namespace CinemaBooking.Controllers
                                 requestData.Add(item.Key, item.Value.ToString());
                             }
                         }
-                        
+
                         bool isValidSignature = _momoService.ValidateSignature(requestData, signature);
                         System.IO.File.WriteAllText(
                             Path.Combine(logPath, $"momo_ipn_signature_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
                             $"isValidSignature: {isValidSignature}");
-                            
+
                         // Trong môi trường thực tế, luôn luôn yêu cầu chữ ký hợp lệ
                         bool requireValidSignature = false; // Đặt thành true khi triển khai thực tế
                         if (requireValidSignature && !isValidSignature)
                         {
                             return BadRequest(new { status = "error", message = "Chữ ký không hợp lệ" });
                         }
-                        
+
                         // Lấy mã đặt vé từ orderId (format: maDatVe-timestamp)
                         int maDatVe = int.Parse(orderId.Split('-')[0]);
-                        
+
                         // *** Kiểm tra thanh toán thành công tương tự như MomoReturn ***
                         bool isSuccessful = false;
-                        
+
                         // Chỉ coi thanh toán thành công khi resultCode = 0
                         if (resultCode == "0")
                         {
                             isSuccessful = true;
                         }
-                        
+
                         // Ghi log kết quả xác định thanh toán
                         System.IO.File.WriteAllText(
                             Path.Combine(logPath, $"momo_ipn_status_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
@@ -533,17 +533,17 @@ namespace CinemaBooking.Controllers
                             if (datVe != null)
                             {
                                 datVe.TrangThai = "Đã thanh toán";
-                                
+
                                 // Cập nhật thông tin thanh toán
                                 var thanhToan = await _context.ThanhToans
                                     .FirstOrDefaultAsync(t => t.MaDatVe == maDatVe && t.PhuongThucThanhToan == "MOMO");
-                                
+
                                 if (thanhToan != null)
                                 {
                                     thanhToan.TrangThai = "Thành công";
                                     thanhToan.MaGiaoDichNganHang = transId;
                                     await _context.SaveChangesAsync();
-                                    
+
                                     // Ghi log giao dịch IPN thành công
                                     var lichSuGiaoDich = new LichSuGiaoDich
                                     {
@@ -554,10 +554,10 @@ namespace CinemaBooking.Controllers
                                         NgayGiaoDich = DateTime.Now,
                                         LoaiGiaoDich = "Thanh toán"
                                     };
-                                    
+
                                     _context.LichSuGiaoDiches.Add(lichSuGiaoDich);
                                     await _context.SaveChangesAsync();
-                                    
+
                                     // Ghi log thành công
                                     System.IO.File.WriteAllText(
                                         Path.Combine(logPath, $"momo_ipn_success_{maDatVe}_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
@@ -569,7 +569,7 @@ namespace CinemaBooking.Controllers
                             }
                         }
                     }
-                    
+
                     // MoMo IPN yêu cầu trả về status "ok"
                     return Ok(new { status = "ok" });
                 }
@@ -582,15 +582,15 @@ namespace CinemaBooking.Controllers
                 {
                     Directory.CreateDirectory(logPath);
                 }
-                
+
                 System.IO.File.WriteAllText(
-                    Path.Combine(logPath, $"momo_ipn_error_{DateTime.Now:yyyyMMdd_HHmmss}.txt"), 
+                    Path.Combine(logPath, $"momo_ipn_error_{DateTime.Now:yyyyMMdd_HHmmss}.txt"),
                     ex.ToString());
-                    
+
                 return BadRequest(new { status = "error", message = ex.Message });
             }
         }
-        
+
         // GET: ThanhToan/ThanhToanThanhCong
         public async Task<IActionResult> ThanhToanThanhCong(int maDatVe)
         {
@@ -626,14 +626,14 @@ namespace CinemaBooking.Controllers
             {
                 datVe.TrangThai = "Đã thanh toán";
                 await _context.SaveChangesAsync();
-                
+
                 // Cập nhật điểm tích lũy
                 await UpdateUserPoints(maDatVe);
             }
 
             return View(datVe);
         }
-        
+
         // Lấy địa chỉ IP của người dùng
         private string GetIpAddress()
         {
@@ -667,16 +667,16 @@ namespace CinemaBooking.Controllers
                     // Kiểm tra xem đã tích điểm cho vé này chưa (tránh cộng trùng)
                     var exists = await _context.LichSuGiaoDiches
                         .AnyAsync(l => l.MaNguoiDung == datVe.MaNguoiDung && l.LoaiGiaoDich == "Tích điểm" && l.NoiDung.Contains($"vé #{maDatVe}"));
-                    
+
                     if (!exists)
                     {
                         // 1,000 VND = 1 điểm
                         int pointsEarned = (int)(datVe.TongTien / 1000);
-                        
+
                         if (pointsEarned > 0)
                         {
                             datVe.NguoiDung.DiemTichLuy += pointsEarned;
-                            
+
                             // Ghi log tích điểm
                             var lichSuDiem = new LichSuGiaoDich
                             {
@@ -686,7 +686,7 @@ namespace CinemaBooking.Controllers
                                 NoiDung = $"Tích +{pointsEarned} điểm từ vé #{maDatVe}",
                                 NgayGiaoDich = DateTime.Now
                             };
-                            
+
                             _context.LichSuGiaoDiches.Add(lichSuDiem);
                             await _context.SaveChangesAsync();
                         }

@@ -28,7 +28,7 @@ namespace CinemaBooking.Middlewares
                     context.Response.Redirect("/Account/Login?returnUrl=" + System.Net.WebUtility.UrlEncode(path));
                     return;
                 }
-                
+
                 if (!user.IsInRole("Admin"))
                 {
                     // Logged in as regular user but trying to access admin area? Deny access.
@@ -46,15 +46,15 @@ namespace CinemaBooking.Middlewares
                 // 2. Account controller (logout, etc.)
                 // 3. Static files/uploads
                 // 4. SignalR Hubs
-                
+
                 bool isAdminArea = path.StartsWith("/Admin", System.StringComparison.OrdinalIgnoreCase);
                 bool isAccountAction = path.StartsWith("/Account", System.StringComparison.OrdinalIgnoreCase);
                 bool isUploads = path.StartsWith("/uploads", System.StringComparison.OrdinalIgnoreCase);
                 bool isHub = path.StartsWith("/bookingHub", System.StringComparison.OrdinalIgnoreCase);
-                
+
                 // Also check for static files (simple check by extension)
-                bool isStaticFile = path.Contains(".") && 
-                                   (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".jpg") || 
+                bool isStaticFile = path.Contains(".") &&
+                                   (path.EndsWith(".css") || path.EndsWith(".js") || path.EndsWith(".jpg") ||
                                     path.EndsWith(".png") || path.EndsWith(".gif") || path.EndsWith(".svg") ||
                                     path.EndsWith(".woff") || path.EndsWith(".woff2") || path.EndsWith(".ttf") ||
                                     path.EndsWith(".ico"));

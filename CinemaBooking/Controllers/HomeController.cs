@@ -36,7 +36,7 @@ namespace CinemaBooking.Controllers
         public async Task<IActionResult> Index(int page = 1)
         {
             // Tăng kích thước trang cho trang chủ để hiển thị đầy đủ hơn
-            const int pageSize = 30; 
+            const int pageSize = 30;
             var today = DateTime.Today;
 
             // 1. Lấy tất cả phim (đa dạng hơn 10 phim)
@@ -50,7 +50,7 @@ namespace CinemaBooking.Controllers
             var nowShowingMovies = await _context.Phims
                 .Include(p => p.DanhGias)
                 .Include(p => p.LichChieus)
-                .Where(p => p.LichChieus.Any(l => 
+                .Where(p => p.LichChieus.Any(l =>
                     l.NgayChieu >= today))
                 .OrderByDescending(p => p.LichChieus.Max(l => l.NgayChieu))
                 .Take(15)
@@ -111,7 +111,7 @@ namespace CinemaBooking.Controllers
             ViewBag.ComingSoonMovies = comingSoonMovies;
             ViewBag.TopRatedMovies = topRatedMovies;
             ViewBag.FeaturedMovies = featuredMovies;
-            
+
             ViewBag.TotalMoviesCount = await _context.Phims.CountAsync();
             ViewBag.TotalCinemasCount = await _context.RapPhims.CountAsync();
             ViewBag.TotalBookings = await _context.DatVes.CountAsync();
