@@ -46,7 +46,6 @@ namespace CinemaBooking.Data
             modelBuilder.Entity<ApplicationRole>(entity =>
             {
                 entity.ToTable("AspNetRoles");
-                // MoTa property configuration will be added in future migration
             });
 
             modelBuilder.Entity<IdentityUserRole<string>>(entity =>
@@ -100,7 +99,6 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.AvatarUrl).HasColumnName("avatar_url").HasMaxLength(255);
                 entity.Property(e => e.DiemTichLuy).HasColumnName("diem_tich_luy").HasDefaultValue(0);
 
-                // Thiết lập quan hệ với VaiTro
                 entity.HasOne(e => e.VaiTro)
                     .WithMany(v => v.NguoiDungs)
                     .HasForeignKey(e => e.MaVaiTro)
@@ -122,13 +120,11 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.MaNguoiDung).HasColumnName("ma_nguoi_dung");
                 entity.Property(e => e.UserId).HasColumnName("user_id").HasMaxLength(450);
 
-                // Cấu hình quan hệ với NguoiDung
                 entity.HasOne(e => e.NguoiDung)
                     .WithMany(n => n.OtpInfos)
                     .HasForeignKey(e => e.MaNguoiDung)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Cấu hình quan hệ với ApplicationUser
                 entity.HasOne(e => e.ApplicationUser)
                     .WithMany(u => u.OtpInfos)
                     .HasForeignKey(e => e.UserId)
@@ -161,7 +157,6 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.PhuDe).HasColumnName("phu_de").HasMaxLength(50);
                 entity.Property(e => e.MaPhim).HasColumnName("ma_phim");
 
-                // Quan hệ với Phim
                 entity.HasOne(e => e.Phim)
                     .WithMany(p => p.NgonNguPhims)
                     .HasForeignKey(e => e.MaPhim)
@@ -189,7 +184,6 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.SoPhong).HasColumnName("so_phong").IsRequired();
                 entity.Property(e => e.SucChua).HasColumnName("suc_chua").IsRequired();
 
-                // Quan hệ với RapPhim
                 entity.HasOne(e => e.RapPhim)
                     .WithMany(r => r.PhongChieus)
                     .HasForeignKey(e => e.MaRap)
@@ -206,7 +200,6 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.SoGhe).HasColumnName("so_ghe").HasMaxLength(10).IsRequired();
                 entity.Property(e => e.LoaiGhe).HasColumnName("loai_ghe").HasMaxLength(20).IsRequired().HasDefaultValue("Thường");
 
-                // Quan hệ với PhongChieu
                 entity.HasOne(e => e.PhongChieu)
                     .WithMany(p => p.Ghes)
                     .HasForeignKey(e => e.MaPhong)
@@ -226,19 +219,16 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.GiaVe).HasColumnName("gia_ve").HasColumnType("decimal(10,2)").IsRequired();
                 entity.Property(e => e.MaNgonNgu).HasColumnName("ma_ngon_ngu");
 
-                // Quan hệ với Phim
                 entity.HasOne(e => e.Phim)
                     .WithMany(p => p.LichChieus)
                     .HasForeignKey(e => e.MaPhim)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với PhongChieu
                 entity.HasOne(e => e.PhongChieu)
                     .WithMany(p => p.LichChieus)
                     .HasForeignKey(e => e.MaPhong)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với NgonNguPhim
                 entity.HasOne(e => e.NgonNguPhim)
                     .WithMany(n => n.LichChieus)
                     .HasForeignKey(e => e.MaNgonNgu)
@@ -274,25 +264,21 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.MaKhuyenMai).HasColumnName("ma_khuyen_mai");
                 entity.Property(e => e.GhiChu).HasColumnName("ghi_chu").HasMaxLength(255);
 
-                // Quan hệ với NguoiDung
                 entity.HasOne(e => e.NguoiDung)
                     .WithMany(n => n.DatVes)
                     .HasForeignKey(e => e.MaNguoiDung)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với ApplicationUser
                 entity.HasOne(e => e.ApplicationUser)
                     .WithMany(u => u.DatVes)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                // Quan hệ với LichChieu
                 entity.HasOne(e => e.LichChieu)
                     .WithMany(l => l.DatVes)
                     .HasForeignKey(e => e.MaLichChieu)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với KhuyenMai
                 entity.HasOne(e => e.KhuyenMai)
                     .WithMany(k => k.DatVes)
                     .HasForeignKey(e => e.MaKhuyenMai)
@@ -307,13 +293,11 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.MaDatVe).HasColumnName("ma_dat_ve");
                 entity.Property(e => e.MaGhe).HasColumnName("ma_ghe");
 
-                // Quan hệ với DatVe
                 entity.HasOne(e => e.DatVe)
                     .WithMany(d => d.DatVeGhes)
                     .HasForeignKey(e => e.MaDatVe)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với Ghe - sử dụng Restrict để tránh multiple cascade paths
                 entity.HasOne(e => e.Ghe)
                     .WithMany(g => g.DatVeGhes)
                     .HasForeignKey(e => e.MaGhe)
@@ -335,7 +319,6 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.MaGiaoDichNganHang).HasColumnName("ma_giao_dich_ngan_hang").HasMaxLength(100);
                 entity.Property(e => e.GhiChu).HasColumnName("ghi_chu").HasMaxLength(500);
 
-                // Quan hệ với DatVe
                 entity.HasOne(e => e.DatVe)
                     .WithMany(d => d.ThanhToans)
                     .HasForeignKey(e => e.MaDatVe)
@@ -368,13 +351,11 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.MaCombo).HasColumnName("ma_combo");
                 entity.Property(e => e.SoLuong).HasColumnName("so_luong").IsRequired();
 
-                // Quan hệ với DatVe
                 entity.HasOne(e => e.DatVe)
                     .WithMany(d => d.DatVeCombos)
                     .HasForeignKey(e => e.MaDatVe)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với Combo
                 entity.HasOne(e => e.Combo)
                     .WithMany(c => c.DatVeCombos)
                     .HasForeignKey(e => e.MaCombo)
@@ -394,19 +375,16 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.NgayDanhGia).HasColumnName("ngay_danh_gia").HasDefaultValueSql("getdate()");
                 entity.Property(e => e.BinhLuan).HasColumnName("binh_luan").HasColumnType("ntext");
 
-                // Quan hệ với NguoiDung
                 entity.HasOne(e => e.NguoiDung)
                     .WithMany(n => n.DanhGias)
                     .HasForeignKey(e => e.MaNguoiDung)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với ApplicationUser
                 entity.HasOne(e => e.ApplicationUser)
                     .WithMany(u => u.DanhGias)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                // Quan hệ với Phim
                 entity.HasOne(e => e.Phim)
                     .WithMany(p => p.DanhGias)
                     .HasForeignKey(e => e.MaPhim)
@@ -427,19 +405,16 @@ namespace CinemaBooking.Data
                 entity.Property(e => e.MaThanhToan).HasColumnName("ma_thanh_toan");
                 entity.Property(e => e.TrangThai).HasColumnName("trang_thai").HasMaxLength(50);
 
-                // Quan hệ với NguoiDung
                 entity.HasOne(e => e.NguoiDung)
                     .WithMany(n => n.LichSuGiaoDichs)
                     .HasForeignKey(e => e.MaNguoiDung)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                // Quan hệ với ApplicationUser
                 entity.HasOne(e => e.ApplicationUser)
                     .WithMany(u => u.LichSuGiaoDichs)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                // Quan hệ với ThanhToan - sử dụng Restrict để tránh multiple cascade paths
                 entity.HasOne(e => e.ThanhToan)
                     .WithMany()
                     .HasForeignKey(e => e.MaThanhToan)

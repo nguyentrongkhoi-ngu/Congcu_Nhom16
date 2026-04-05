@@ -1,0 +1,153 @@
+@model CinemaBooking.Models.ViewModels.PhimDanhGiaViewModel
+
+@{
+    ViewData["Title"] = "Đánh giá - " + Model.Phim.TenPhim;
+}
+
+<div class="container">
+    <div class="row mt-4">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>Đánh giá phim: @Model.Phim.TenPhim</h3>
+                        <a asp-controller="Phim" asp-action="Detail" asp-route-id="@Model.Phim.MaPhim" 
+                           class="btn btn-outline-secondary">Quay lại chi tiết phim</a>
+                    </div>
+                    
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <img src="@(string.IsNullOrEmpty(Model.Phim.UrlPoster) ? "/images/no-image.jpg" : Model.Phim.UrlPoster)" 
+                                 class="img-fluid rounded" alt="@Model.Phim.TenPhim">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="display-4 me-3">@Model.DiemTrungBinh</div>
+                                <div>
+                                    <div class="stars-container mb-2">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Floor(Model.DiemTrungBinh))
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else if (i - 0.5 <= Model.DiemTrungBinh)
+                                            {
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-warning"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <div>từ @Model.TongSoDanhGia đánh giá</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <a asp-controller="DanhGia" asp-action="CreateDanhGia" asp-route-id="@Model.Phim.MaPhim" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-star me-1"></i> Viết đánh giá
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr />
+                    
+                    <h4 class="mb-4">Tất cả đánh giá (@Model.TongSoDanhGia)</h4>
+                    
+                    @if (!Model.DanhSachDanhGia.Any())
+                    {
+                        <div class="alert alert-info">
+                            Chưa có đánh giá nào cho phim này. Hãy là người đầu tiên đánh giá!
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var danhGia in Model.DanhSachDanhGia)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <h5 class="mb-0">@danhGia.NguoiDung.HoTen</h5>
+                                            <small class="text-muted">
+                                                @danhGia.NgayDanhGia?.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+                                        <div class="stars-container">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= danhGia.DiemSo)
+                                                {
+                                                    <i class="fas fa-star text-warning"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-star text-warning"></i>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    
+                                    <p>@danhGia.BinhLuan</p>
+                                    
+                                    @{
+                                        bool canEdit = false;
+                                        if (User.Identity.IsAuthenticated)
+                                        {
+                                            {
+                                                // Lấy legacy user ID từ email
+                                                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                                                if (!string.IsNullOrEmpty(email))
+                                                {
+                                                    var legacyUser = ViewBag.LegacyUsers as List<CinemaBooking.Models.NguoiDung>;
+                                                    var currentLegacyUser = legacyUser?.FirstOrDefault(u => u.Email == email);
+                                                    if (currentLegacyUser != null && currentLegacyUser.MaNguoiDung == danhGia.MaNguoiDung)
+                                                    {
+                                                        canEdit = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    @if (canEdit)
+                                    {
+                                        <div class="d-flex justify-content-end">
+                                            <form asp-action="XoaDanhGia" asp-route-id="@danhGia.MaDanhGia" method="post" 
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load FontAwesome if not already loaded
+            if (!$('link[href*="fontawesome"]').length) {
+                $('head').append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">');
+            }
+        });
+    </script>
+} 
